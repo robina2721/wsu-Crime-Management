@@ -3,21 +3,32 @@ import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '@shared/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { 
-  Shield, 
-  AlertTriangle, 
-  FileText, 
-  Users, 
-  TrendingUp, 
+import { useNavigate } from 'react-router-dom';
+import {
+  Shield,
+  AlertTriangle,
+  FileText,
+  Users,
+  TrendingUp,
   Activity,
   MapPin,
   Clock,
   PhoneCall,
-  Plus
+  Plus,
+  Search,
+  UserCheck,
+  Settings,
+  Database,
+  BarChart3,
+  Package,
+  CheckCircle,
+  UserPlus,
+  Briefcase
 } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout, hasRole, hasAnyRole } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) {
     return <div>Loading...</div>;
@@ -136,50 +147,171 @@ export default function Dashboard() {
                 <CardDescription>Common tasks for your role</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {isCitizen && (
-                  <Button className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start">
-                    <Plus className="w-4 h-4 mr-2" />
-                    File Crime Report
-                  </Button>
-                )}
-                
-                {isOfficer && (
+                {/* Super Admin Actions */}
+                {isAdmin && (
                   <>
-                    <Button className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start">
+                    <Button
+                      onClick={() => navigate('/case-management')}
+                      className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start"
+                    >
                       <FileText className="w-4 h-4 mr-2" />
-                      View Active Cases
+                      Case Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/user-management')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      User Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/staff-management')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Staff Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/reports')}
+                      className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Generate Reports
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/asset-management')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white justify-start"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Asset Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/system-config')}
+                      className="w-full bg-gray-600 hover:bg-gray-700 text-white justify-start"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      System Configuration
+                    </Button>
+                  </>
+                )}
+
+                {/* Police Head Actions */}
+                {hasRole(UserRole.POLICE_HEAD) && (
+                  <>
+                    <Button
+                      onClick={() => navigate('/case-management')}
+                      className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Case Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/staff-management')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Staff Supervision
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/reports')}
+                      className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Generate Reports
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/asset-management')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white justify-start"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Asset Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/user-management')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Approve Officers
+                    </Button>
+                  </>
+                )}
+
+                {/* Detective & Preventive Officer Actions */}
+                {isOfficer && !hasRole(UserRole.POLICE_HEAD) && (
+                  <>
+                    <Button
+                      onClick={() => navigate('/case-management')}
+                      className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      View Cases
                     </Button>
                     <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white justify-start">
                       <MapPin className="w-4 h-4 mr-2" />
-                      Patrol Assignment
+                      My Assignments
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/reports')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      My Reports
                     </Button>
                   </>
                 )}
-                
-                {isAdmin && (
+
+                {/* HR Manager Actions */}
+                {isHR && (
+                  <>
+                    <Button
+                      onClick={() => navigate('/staff-management')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Staff Management
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/user-management')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Employee Accounts
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/reports')}
+                      className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      HR Reports
+                    </Button>
+                  </>
+                )}
+
+                {/* Citizen Actions */}
+                {isCitizen && (
                   <>
                     <Button className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start">
-                      <Users className="w-4 h-4 mr-2" />
-                      Manage Users
+                      <Plus className="w-4 h-4 mr-2" />
+                      File Crime Report
                     </Button>
-                    <Button className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start">
-                      <TrendingUp className="w-4 h-4 mr-2" />
-                      Generate Reports
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start">
+                      <FileText className="w-4 h-4 mr-2" />
+                      My Reports
+                    </Button>
+                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white justify-start">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Track Status
                     </Button>
                   </>
                 )}
-                
-                {isHR && (
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start">
-                    <Users className="w-4 h-4 mr-2" />
-                    Employee Management
+
+                {/* Emergency Contact - Always Available */}
+                <div className="pt-2 border-t">
+                  <Button variant="outline" className="w-full border-crime-red text-crime-red hover:bg-crime-red hover:text-white justify-start">
+                    <PhoneCall className="w-4 h-4 mr-2" />
+                    Emergency: 911
                   </Button>
-                )}
-                
-                <Button variant="outline" className="w-full border-crime-red text-crime-red hover:bg-crime-red hover:text-white justify-start">
-                  <PhoneCall className="w-4 h-4 mr-2" />
-                  Emergency Contact
-                </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
