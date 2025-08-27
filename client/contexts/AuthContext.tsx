@@ -56,7 +56,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.json();
+      // Check if response is ok before trying to parse
+      if (!response.ok) {
+        console.error('Login failed with status:', response.status);
+        return false;
+      }
+
+      // Clone the response to avoid "body stream already read" errors
+      const responseClone = response.clone();
+      let data;
+
+      try {
+        data = await responseClone.json();
+      } catch (parseError) {
+        console.error('Failed to parse response JSON:', parseError);
+        return false;
+      }
 
       if (data.success && data.user && data.token) {
         setUser(data.user);
