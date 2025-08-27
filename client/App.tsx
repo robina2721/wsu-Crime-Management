@@ -18,6 +18,11 @@ import ReportGeneration from "./pages/ReportGeneration";
 import AssetManagement from "./pages/AssetManagement";
 import UserManagement from "./pages/UserManagement";
 import SystemConfiguration from "./pages/SystemConfiguration";
+import IncidentReports from "./pages/IncidentReports";
+import PatrolLogs from "./pages/PatrolLogs";
+import CriminalDatabase from "./pages/CriminalDatabase";
+import InvestigationReports from "./pages/InvestigationReports";
+import MyCases from "./pages/MyCases";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +104,58 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRoles={[UserRole.SUPER_ADMIN]}>
             <SystemConfiguration />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Officer-Specific Routes */}
+
+      {/* Incident Reports - Preventive Officers and above */}
+      <Route
+        path="/incident-reports"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.PREVENTIVE_OFFICER, UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}>
+            <IncidentReports />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Patrol Logs - Preventive Officers and above */}
+      <Route
+        path="/patrol-logs"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.PREVENTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}>
+            <PatrolLogs />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Criminal Database - Detectives and above */}
+      <Route
+        path="/criminal-database"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}>
+            <CriminalDatabase />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Investigation Reports - Detectives and above */}
+      <Route
+        path="/investigation-reports"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}>
+            <InvestigationReports />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* My Cases - Officers and above */}
+      <Route
+        path="/my-cases"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.PREVENTIVE_OFFICER, UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}>
+            <MyCases />
           </ProtectedRoute>
         }
       />

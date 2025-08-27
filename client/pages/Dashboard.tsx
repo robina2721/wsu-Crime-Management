@@ -236,26 +236,70 @@ export default function Dashboard() {
                   </>
                 )}
 
-                {/* Detective & Preventive Officer Actions */}
-                {isOfficer && !hasRole(UserRole.POLICE_HEAD) && (
+                {/* Detective Officer Actions */}
+                {hasRole(UserRole.DETECTIVE_OFFICER) && (
                   <>
                     <Button
-                      onClick={() => navigate('/case-management')}
+                      onClick={() => navigate('/my-cases')}
                       className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start"
                     >
-                      <Search className="w-4 h-4 mr-2" />
-                      View Cases
-                    </Button>
-                    <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white justify-start">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      My Assignments
+                      <Briefcase className="w-4 h-4 mr-2" />
+                      My Cases
                     </Button>
                     <Button
-                      onClick={() => navigate('/reports')}
+                      onClick={() => navigate('/criminal-database')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Criminal Database
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/investigation-reports')}
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
                     >
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      My Reports
+                      <FileText className="w-4 h-4 mr-2" />
+                      Investigation Reports
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/case-management')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white justify-start"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Case Management
+                    </Button>
+                  </>
+                )}
+
+                {/* Preventive Officer Actions */}
+                {hasRole(UserRole.PREVENTIVE_OFFICER) && (
+                  <>
+                    <Button
+                      onClick={() => navigate('/incident-reports')}
+                      className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start"
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Incident Reports
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/my-cases')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
+                    >
+                      <Briefcase className="w-4 h-4 mr-2" />
+                      My Cases
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/patrol-logs')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white justify-start"
+                    >
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Patrol Logs
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/case-management')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Case Updates
                     </Button>
                   </>
                 )}
