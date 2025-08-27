@@ -57,6 +57,18 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Crime Management System Colors */
+    --crime-black: 0 0% 8%;
+    --crime-red: 0 84% 50%;
+    --crime-yellow: 48 98% 50%;
+    --crime-red-dark: 0 75% 35%;
+    --crime-yellow-light: 48 95% 70%;
+
+    --danger: 0 84% 50%;
+    --danger-foreground: 0 0% 98%;
+    --warning: 48 98% 50%;
+    --warning-foreground: 0 0% 8%;
   }
 
   .dark {
@@ -95,6 +107,18 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Crime Management System Colors - Dark Mode */
+    --crime-black: 0 0% 95%;
+    --crime-red: 0 84% 60%;
+    --crime-yellow: 48 98% 65%;
+    --crime-red-dark: 0 75% 45%;
+    --crime-yellow-light: 48 95% 80%;
+
+    --danger: 0 84% 60%;
+    --danger-foreground: 0 0% 8%;
+    --warning: 48 98% 65%;
+    --warning-foreground: 0 0% 8%;
   }
 }
 
