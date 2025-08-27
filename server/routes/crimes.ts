@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { CrimeReport, CrimeCategory, CrimeStatus, Priority, ApiResponse } from "@shared/types";
+import { CrimeReport, CrimeCategory, CrimeStatus, Priority, ApiResponse } from "../../shared/types";
 
 // Mock database - In production, use a real database like PlanetScale/MySQL
 let crimeReports: CrimeReport[] = [

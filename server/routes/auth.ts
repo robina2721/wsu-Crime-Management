@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { LoginRequest, LoginResponse, User, UserRole } from "@shared/types";
+import { LoginRequest, LoginResponse, User, UserRole } from "../../shared/types";
 
 // Mock database - In production, use a real database like PlanetScale/MySQL
 const users: User[] = [
