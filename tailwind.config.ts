@@ -31,6 +31,21 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        danger: {
+          DEFAULT: "hsl(var(--danger))",
+          foreground: "hsl(var(--danger-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        crime: {
+          black: "hsl(var(--crime-black))",
+          red: "hsl(var(--crime-red))",
+          yellow: "hsl(var(--crime-yellow))",
+          "red-dark": "hsl(var(--crime-red-dark))",
+          "yellow-light": "hsl(var(--crime-yellow-light))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
