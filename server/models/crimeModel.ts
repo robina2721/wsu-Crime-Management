@@ -1,53 +1,54 @@
-import { query, queryOne } from "../db";
+import { queryRow, queryRows } from "../db";
 import { CrimeReport } from "@shared/types";
 
 export async function listCrimes(filters: any, limit: number, offset: number) {
   const where: string[] = [];
   const params: any[] = [];
   if (filters.status) {
-    where.push(`status = $${params.length + 1}`);
+    where.push(`status = @p${params.length + 1}`);
     params.push(filters.status);
   }
   if (filters.category) {
-    where.push(`category = $${params.length + 1}`);
+    where.push(`category = @p${params.length + 1}`);
     params.push(filters.category);
   }
   if (filters.priority) {
-    where.push(`priority = $${params.length + 1}`);
+    where.push(`priority = @p${params.length + 1}`);
     params.push(filters.priority);
   }
-  params.push(limit);
-  params.push(offset);
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  const rows = await query<any>(
+  // SQL Server pagination with OFFSET/FETCH
+  params.push(offset);
+  params.push(limit);
+  const rows = await queryRows<any>(
     `SELECT id, title, description, category, status, priority, location,
-            date_reported as "dateReported", date_incident as "dateIncident",
-            reported_by as "reportedBy", assigned_to as "assignedTo", created_at as "createdAt", updated_at as "updatedAt"
+            date_reported as dateReported, date_incident as dateIncident,
+            reported_by as reportedBy, assigned_to as assignedTo, created_at as createdAt, updated_at as updatedAt
      FROM crimes ${whereSql}
      ORDER BY date_reported DESC
-     LIMIT $${params.length - 1} OFFSET $${params.length}`,
+     OFFSET @p${params.length - 1} ROWS FETCH NEXT @p${params.length} ROWS ONLY`,
     params
   );
   return rows as CrimeReport[];
 }
 
 export async function getCrime(id: string) {
-  const row = await queryOne<any>(
+  const row = await queryRow<any>(
     `SELECT id, title, description, category, status, priority, location,
-            date_reported as "dateReported", date_incident as "dateIncident",
-            reported_by as "reportedBy", assigned_to as "assignedTo", created_at as "createdAt", updated_at as "updatedAt"
-     FROM crimes WHERE id = $1`,
+            date_reported as dateReported, date_incident as dateIncident,
+            reported_by as reportedBy, assigned_to as assignedTo, created_at as createdAt, updated_at as updatedAt
+     FROM crimes WHERE id = @p1`,
     [id]
   );
   return row as CrimeReport | undefined;
 }
 
 export async function createCrime(data: any) {
-  const id = crypto.randomUUID();
-  const now = new Date().toISOString();
-  await query(
+  const id = (global as any).crypto?.randomUUID?.() || require("crypto").randomUUID();
+  const now = new Date();
+  await queryRows(
     `INSERT INTO crimes (id, title, description, category, status, priority, location, date_reported, date_incident, reported_by, assigned_to, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, 'reported', $5, $6, $7, $8, $9, NULL, $10, $11)`,
+     VALUES (@p1, @p2, @p3, @p4, 'reported', @p5, @p6, @p7, @p8, @p9, NULL, @p10, @p11)`,
     [
       id,
       data.title,
@@ -56,7 +57,7 @@ export async function createCrime(data: any) {
       data.priority ?? "medium",
       data.location,
       now,
-      new Date(data.dateIncident).toISOString(),
+      new Date(data.dateIncident),
       data.reportedBy,
       now,
       now,
@@ -66,7 +67,7 @@ export async function createCrime(data: any) {
 }
 
 export async function updateCrime(id: string, updates: any) {
-  const now = new Date().toISOString();
+  const now = new Date();
   const mapping: Record<string, string> = {
     dateIncident: "date_incident",
     reportedBy: "reported_by",
@@ -85,22 +86,22 @@ export async function updateCrime(id: string, updates: any) {
   ]);
   const set: string[] = [];
   const params: any[] = [];
-  let i = 1;
   for (const key of Object.keys(updates)) {
     const dbKey = mapping[key] ?? key;
     if (allowed.has(dbKey)) {
-      set.push(`${dbKey} = $${i++}`);
-      params.push(dbKey === "date_incident" ? new Date(updates[key]).toISOString() : updates[key]);
+      params.push(dbKey === "date_incident" ? new Date(updates[key]) : updates[key]);
+      set.push(`${dbKey} = @p${params.length}`);
     }
   }
-  set.push(`updated_at = $${i++}`);
   params.push(now);
+  set.push(`updated_at = @p${params.length}`);
   params.push(id);
-  await query(`UPDATE crimes SET ${set.join(", ")} WHERE id = $${i}` as string, params);
+  const sql = `UPDATE crimes SET ${set.join(", ")} WHERE id = @p${params.length}`;
+  await queryRows(sql, params);
   return await getCrime(id);
 }
 
 export async function deleteCrime(id: string) {
-  await query(`DELETE FROM crimes WHERE id = $1`, [id]);
+  await queryRows(`DELETE FROM crimes WHERE id = @p1`, [id]);
   return true;
 }
