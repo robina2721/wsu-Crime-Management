@@ -308,25 +308,32 @@ export default function Dashboard() {
                 {isHR && (
                   <>
                     <Button
-                      onClick={() => navigate('/staff-management')}
+                      onClick={() => navigate('/hr-management')}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
                     >
                       <Users className="w-4 h-4 mr-2" />
-                      Staff Management
+                      HR Management
                     </Button>
                     <Button
-                      onClick={() => navigate('/user-management')}
+                      onClick={() => navigate('/staff-scheduling')}
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
                     >
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Employee Accounts
+                      <Clock className="w-4 h-4 mr-2" />
+                      Staff Scheduling
                     </Button>
                     <Button
-                      onClick={() => navigate('/reports')}
+                      onClick={() => navigate('/hr-reports')}
                       className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start"
                     >
                       <BarChart3 className="w-4 h-4 mr-2" />
                       HR Reports
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/user-management')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white justify-start"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      User Management
                     </Button>
                   </>
                 )}
@@ -334,17 +341,33 @@ export default function Dashboard() {
                 {/* Citizen Actions */}
                 {isCitizen && (
                   <>
-                    <Button className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start">
+                    <Button
+                      onClick={() => navigate('/citizen-portal')}
+                      className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start"
+                    >
                       <Plus className="w-4 h-4 mr-2" />
-                      File Crime Report
+                      Submit Crime Report
                     </Button>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start">
+                    <Button
+                      onClick={() => navigate('/citizen-portal')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start"
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       My Reports
                     </Button>
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white justify-start">
-                      <Clock className="w-4 h-4 mr-2" />
-                      Track Status
+                    <Button
+                      onClick={() => navigate('/citizen-feedback')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white justify-start"
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Submit Feedback
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/safety-information')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start"
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Safety Information
                     </Button>
                   </>
                 )}
