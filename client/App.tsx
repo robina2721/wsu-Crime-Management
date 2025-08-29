@@ -166,6 +166,70 @@ const AppRoutes = () => {
         }
       />
 
+      {/* HR Manager Routes */}
+
+      {/* HR Management - HR Managers only */}
+      <Route
+        path="/hr-management"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}>
+            <HRManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Staff Scheduling - HR Managers only */}
+      <Route
+        path="/staff-scheduling"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}>
+            <StaffScheduling />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* HR Reports - HR Managers only */}
+      <Route
+        path="/hr-reports"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}>
+            <HRReports />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Citizen Routes */}
+
+      {/* Citizen Portal - Citizens only */}
+      <Route
+        path="/citizen-portal"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.CITIZEN]}>
+            <CitizenPortal />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Citizen Feedback - Citizens only */}
+      <Route
+        path="/citizen-feedback"
+        element={
+          <ProtectedRoute requiredRoles={[UserRole.CITIZEN]}>
+            <CitizenFeedback />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Safety Information - Public access (Citizens and others) */}
+      <Route
+        path="/safety-information"
+        element={
+          <ProtectedRoute>
+            <SafetyInformation />
+          </ProtectedRoute>
+        }
+      />
+
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
