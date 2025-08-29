@@ -64,7 +64,8 @@
     "vaul": "^1.1.2",
     "jose": "^5.2.0",
     "bcryptjs": "^2.4.3",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",
