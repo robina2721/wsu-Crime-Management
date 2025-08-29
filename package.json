@@ -9,7 +9,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "format:fix": "prettier --write .",
-    "db:setup": "ts-node --transpile-only scripts/run-sql.ts"
+    "db:setup": "node scripts/run-sql.js"
   },
   "dependencies": {
     "next": "^14.0.4",
