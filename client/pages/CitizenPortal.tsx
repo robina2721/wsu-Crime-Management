@@ -1,21 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Textarea } from '../components/ui/textarea';
-import { Badge } from '../components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { Progress } from '../components/ui/progress';
-import { 
-  FileText, 
-  Plus, 
-  Eye, 
-  Search, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
+import { Badge } from "../components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Progress } from "../components/ui/progress";
+import {
+  FileText,
+  Plus,
+  Eye,
+  Search,
   Filter,
   MapPin,
   Calendar,
@@ -35,8 +59,8 @@ import {
   Bell,
   Star,
   Map,
-  Info
-} from 'lucide-react';
+  Info,
+} from "lucide-react";
 import {
   CrimeReport,
   CrimeCategory,
@@ -44,214 +68,226 @@ import {
   Priority,
   Witness,
   CitizenReportStatus,
-  StatusUpdate
-} from '../../shared/types';
+  StatusUpdate,
+} from "../../shared/types";
 
 // Mock data for demonstration
 const mockReports: CrimeReport[] = [
   {
-    id: '1',
-    title: 'Bicycle Theft',
-    description: 'My bicycle was stolen from outside the grocery store while I was shopping',
+    id: "1",
+    title: "Bicycle Theft",
+    description:
+      "My bicycle was stolen from outside the grocery store while I was shopping",
     category: CrimeCategory.THEFT,
     status: CrimeStatus.UNDER_INVESTIGATION,
     priority: Priority.MEDIUM,
-    location: '123 Main Street, Downtown',
-    dateReported: new Date('2024-01-10'),
-    dateIncident: new Date('2024-01-10'),
-    reportedBy: 'citizen1',
-    assignedTo: 'officer123',
-    evidence: ['photo1.jpg', 'receipt.pdf'],
+    location: "123 Main Street, Downtown",
+    dateReported: new Date("2024-01-10"),
+    dateIncident: new Date("2024-01-10"),
+    reportedBy: "citizen1",
+    assignedTo: "officer123",
+    evidence: ["photo1.jpg", "receipt.pdf"],
     witnesses: [],
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-12')
+    createdAt: new Date("2024-01-10"),
+    updatedAt: new Date("2024-01-12"),
   },
   {
-    id: '2',
-    title: 'Suspicious Activity',
-    description: 'Noticed unfamiliar people looking into car windows in the parking lot',
+    id: "2",
+    title: "Suspicious Activity",
+    description:
+      "Noticed unfamiliar people looking into car windows in the parking lot",
     category: CrimeCategory.OTHER,
     status: CrimeStatus.RESOLVED,
     priority: Priority.LOW,
-    location: 'City Mall Parking Lot',
-    dateReported: new Date('2024-01-05'),
-    dateIncident: new Date('2024-01-05'),
-    reportedBy: 'citizen1',
-    assignedTo: 'officer456',
+    location: "City Mall Parking Lot",
+    dateReported: new Date("2024-01-05"),
+    dateIncident: new Date("2024-01-05"),
+    reportedBy: "citizen1",
+    assignedTo: "officer456",
     evidence: [],
     witnesses: [],
-    createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-08')
-  }
+    createdAt: new Date("2024-01-05"),
+    updatedAt: new Date("2024-01-08"),
+  },
 ];
 
 const mockReportStatuses: CitizenReportStatus[] = [
   {
-    reportId: '1',
+    reportId: "1",
     currentStatus: CrimeStatus.UNDER_INVESTIGATION,
     statusHistory: [
       {
         status: CrimeStatus.REPORTED,
-        timestamp: new Date('2024-01-10T10:00:00'),
-        updatedBy: 'System',
-        notes: 'Report submitted successfully',
-        isVisibleToCitizen: true
+        timestamp: new Date("2024-01-10T10:00:00"),
+        updatedBy: "System",
+        notes: "Report submitted successfully",
+        isVisibleToCitizen: true,
       },
       {
         status: CrimeStatus.ASSIGNED,
-        timestamp: new Date('2024-01-10T14:30:00'),
-        updatedBy: 'Sergeant Johnson',
-        notes: 'Case assigned to Officer Smith for investigation',
-        isVisibleToCitizen: true
+        timestamp: new Date("2024-01-10T14:30:00"),
+        updatedBy: "Sergeant Johnson",
+        notes: "Case assigned to Officer Smith for investigation",
+        isVisibleToCitizen: true,
       },
       {
         status: CrimeStatus.UNDER_INVESTIGATION,
-        timestamp: new Date('2024-01-11T09:15:00'),
-        updatedBy: 'Officer Smith',
-        notes: 'Investigation commenced. CCTV footage being reviewed.',
-        isVisibleToCitizen: true
-      }
+        timestamp: new Date("2024-01-11T09:15:00"),
+        updatedBy: "Officer Smith",
+        notes: "Investigation commenced. CCTV footage being reviewed.",
+        isVisibleToCitizen: true,
+      },
     ],
     assignedOfficer: {
-      id: 'officer123',
-      name: 'Officer John Smith',
-      badgeNumber: 'BADGE123',
-      contactInfo: 'For urgent matters, call (555) 123-4567'
+      id: "officer123",
+      name: "Officer John Smith",
+      badgeNumber: "BADGE123",
+      contactInfo: "For urgent matters, call (555) 123-4567",
     },
-    lastUpdate: new Date('2024-01-11T09:15:00'),
-    estimatedResolution: new Date('2024-01-20'),
-    canProvideUpdates: true
+    lastUpdate: new Date("2024-01-11T09:15:00"),
+    estimatedResolution: new Date("2024-01-20"),
+    canProvideUpdates: true,
   },
   {
-    reportId: '2',
+    reportId: "2",
     currentStatus: CrimeStatus.RESOLVED,
     statusHistory: [
       {
         status: CrimeStatus.REPORTED,
-        timestamp: new Date('2024-01-05T16:00:00'),
-        updatedBy: 'System',
-        notes: 'Report submitted successfully',
-        isVisibleToCitizen: true
+        timestamp: new Date("2024-01-05T16:00:00"),
+        updatedBy: "System",
+        notes: "Report submitted successfully",
+        isVisibleToCitizen: true,
       },
       {
         status: CrimeStatus.ASSIGNED,
-        timestamp: new Date('2024-01-05T18:00:00'),
-        updatedBy: 'Dispatcher',
-        notes: 'Patrol unit dispatched to location',
-        isVisibleToCitizen: true
+        timestamp: new Date("2024-01-05T18:00:00"),
+        updatedBy: "Dispatcher",
+        notes: "Patrol unit dispatched to location",
+        isVisibleToCitizen: true,
       },
       {
         status: CrimeStatus.RESOLVED,
-        timestamp: new Date('2024-01-08T10:00:00'),
-        updatedBy: 'Officer Davis',
-        notes: 'Increased patrol in the area. No further incidents reported.',
-        isVisibleToCitizen: true
-      }
+        timestamp: new Date("2024-01-08T10:00:00"),
+        updatedBy: "Officer Davis",
+        notes: "Increased patrol in the area. No further incidents reported.",
+        isVisibleToCitizen: true,
+      },
     ],
     assignedOfficer: {
-      id: 'officer456',
-      name: 'Officer Sarah Davis',
-      badgeNumber: 'BADGE456'
+      id: "officer456",
+      name: "Officer Sarah Davis",
+      badgeNumber: "BADGE456",
     },
-    lastUpdate: new Date('2024-01-08T10:00:00'),
-    canProvideUpdates: false
-  }
+    lastUpdate: new Date("2024-01-08T10:00:00"),
+    canProvideUpdates: false,
+  },
 ];
 
 export default function CitizenPortal() {
   const { user } = useAuth();
   const [reports, setReports] = useState<CrimeReport[]>(mockReports);
-  const [reportStatuses, setReportStatuses] = useState<CitizenReportStatus[]>(mockReportStatuses);
+  const [reportStatuses, setReportStatuses] =
+    useState<CitizenReportStatus[]>(mockReportStatuses);
   const [showNewReportForm, setShowNewReportForm] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(
+    null,
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [formData, setFormData] = useState<Partial<CrimeReport>>({});
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
-    const matchesCategory = filterCategory === 'all' || report.category === filterCategory;
-    
+  const filteredReports = reports.filter((report) => {
+    const matchesSearch =
+      report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      filterStatus === "all" || report.status === filterStatus;
+    const matchesCategory =
+      filterCategory === "all" || report.category === filterCategory;
+
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
   const getStatusBadge = (status: CrimeStatus) => {
     const variants = {
-      [CrimeStatus.REPORTED]: 'secondary',
-      [CrimeStatus.UNDER_INVESTIGATION]: 'default',
-      [CrimeStatus.ASSIGNED]: 'outline',
-      [CrimeStatus.RESOLVED]: 'default',
-      [CrimeStatus.CLOSED]: 'outline',
-      [CrimeStatus.REJECTED]: 'destructive'
+      [CrimeStatus.REPORTED]: "secondary",
+      [CrimeStatus.UNDER_INVESTIGATION]: "default",
+      [CrimeStatus.ASSIGNED]: "outline",
+      [CrimeStatus.RESOLVED]: "default",
+      [CrimeStatus.CLOSED]: "outline",
+      [CrimeStatus.REJECTED]: "destructive",
     };
-    
+
     const icons = {
       [CrimeStatus.REPORTED]: <Clock className="h-3 w-3 mr-1" />,
       [CrimeStatus.UNDER_INVESTIGATION]: <RefreshCw className="h-3 w-3 mr-1" />,
       [CrimeStatus.ASSIGNED]: <User className="h-3 w-3 mr-1" />,
       [CrimeStatus.RESOLVED]: <CheckCircle className="h-3 w-3 mr-1" />,
       [CrimeStatus.CLOSED]: <CheckCircle className="h-3 w-3 mr-1" />,
-      [CrimeStatus.REJECTED]: <XCircle className="h-3 w-3 mr-1" />
+      [CrimeStatus.REJECTED]: <XCircle className="h-3 w-3 mr-1" />,
     };
-    
+
     return (
       <Badge variant={variants[status] as any} className="text-xs">
         {icons[status]}
-        {status.replace('_', ' ')}
+        {status.replace("_", " ")}
       </Badge>
     );
   };
 
   const getPriorityBadge = (priority: Priority) => {
     const variants = {
-      [Priority.LOW]: 'outline',
-      [Priority.MEDIUM]: 'secondary',
-      [Priority.HIGH]: 'destructive',
-      [Priority.CRITICAL]: 'destructive'
+      [Priority.LOW]: "outline",
+      [Priority.MEDIUM]: "secondary",
+      [Priority.HIGH]: "destructive",
+      [Priority.CRITICAL]: "destructive",
     };
-    
-    return <Badge variant={variants[priority] as any}>{priority.toUpperCase()}</Badge>;
+
+    return (
+      <Badge variant={variants[priority] as any}>
+        {priority.toUpperCase()}
+      </Badge>
+    );
   };
 
   const getCategoryIcon = (category: CrimeCategory) => {
     const icons = {
-      [CrimeCategory.THEFT]: '🔒',
-      [CrimeCategory.ASSAULT]: '⚠️',
-      [CrimeCategory.BURGLARY]: '🏠',
-      [CrimeCategory.FRAUD]: '💳',
-      [CrimeCategory.VANDALISM]: '🔨',
-      [CrimeCategory.DRUG_OFFENSE]: '💊',
-      [CrimeCategory.DOMESTIC_VIOLENCE]: '🏠',
-      [CrimeCategory.TRAFFIC_VIOLATION]: '🚗',
-      [CrimeCategory.OTHER]: '📋'
+      [CrimeCategory.THEFT]: "🔒",
+      [CrimeCategory.ASSAULT]: "⚠️",
+      [CrimeCategory.BURGLARY]: "🏠",
+      [CrimeCategory.FRAUD]: "💳",
+      [CrimeCategory.VANDALISM]: "🔨",
+      [CrimeCategory.DRUG_OFFENSE]: "💊",
+      [CrimeCategory.DOMESTIC_VIOLENCE]: "🏠",
+      [CrimeCategory.TRAFFIC_VIOLATION]: "🚗",
+      [CrimeCategory.OTHER]: "📋",
     };
-    
-    return icons[category] || '📋';
+
+    return icons[category] || "📋";
   };
 
   const handleSubmitReport = (data: Partial<CrimeReport>) => {
     const newReport: CrimeReport = {
       id: Date.now().toString(),
-      title: data.title || '',
-      description: data.description || '',
+      title: data.title || "",
+      description: data.description || "",
       category: data.category || CrimeCategory.OTHER,
       status: CrimeStatus.REPORTED,
       priority: data.priority || Priority.MEDIUM,
-      location: data.location || '',
+      location: data.location || "",
       dateReported: new Date(),
       dateIncident: data.dateIncident || new Date(),
-      reportedBy: user?.id || 'citizen1',
+      reportedBy: user?.id || "citizen1",
       evidence: data.evidence || [],
       witnesses: witnesses,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     const newStatus: CitizenReportStatus = {
@@ -261,17 +297,17 @@ export default function CitizenPortal() {
         {
           status: CrimeStatus.REPORTED,
           timestamp: new Date(),
-          updatedBy: 'System',
-          notes: 'Report submitted successfully',
-          isVisibleToCitizen: true
-        }
+          updatedBy: "System",
+          notes: "Report submitted successfully",
+          isVisibleToCitizen: true,
+        },
       ],
       lastUpdate: new Date(),
-      canProvideUpdates: true
+      canProvideUpdates: true,
     };
 
-    setReports(prev => [newReport, ...prev]);
-    setReportStatuses(prev => [newStatus, ...prev]);
+    setReports((prev) => [newReport, ...prev]);
+    setReportStatuses((prev) => [newStatus, ...prev]);
     setFormData({});
     setWitnesses([]);
     setShowNewReportForm(false);
@@ -280,10 +316,10 @@ export default function CitizenPortal() {
   const handleFileUpload = async (files: FileList) => {
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     // Simulate upload progress
     const interval = setInterval(() => {
-      setUploadProgress(prev => {
+      setUploadProgress((prev) => {
         if (prev >= 95) {
           clearInterval(interval);
           return 95;
@@ -296,38 +332,43 @@ export default function CitizenPortal() {
     setTimeout(() => {
       setUploadProgress(100);
       setIsUploading(false);
-      
-      const fileNames = Array.from(files).map(file => file.name);
-      setFormData(prev => ({
+
+      const fileNames = Array.from(files).map((file) => file.name);
+      setFormData((prev) => ({
         ...prev,
-        evidence: [...(prev.evidence || []), ...fileNames]
+        evidence: [...(prev.evidence || []), ...fileNames],
       }));
     }, 2000);
   };
 
   const addWitness = () => {
-    setWitnesses(prev => [...prev, {
-      id: Date.now().toString(),
-      name: '',
-      phone: '',
-      email: '',
-      statement: '',
-      reportId: ''
-    }]);
+    setWitnesses((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        name: "",
+        phone: "",
+        email: "",
+        statement: "",
+        reportId: "",
+      },
+    ]);
   };
 
   const updateWitness = (index: number, field: string, value: string) => {
-    setWitnesses(prev => prev.map((witness, i) => 
-      i === index ? { ...witness, [field]: value } : witness
-    ));
+    setWitnesses((prev) =>
+      prev.map((witness, i) =>
+        i === index ? { ...witness, [field]: value } : witness,
+      ),
+    );
   };
 
   const removeWitness = (index: number) => {
-    setWitnesses(prev => prev.filter((_, i) => i !== index));
+    setWitnesses((prev) => prev.filter((_, i) => i !== index));
   };
 
   const getReportStatus = (reportId: string) => {
-    return reportStatuses.find(status => status.reportId === reportId);
+    return reportStatuses.find((status) => status.reportId === reportId);
   };
 
   return (
@@ -341,9 +382,11 @@ export default function CitizenPortal() {
                 <Shield className="h-8 w-8 text-red-600" />
                 Citizen Portal
               </h1>
-              <p className="text-gray-600 mt-2">Submit and track your crime reports</p>
+              <p className="text-gray-600 mt-2">
+                Submit and track your crime reports
+              </p>
             </div>
-            <Button 
+            <Button
               onClick={() => setShowNewReportForm(true)}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -368,7 +411,7 @@ export default function CitizenPortal() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -378,13 +421,17 @@ export default function CitizenPortal() {
                 <div>
                   <p className="text-sm text-gray-600">Under Investigation</p>
                   <p className="text-2xl font-bold">
-                    {reports.filter(r => r.status === CrimeStatus.UNDER_INVESTIGATION).length}
+                    {
+                      reports.filter(
+                        (r) => r.status === CrimeStatus.UNDER_INVESTIGATION,
+                      ).length
+                    }
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -394,13 +441,16 @@ export default function CitizenPortal() {
                 <div>
                   <p className="text-sm text-gray-600">Resolved</p>
                   <p className="text-2xl font-bold">
-                    {reports.filter(r => r.status === CrimeStatus.RESOLVED).length}
+                    {
+                      reports.filter((r) => r.status === CrimeStatus.RESOLVED)
+                        .length
+                    }
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -438,22 +488,26 @@ export default function CitizenPortal() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    {Object.values(CrimeStatus).map(status => (
+                    {Object.values(CrimeStatus).map((status) => (
                       <SelectItem key={status} value={status}>
-                        {status.replace('_', ' ').toUpperCase()}
+                        {status.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <Select
+                  value={filterCategory}
+                  onValueChange={setFilterCategory}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by Category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {Object.values(CrimeCategory).map(category => (
+                    {Object.values(CrimeCategory).map((category) => (
                       <SelectItem key={category} value={category}>
-                        {getCategoryIcon(category)} {category.replace('_', ' ').toUpperCase()}
+                        {getCategoryIcon(category)}{" "}
+                        {category.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -468,7 +522,10 @@ export default function CitizenPortal() {
           {filteredReports.map((report) => {
             const status = getReportStatus(report.id);
             return (
-              <Card key={report.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={report.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
@@ -477,12 +534,16 @@ export default function CitizenPortal() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{report.title}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {report.title}
+                          </h3>
                           {getStatusBadge(report.status)}
                           {getPriorityBadge(report.priority)}
                         </div>
-                        <p className="text-gray-600 mb-3 line-clamp-2">{report.description}</p>
-                        
+                        <p className="text-gray-600 mb-3 line-clamp-2">
+                          {report.description}
+                        </p>
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-gray-400" />
@@ -490,31 +551,42 @@ export default function CitizenPortal() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
-                            <span>{report.dateIncident.toLocaleDateString()}</span>
+                            <span>
+                              {report.dateIncident.toLocaleDateString()}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-gray-400" />
-                            <span>Reported {report.dateReported.toLocaleDateString()}</span>
+                            <span>
+                              Reported{" "}
+                              {report.dateReported.toLocaleDateString()}
+                            </span>
                           </div>
                           {status?.assignedOfficer && (
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-gray-400" />
-                              <span className="truncate">{status.assignedOfficer.name}</span>
+                              <span className="truncate">
+                                {status.assignedOfficer.name}
+                              </span>
                             </div>
                           )}
                         </div>
-                        
-                        {status?.estimatedResolution && report.status === CrimeStatus.UNDER_INVESTIGATION && (
-                          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                            <div className="flex items-center gap-2 text-sm text-blue-700">
-                              <Info className="h-4 w-4" />
-                              <span>Estimated resolution: {status.estimatedResolution.toLocaleDateString()}</span>
+
+                        {status?.estimatedResolution &&
+                          report.status === CrimeStatus.UNDER_INVESTIGATION && (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                              <div className="flex items-center gap-2 text-sm text-blue-700">
+                                <Info className="h-4 w-4" />
+                                <span>
+                                  Estimated resolution:{" "}
+                                  {status.estimatedResolution.toLocaleDateString()}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2 ml-4">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -525,22 +597,36 @@ export default function CitizenPortal() {
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Report Details - {report.title}</DialogTitle>
-                            <DialogDescription>Report ID: {report.id}</DialogDescription>
+                            <DialogTitle>
+                              Report Details - {report.title}
+                            </DialogTitle>
+                            <DialogDescription>
+                              Report ID: {report.id}
+                            </DialogDescription>
                           </DialogHeader>
                           <Tabs defaultValue="details" className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
                               <TabsTrigger value="details">Details</TabsTrigger>
-                              <TabsTrigger value="status">Status Tracking</TabsTrigger>
-                              <TabsTrigger value="contact">Contact Officer</TabsTrigger>
+                              <TabsTrigger value="status">
+                                Status Tracking
+                              </TabsTrigger>
+                              <TabsTrigger value="contact">
+                                Contact Officer
+                              </TabsTrigger>
                             </TabsList>
                             <TabsContent value="details" className="space-y-6">
                               <div className="grid grid-cols-2 gap-6">
                                 <div>
                                   <Label>Category</Label>
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-lg">{getCategoryIcon(report.category)}</span>
-                                    <span>{report.category.replace('_', ' ').toUpperCase()}</span>
+                                    <span className="text-lg">
+                                      {getCategoryIcon(report.category)}
+                                    </span>
+                                    <span>
+                                      {report.category
+                                        .replace("_", " ")
+                                        .toUpperCase()}
+                                    </span>
                                   </div>
                                 </div>
                                 <div>
@@ -551,14 +637,18 @@ export default function CitizenPortal() {
                                 </div>
                                 <div>
                                   <Label>Incident Date</Label>
-                                  <p className="mt-1">{report.dateIncident.toLocaleDateString()}</p>
+                                  <p className="mt-1">
+                                    {report.dateIncident.toLocaleDateString()}
+                                  </p>
                                 </div>
                                 <div>
                                   <Label>Reported Date</Label>
-                                  <p className="mt-1">{report.dateReported.toLocaleDateString()}</p>
+                                  <p className="mt-1">
+                                    {report.dateReported.toLocaleDateString()}
+                                  </p>
                                 </div>
                               </div>
-                              
+
                               <div>
                                 <Label>Location</Label>
                                 <div className="flex items-center gap-2 mt-1">
@@ -566,86 +656,133 @@ export default function CitizenPortal() {
                                   <span>{report.location}</span>
                                 </div>
                               </div>
-                              
+
                               <div>
                                 <Label>Description</Label>
-                                <p className="mt-1 text-gray-700 whitespace-pre-wrap">{report.description}</p>
+                                <p className="mt-1 text-gray-700 whitespace-pre-wrap">
+                                  {report.description}
+                                </p>
                               </div>
-                              
-                              {report.evidence && report.evidence.length > 0 && (
-                                <div>
-                                  <Label>Evidence</Label>
-                                  <div className="grid grid-cols-2 gap-2 mt-2">
-                                    {report.evidence.map((evidence, index) => (
-                                      <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                                        <Camera className="h-4 w-4 text-gray-400" />
-                                        <span className="text-sm truncate">{evidence}</span>
-                                      </div>
-                                    ))}
+
+                              {report.evidence &&
+                                report.evidence.length > 0 && (
+                                  <div>
+                                    <Label>Evidence</Label>
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                      {report.evidence.map(
+                                        (evidence, index) => (
+                                          <div
+                                            key={index}
+                                            className="flex items-center gap-2 p-2 border rounded"
+                                          >
+                                            <Camera className="h-4 w-4 text-gray-400" />
+                                            <span className="text-sm truncate">
+                                              {evidence}
+                                            </span>
+                                          </div>
+                                        ),
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-                              
-                              {report.witnesses && report.witnesses.length > 0 && (
-                                <div>
-                                  <Label>Witnesses</Label>
-                                  <div className="space-y-2 mt-2">
-                                    {report.witnesses.map((witness, index) => (
-                                      <div key={index} className="p-3 border rounded">
-                                        <p className="font-medium">{witness.name}</p>
-                                        {witness.phone && <p className="text-sm text-gray-600">{witness.phone}</p>}
-                                        {witness.email && <p className="text-sm text-gray-600">{witness.email}</p>}
-                                      </div>
-                                    ))}
+                                )}
+
+                              {report.witnesses &&
+                                report.witnesses.length > 0 && (
+                                  <div>
+                                    <Label>Witnesses</Label>
+                                    <div className="space-y-2 mt-2">
+                                      {report.witnesses.map(
+                                        (witness, index) => (
+                                          <div
+                                            key={index}
+                                            className="p-3 border rounded"
+                                          >
+                                            <p className="font-medium">
+                                              {witness.name}
+                                            </p>
+                                            {witness.phone && (
+                                              <p className="text-sm text-gray-600">
+                                                {witness.phone}
+                                              </p>
+                                            )}
+                                            {witness.email && (
+                                              <p className="text-sm text-gray-600">
+                                                {witness.email}
+                                              </p>
+                                            )}
+                                          </div>
+                                        ),
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
                             </TabsContent>
                             <TabsContent value="status" className="space-y-6">
                               {status && (
                                 <div>
                                   <div className="flex items-center justify-between mb-4">
                                     <div>
-                                      <h3 className="font-semibold">Current Status</h3>
+                                      <h3 className="font-semibold">
+                                        Current Status
+                                      </h3>
                                       <div className="mt-1">
                                         {getStatusBadge(status.currentStatus)}
                                       </div>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-sm text-gray-600">Last Updated</p>
-                                      <p className="font-medium">{status.lastUpdate.toLocaleString()}</p>
+                                      <p className="text-sm text-gray-600">
+                                        Last Updated
+                                      </p>
+                                      <p className="font-medium">
+                                        {status.lastUpdate.toLocaleString()}
+                                      </p>
                                     </div>
                                   </div>
-                                  
+
                                   <div>
-                                    <h4 className="font-semibold mb-3">Status History</h4>
+                                    <h4 className="font-semibold mb-3">
+                                      Status History
+                                    </h4>
                                     <div className="space-y-4">
-                                      {status.statusHistory.map((update, index) => (
-                                        <div key={index} className="flex gap-4">
-                                          <div className="flex flex-col items-center">
-                                            <div className={`w-3 h-3 rounded-full ${
-                                              index === 0 ? 'bg-red-500' : 'bg-gray-300'
-                                            }`} />
-                                            {index < status.statusHistory.length - 1 && (
-                                              <div className="w-px h-8 bg-gray-300 mt-2" />
-                                            )}
-                                          </div>
-                                          <div className="flex-1 pb-4">
-                                            <div className="flex items-center gap-2 mb-1">
-                                              {getStatusBadge(update.status)}
-                                              <span className="text-sm text-gray-500">
-                                                by {update.updatedBy}
-                                              </span>
+                                      {status.statusHistory.map(
+                                        (update, index) => (
+                                          <div
+                                            key={index}
+                                            className="flex gap-4"
+                                          >
+                                            <div className="flex flex-col items-center">
+                                              <div
+                                                className={`w-3 h-3 rounded-full ${
+                                                  index === 0
+                                                    ? "bg-red-500"
+                                                    : "bg-gray-300"
+                                                }`}
+                                              />
+                                              {index <
+                                                status.statusHistory.length -
+                                                  1 && (
+                                                <div className="w-px h-8 bg-gray-300 mt-2" />
+                                              )}
                                             </div>
-                                            <p className="text-sm text-gray-600 mb-1">
-                                              {update.timestamp.toLocaleString()}
-                                            </p>
-                                            {update.notes && (
-                                              <p className="text-sm">{update.notes}</p>
-                                            )}
+                                            <div className="flex-1 pb-4">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                {getStatusBadge(update.status)}
+                                                <span className="text-sm text-gray-500">
+                                                  by {update.updatedBy}
+                                                </span>
+                                              </div>
+                                              <p className="text-sm text-gray-600 mb-1">
+                                                {update.timestamp.toLocaleString()}
+                                              </p>
+                                              {update.notes && (
+                                                <p className="text-sm">
+                                                  {update.notes}
+                                                </p>
+                                              )}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ),
+                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -659,11 +796,15 @@ export default function CitizenPortal() {
                                       <User className="h-8 w-8 text-gray-600" />
                                     </div>
                                     <div>
-                                      <h3 className="font-semibold text-lg">{status.assignedOfficer.name}</h3>
-                                      <p className="text-gray-600">{status.assignedOfficer.badgeNumber}</p>
+                                      <h3 className="font-semibold text-lg">
+                                        {status.assignedOfficer.name}
+                                      </h3>
+                                      <p className="text-gray-600">
+                                        {status.assignedOfficer.badgeNumber}
+                                      </p>
                                     </div>
                                   </div>
-                                  
+
                                   {status.assignedOfficer.contactInfo && (
                                     <Alert>
                                       <Info className="h-4 w-4" />
@@ -672,11 +813,13 @@ export default function CitizenPortal() {
                                       </AlertDescription>
                                     </Alert>
                                   )}
-                                  
+
                                   {status.canProvideUpdates && (
                                     <div className="space-y-4">
                                       <div>
-                                        <Label htmlFor="additionalInfo">Provide Additional Information</Label>
+                                        <Label htmlFor="additionalInfo">
+                                          Provide Additional Information
+                                        </Label>
                                         <Textarea
                                           id="additionalInfo"
                                           placeholder="Any additional information or updates regarding this incident..."
@@ -693,8 +836,13 @@ export default function CitizenPortal() {
                               ) : (
                                 <div className="text-center py-8">
                                   <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Officer Assigned</h3>
-                                  <p className="text-gray-600">This report is pending assignment to an investigating officer.</p>
+                                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                    No Officer Assigned
+                                  </h3>
+                                  <p className="text-gray-600">
+                                    This report is pending assignment to an
+                                    investigating officer.
+                                  </p>
                                 </div>
                               )}
                             </TabsContent>
@@ -718,14 +866,18 @@ export default function CitizenPortal() {
                 Provide details about the incident you wish to report
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmitReport(formData);
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmitReport(formData);
+              }}
+            >
               <Tabs defaultValue="incident" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="incident">Incident Details</TabsTrigger>
-                  <TabsTrigger value="evidence">Evidence & Witnesses</TabsTrigger>
+                  <TabsTrigger value="evidence">
+                    Evidence & Witnesses
+                  </TabsTrigger>
                   <TabsTrigger value="review">Review & Submit</TabsTrigger>
                 </TabsList>
                 <TabsContent value="incident" className="space-y-4">
@@ -735,31 +887,42 @@ export default function CitizenPortal() {
                       <Input
                         id="title"
                         required
-                        value={formData.title || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        value={formData.title || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
                         placeholder="Brief description of the incident"
                       />
                     </div>
                     <div>
                       <Label htmlFor="category">Category *</Label>
                       <Select
-                        value={formData.category || ''}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as CrimeCategory }))}
+                        value={formData.category || ""}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            category: value as CrimeCategory,
+                          }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.values(CrimeCategory).map(category => (
+                          {Object.values(CrimeCategory).map((category) => (
                             <SelectItem key={category} value={category}>
-                              {getCategoryIcon(category)} {category.replace('_', ' ').toUpperCase()}
+                              {getCategoryIcon(category)}{" "}
+                              {category.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="dateIncident">Date of Incident *</Label>
@@ -767,21 +930,34 @@ export default function CitizenPortal() {
                         id="dateIncident"
                         type="datetime-local"
                         required
-                        value={formData.dateIncident?.toISOString().slice(0, 16) || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, dateIncident: new Date(e.target.value) }))}
+                        value={
+                          formData.dateIncident?.toISOString().slice(0, 16) ||
+                          ""
+                        }
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            dateIncident: new Date(e.target.value),
+                          }))
+                        }
                       />
                     </div>
                     <div>
                       <Label htmlFor="priority">Priority</Label>
                       <Select
                         value={formData.priority || Priority.MEDIUM}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as Priority }))}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            priority: value as Priority,
+                          }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.values(Priority).map(priority => (
+                          {Object.values(Priority).map((priority) => (
                             <SelectItem key={priority} value={priority}>
                               {priority.toUpperCase()}
                             </SelectItem>
@@ -790,26 +966,36 @@ export default function CitizenPortal() {
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="location">Location *</Label>
                     <Input
                       id="location"
                       required
-                      value={formData.location || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                      value={formData.location || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          location: e.target.value,
+                        }))
+                      }
                       placeholder="Address or description of the location"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="description">Detailed Description *</Label>
                     <Textarea
                       id="description"
                       required
                       rows={6}
-                      value={formData.description || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      value={formData.description || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
                       placeholder="Provide a detailed description of what happened, including dates, times, people involved, and any other relevant information..."
                     />
                   </div>
@@ -821,8 +1007,12 @@ export default function CitizenPortal() {
                       <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-500">Click to upload photos, videos, or documents</p>
-                          <p className="text-xs text-gray-400">Max file size: 10MB</p>
+                          <p className="text-sm text-gray-500">
+                            Click to upload photos, videos, or documents
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Max file size: 10MB
+                          </p>
                         </div>
                         <input
                           type="file"
@@ -837,7 +1027,7 @@ export default function CitizenPortal() {
                         />
                       </label>
                     </div>
-                    
+
                     {isUploading && (
                       <div className="space-y-2 mt-4">
                         <div className="flex justify-between text-sm">
@@ -847,13 +1037,16 @@ export default function CitizenPortal() {
                         <Progress value={uploadProgress} />
                       </div>
                     )}
-                    
+
                     {formData.evidence && formData.evidence.length > 0 && (
                       <div className="mt-4">
                         <Label>Uploaded Files</Label>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           {formData.evidence.map((file, index) => (
-                            <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 p-2 border rounded"
+                            >
                               <Camera className="h-4 w-4 text-gray-400" />
                               <span className="text-sm truncate">{file}</span>
                             </div>
@@ -862,24 +1055,32 @@ export default function CitizenPortal() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     <div className="flex items-center justify-between">
                       <Label>Witnesses</Label>
-                      <Button type="button" variant="outline" onClick={addWitness}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addWitness}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Witness
                       </Button>
                     </div>
                     {witnesses.length === 0 ? (
-                      <p className="text-gray-500 text-center py-4">No witnesses added</p>
+                      <p className="text-gray-500 text-center py-4">
+                        No witnesses added
+                      </p>
                     ) : (
                       <div className="space-y-4 mt-4">
                         {witnesses.map((witness, index) => (
                           <Card key={index}>
                             <CardContent className="p-4">
                               <div className="flex justify-between items-start mb-4">
-                                <h4 className="font-medium">Witness {index + 1}</h4>
+                                <h4 className="font-medium">
+                                  Witness {index + 1}
+                                </h4>
                                 <Button
                                   type="button"
                                   variant="outline"
@@ -894,15 +1095,27 @@ export default function CitizenPortal() {
                                   <Label>Name</Label>
                                   <Input
                                     value={witness.name}
-                                    onChange={(e) => updateWitness(index, 'name', e.target.value)}
+                                    onChange={(e) =>
+                                      updateWitness(
+                                        index,
+                                        "name",
+                                        e.target.value,
+                                      )
+                                    }
                                     placeholder="Witness name"
                                   />
                                 </div>
                                 <div>
                                   <Label>Phone</Label>
                                   <Input
-                                    value={witness.phone || ''}
-                                    onChange={(e) => updateWitness(index, 'phone', e.target.value)}
+                                    value={witness.phone || ""}
+                                    onChange={(e) =>
+                                      updateWitness(
+                                        index,
+                                        "phone",
+                                        e.target.value,
+                                      )
+                                    }
                                     placeholder="Phone number"
                                   />
                                 </div>
@@ -910,8 +1123,14 @@ export default function CitizenPortal() {
                                   <Label>Email</Label>
                                   <Input
                                     type="email"
-                                    value={witness.email || ''}
-                                    onChange={(e) => updateWitness(index, 'email', e.target.value)}
+                                    value={witness.email || ""}
+                                    onChange={(e) =>
+                                      updateWitness(
+                                        index,
+                                        "email",
+                                        e.target.value,
+                                      )
+                                    }
                                     placeholder="Email address"
                                   />
                                 </div>
@@ -919,7 +1138,13 @@ export default function CitizenPortal() {
                                   <Label>Statement</Label>
                                   <Textarea
                                     value={witness.statement}
-                                    onChange={(e) => updateWitness(index, 'statement', e.target.value)}
+                                    onChange={(e) =>
+                                      updateWitness(
+                                        index,
+                                        "statement",
+                                        e.target.value,
+                                      )
+                                    }
                                     placeholder="What did this witness see or know about the incident?"
                                   />
                                 </div>
@@ -933,83 +1158,91 @@ export default function CitizenPortal() {
                 </TabsContent>
                 <TabsContent value="review" className="space-y-6">
                   <div>
-                    <h3 className="font-semibold text-lg mb-4">Review Your Report</h3>
+                    <h3 className="font-semibold text-lg mb-4">
+                      Review Your Report
+                    </h3>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>Title</Label>
-                          <p className="mt-1">{formData.title || 'Not provided'}</p>
+                          <p className="mt-1">
+                            {formData.title || "Not provided"}
+                          </p>
                         </div>
                         <div>
                           <Label>Category</Label>
                           <p className="mt-1">
-                            {formData.category ? 
-                              `${getCategoryIcon(formData.category)} ${formData.category.replace('_', ' ').toUpperCase()}` :
-                              'Not selected'
-                            }
+                            {formData.category
+                              ? `${getCategoryIcon(formData.category)} ${formData.category.replace("_", " ").toUpperCase()}`
+                              : "Not selected"}
                           </p>
                         </div>
                         <div>
                           <Label>Date of Incident</Label>
                           <p className="mt-1">
-                            {formData.dateIncident ? 
-                              formData.dateIncident.toLocaleString() :
-                              'Not provided'
-                            }
+                            {formData.dateIncident
+                              ? formData.dateIncident.toLocaleString()
+                              : "Not provided"}
                           </p>
                         </div>
                         <div>
                           <Label>Priority</Label>
-                          <p className="mt-1">{formData.priority || Priority.MEDIUM}</p>
+                          <p className="mt-1">
+                            {formData.priority || Priority.MEDIUM}
+                          </p>
                         </div>
                       </div>
-                      
+
                       <div>
                         <Label>Location</Label>
-                        <p className="mt-1">{formData.location || 'Not provided'}</p>
+                        <p className="mt-1">
+                          {formData.location || "Not provided"}
+                        </p>
                       </div>
-                      
+
                       <div>
                         <Label>Description</Label>
-                        <p className="mt-1 whitespace-pre-wrap">{formData.description || 'Not provided'}</p>
+                        <p className="mt-1 whitespace-pre-wrap">
+                          {formData.description || "Not provided"}
+                        </p>
                       </div>
-                      
+
                       <div>
                         <Label>Evidence Files</Label>
                         <p className="mt-1">
-                          {formData.evidence && formData.evidence.length > 0 ? 
-                            `${formData.evidence.length} files uploaded` :
-                            'No files uploaded'
-                          }
+                          {formData.evidence && formData.evidence.length > 0
+                            ? `${formData.evidence.length} files uploaded`
+                            : "No files uploaded"}
                         </p>
                       </div>
-                      
+
                       <div>
                         <Label>Witnesses</Label>
                         <p className="mt-1">
-                          {witnesses.length > 0 ? 
-                            `${witnesses.length} witnesses added` :
-                            'No witnesses added'
-                          }
+                          {witnesses.length > 0
+                            ? `${witnesses.length} witnesses added`
+                            : "No witnesses added"}
                         </p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <Alert>
                     <Info className="h-4 w-4" />
                     <AlertDescription>
-                      By submitting this report, you confirm that the information provided is accurate to the best of your knowledge. 
-                      You will receive a report ID and can track the status of your report through this portal.
+                      By submitting this report, you confirm that the
+                      information provided is accurate to the best of your
+                      knowledge. You will receive a report ID and can track the
+                      status of your report through this portal.
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
               </Tabs>
-              
+
               <div className="flex justify-end gap-4 mt-6 pt-6 border-t">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setShowNewReportForm(false);
                     setFormData({});
@@ -1018,10 +1251,7 @@ export default function CitizenPortal() {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit"
-                  className="bg-red-600 hover:bg-red-700"
-                >
+                <Button type="submit" className="bg-red-600 hover:bg-red-700">
                   Submit Report
                 </Button>
               </div>
@@ -1033,8 +1263,13 @@ export default function CitizenPortal() {
           <Card>
             <CardContent className="p-12 text-center">
               <Shield className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No reports found</h3>
-              <p className="text-gray-600 mb-4">You haven't submitted any reports yet or no reports match your search criteria.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No reports found
+              </h3>
+              <p className="text-gray-600 mb-4">
+                You haven't submitted any reports yet or no reports match your
+                search criteria.
+              </p>
               <Button
                 onClick={() => setShowNewReportForm(true)}
                 className="bg-red-600 hover:bg-red-700"

@@ -1,21 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Textarea } from '../components/ui/textarea';
-import { Badge } from '../components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { Checkbox } from '../components/ui/checkbox';
-import { 
-  MessageSquare, 
-  Plus, 
-  Eye, 
-  Search, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
+import { Badge } from "../components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Checkbox } from "../components/ui/checkbox";
+import {
+  MessageSquare,
+  Plus,
+  Eye,
+  Search,
   Filter,
   ThumbsUp,
   ThumbsDown,
@@ -38,118 +62,128 @@ import {
   Heart,
   Lightbulb,
   MessageCircle,
-  Info
-} from 'lucide-react';
+  Info,
+} from "lucide-react";
 import {
   CitizenFeedback,
   FeedbackType,
   FeedbackCategory,
   FeedbackStatus,
-  Priority
-} from '../../shared/types';
+  Priority,
+} from "../../shared/types";
 
 // Mock data for demonstration
 const mockFeedback: CitizenFeedback[] = [
   {
-    id: '1',
-    citizenId: 'citizen1',
-    citizenName: 'John Doe',
-    email: 'john.doe@email.com',
-    phone: '+1-234-567-8901',
+    id: "1",
+    citizenId: "citizen1",
+    citizenName: "John Doe",
+    email: "john.doe@email.com",
+    phone: "+1-234-567-8901",
     feedbackType: FeedbackType.COMPLIMENT,
     category: FeedbackCategory.OFFICER_CONDUCT,
-    subject: 'Excellent Service by Officer Smith',
-    message: 'I wanted to express my gratitude for the professional and courteous service provided by Officer Smith during my recent interaction. He was very helpful and understanding.',
-    relatedCaseId: 'CASE-001',
+    subject: "Excellent Service by Officer Smith",
+    message:
+      "I wanted to express my gratitude for the professional and courteous service provided by Officer Smith during my recent interaction. He was very helpful and understanding.",
+    relatedCaseId: "CASE-001",
     priority: Priority.LOW,
     status: FeedbackStatus.RESOLVED,
-    response: 'Thank you for your positive feedback. We have forwarded your compliments to Officer Smith and his supervisor.',
-    respondedBy: 'Supervisor Johnson',
-    respondedAt: new Date('2024-01-15T10:30:00'),
+    response:
+      "Thank you for your positive feedback. We have forwarded your compliments to Officer Smith and his supervisor.",
+    respondedBy: "Supervisor Johnson",
+    respondedAt: new Date("2024-01-15T10:30:00"),
     attachments: [],
     isAnonymous: false,
-    submittedAt: new Date('2024-01-10T14:20:00'),
-    updatedAt: new Date('2024-01-15T10:30:00')
+    submittedAt: new Date("2024-01-10T14:20:00"),
+    updatedAt: new Date("2024-01-15T10:30:00"),
   },
   {
-    id: '2',
-    citizenId: 'citizen1',
-    citizenName: 'Anonymous',
+    id: "2",
+    citizenId: "citizen1",
+    citizenName: "Anonymous",
     feedbackType: FeedbackType.COMPLAINT,
     category: FeedbackCategory.RESPONSE_TIME,
-    subject: 'Slow Response to Emergency Call',
-    message: 'I called for emergency assistance and it took over 45 minutes for officers to arrive. This seems excessive for an emergency situation.',
+    subject: "Slow Response to Emergency Call",
+    message:
+      "I called for emergency assistance and it took over 45 minutes for officers to arrive. This seems excessive for an emergency situation.",
     priority: Priority.HIGH,
     status: FeedbackStatus.UNDER_REVIEW,
     attachments: [],
     isAnonymous: true,
-    submittedAt: new Date('2024-01-12T20:15:00'),
-    updatedAt: new Date('2024-01-13T09:00:00')
+    submittedAt: new Date("2024-01-12T20:15:00"),
+    updatedAt: new Date("2024-01-13T09:00:00"),
   },
   {
-    id: '3',
-    citizenId: 'citizen1',
-    citizenName: 'John Doe',
-    email: 'john.doe@email.com',
+    id: "3",
+    citizenId: "citizen1",
+    citizenName: "John Doe",
+    email: "john.doe@email.com",
     feedbackType: FeedbackType.SUGGESTION,
     category: FeedbackCategory.SERVICE_QUALITY,
-    subject: 'Suggestion for Online Reporting System',
-    message: 'It would be great if we could submit non-emergency reports online. This would save time for both citizens and officers.',
+    subject: "Suggestion for Online Reporting System",
+    message:
+      "It would be great if we could submit non-emergency reports online. This would save time for both citizens and officers.",
     priority: Priority.MEDIUM,
     status: FeedbackStatus.INVESTIGATING,
-    response: 'Thank you for your suggestion. We are currently evaluating options for an online reporting system.',
-    respondedBy: 'IT Department',
-    respondedAt: new Date('2024-01-14T11:00:00'),
+    response:
+      "Thank you for your suggestion. We are currently evaluating options for an online reporting system.",
+    respondedBy: "IT Department",
+    respondedAt: new Date("2024-01-14T11:00:00"),
     attachments: [],
     isAnonymous: false,
-    submittedAt: new Date('2024-01-08T16:45:00'),
-    updatedAt: new Date('2024-01-14T11:00:00')
-  }
+    submittedAt: new Date("2024-01-08T16:45:00"),
+    updatedAt: new Date("2024-01-14T11:00:00"),
+  },
 ];
 
 export default function CitizenFeedback() {
   const { user } = useAuth();
   const [feedback, setFeedback] = useState<CitizenFeedback[]>(mockFeedback);
   const [showNewFeedbackForm, setShowNewFeedbackForm] = useState(false);
-  const [selectedFeedback, setSelectedFeedback] = useState<CitizenFeedback | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [selectedFeedback, setSelectedFeedback] =
+    useState<CitizenFeedback | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [formData, setFormData] = useState<Partial<CitizenFeedback>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const filteredFeedback = feedback.filter(item => {
-    const matchesSearch = item.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.message.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || item.feedbackType === filterType;
-    const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
-    const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
-    
+  const filteredFeedback = feedback.filter((item) => {
+    const matchesSearch =
+      item.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.message.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType =
+      filterType === "all" || item.feedbackType === filterType;
+    const matchesStatus =
+      filterStatus === "all" || item.status === filterStatus;
+    const matchesCategory =
+      filterCategory === "all" || item.category === filterCategory;
+
     return matchesSearch && matchesType && matchesStatus && matchesCategory;
   });
 
   const getStatusBadge = (status: FeedbackStatus) => {
     const variants = {
-      [FeedbackStatus.SUBMITTED]: 'secondary',
-      [FeedbackStatus.UNDER_REVIEW]: 'default',
-      [FeedbackStatus.INVESTIGATING]: 'outline',
-      [FeedbackStatus.RESOLVED]: 'default',
-      [FeedbackStatus.CLOSED]: 'outline'
+      [FeedbackStatus.SUBMITTED]: "secondary",
+      [FeedbackStatus.UNDER_REVIEW]: "default",
+      [FeedbackStatus.INVESTIGATING]: "outline",
+      [FeedbackStatus.RESOLVED]: "default",
+      [FeedbackStatus.CLOSED]: "outline",
     };
-    
+
     const icons = {
       [FeedbackStatus.SUBMITTED]: <Clock className="h-3 w-3 mr-1" />,
       [FeedbackStatus.UNDER_REVIEW]: <RefreshCw className="h-3 w-3 mr-1" />,
       [FeedbackStatus.INVESTIGATING]: <Search className="h-3 w-3 mr-1" />,
       [FeedbackStatus.RESOLVED]: <CheckCircle className="h-3 w-3 mr-1" />,
-      [FeedbackStatus.CLOSED]: <CheckCircle className="h-3 w-3 mr-1" />
+      [FeedbackStatus.CLOSED]: <CheckCircle className="h-3 w-3 mr-1" />,
     };
-    
+
     return (
       <Badge variant={variants[status] as any} className="text-xs">
         {icons[status]}
-        {status.replace('_', ' ')}
+        {status.replace("_", " ")}
       </Badge>
     );
   };
@@ -157,100 +191,108 @@ export default function CitizenFeedback() {
   const getTypeIcon = (type: FeedbackType) => {
     const icons = {
       [FeedbackType.COMPLAINT]: <ThumbsDown className="h-5 w-5 text-red-500" />,
-      [FeedbackType.SUGGESTION]: <Lightbulb className="h-5 w-5 text-yellow-500" />,
+      [FeedbackType.SUGGESTION]: (
+        <Lightbulb className="h-5 w-5 text-yellow-500" />
+      ),
       [FeedbackType.COMPLIMENT]: <Heart className="h-5 w-5 text-green-500" />,
       [FeedbackType.INQUIRY]: <HelpCircle className="h-5 w-5 text-blue-500" />,
-      [FeedbackType.SERVICE_REQUEST]: <Settings className="h-5 w-5 text-purple-500" />
+      [FeedbackType.SERVICE_REQUEST]: (
+        <Settings className="h-5 w-5 text-purple-500" />
+      ),
     };
-    
+
     return icons[type] || <MessageCircle className="h-5 w-5 text-gray-500" />;
   };
 
   const getTypeColor = (type: FeedbackType) => {
     const colors = {
-      [FeedbackType.COMPLAINT]: 'bg-red-50 border-red-200',
-      [FeedbackType.SUGGESTION]: 'bg-yellow-50 border-yellow-200',
-      [FeedbackType.COMPLIMENT]: 'bg-green-50 border-green-200',
-      [FeedbackType.INQUIRY]: 'bg-blue-50 border-blue-200',
-      [FeedbackType.SERVICE_REQUEST]: 'bg-purple-50 border-purple-200'
+      [FeedbackType.COMPLAINT]: "bg-red-50 border-red-200",
+      [FeedbackType.SUGGESTION]: "bg-yellow-50 border-yellow-200",
+      [FeedbackType.COMPLIMENT]: "bg-green-50 border-green-200",
+      [FeedbackType.INQUIRY]: "bg-blue-50 border-blue-200",
+      [FeedbackType.SERVICE_REQUEST]: "bg-purple-50 border-purple-200",
     };
-    
-    return colors[type] || 'bg-gray-50 border-gray-200';
+
+    return colors[type] || "bg-gray-50 border-gray-200";
   };
 
   const getPriorityBadge = (priority: Priority) => {
     const variants = {
-      [Priority.LOW]: 'outline',
-      [Priority.MEDIUM]: 'secondary',
-      [Priority.HIGH]: 'destructive',
-      [Priority.CRITICAL]: 'destructive'
+      [Priority.LOW]: "outline",
+      [Priority.MEDIUM]: "secondary",
+      [Priority.HIGH]: "destructive",
+      [Priority.CRITICAL]: "destructive",
     };
-    
-    return <Badge variant={variants[priority] as any}>{priority.toUpperCase()}</Badge>;
+
+    return (
+      <Badge variant={variants[priority] as any}>
+        {priority.toUpperCase()}
+      </Badge>
+    );
   };
 
   const handleSubmitFeedback = async (data: Partial<CitizenFeedback>) => {
     setIsSubmitting(true);
-    
+
     // Simulate submission delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     const newFeedback: CitizenFeedback = {
       id: Date.now().toString(),
-      citizenId: user?.id || 'citizen1',
-      citizenName: data.isAnonymous ? 'Anonymous' : (user?.fullName || 'Unknown'),
+      citizenId: user?.id || "citizen1",
+      citizenName: data.isAnonymous ? "Anonymous" : user?.fullName || "Unknown",
       email: data.isAnonymous ? undefined : data.email,
       phone: data.isAnonymous ? undefined : data.phone,
       feedbackType: data.feedbackType || FeedbackType.INQUIRY,
       category: data.category || FeedbackCategory.GENERAL,
-      subject: data.subject || '',
-      message: data.message || '',
+      subject: data.subject || "",
+      message: data.message || "",
       relatedCaseId: data.relatedCaseId,
       priority: data.priority || Priority.MEDIUM,
       status: FeedbackStatus.SUBMITTED,
       attachments: data.attachments || [],
       isAnonymous: data.isAnonymous || false,
       submittedAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
-    setFeedback(prev => [newFeedback, ...prev]);
+    setFeedback((prev) => [newFeedback, ...prev]);
     setFormData({});
     setShowNewFeedbackForm(false);
     setIsSubmitting(false);
   };
 
   const feedbackTypeOptions = [
-    { 
-      value: FeedbackType.COMPLAINT, 
-      label: 'Complaint', 
-      description: 'Report issues or concerns about police services',
-      icon: <ThumbsDown className="h-5 w-5 text-red-500" />
+    {
+      value: FeedbackType.COMPLAINT,
+      label: "Complaint",
+      description: "Report issues or concerns about police services",
+      icon: <ThumbsDown className="h-5 w-5 text-red-500" />,
     },
-    { 
-      value: FeedbackType.SUGGESTION, 
-      label: 'Suggestion', 
-      description: 'Propose improvements to police services',
-      icon: <Lightbulb className="h-5 w-5 text-yellow-500" />
+    {
+      value: FeedbackType.SUGGESTION,
+      label: "Suggestion",
+      description: "Propose improvements to police services",
+      icon: <Lightbulb className="h-5 w-5 text-yellow-500" />,
     },
-    { 
-      value: FeedbackType.COMPLIMENT, 
-      label: 'Compliment', 
-      description: 'Praise officers or services',
-      icon: <Heart className="h-5 w-5 text-green-500" />
+    {
+      value: FeedbackType.COMPLIMENT,
+      label: "Compliment",
+      description: "Praise officers or services",
+      icon: <Heart className="h-5 w-5 text-green-500" />,
     },
-    { 
-      value: FeedbackType.INQUIRY, 
-      label: 'Inquiry', 
-      description: 'Ask questions about police services or procedures',
-      icon: <HelpCircle className="h-5 w-5 text-blue-500" />
+    {
+      value: FeedbackType.INQUIRY,
+      label: "Inquiry",
+      description: "Ask questions about police services or procedures",
+      icon: <HelpCircle className="h-5 w-5 text-blue-500" />,
     },
-    { 
-      value: FeedbackType.SERVICE_REQUEST, 
-      label: 'Service Request', 
-      description: 'Request specific police services',
-      icon: <Settings className="h-5 w-5 text-purple-500" />
-    }
+    {
+      value: FeedbackType.SERVICE_REQUEST,
+      label: "Service Request",
+      description: "Request specific police services",
+      icon: <Settings className="h-5 w-5 text-purple-500" />,
+    },
   ];
 
   return (
@@ -264,9 +306,11 @@ export default function CitizenFeedback() {
                 <MessageSquare className="h-8 w-8 text-red-600" />
                 Citizen Feedback
               </h1>
-              <p className="text-gray-600 mt-2">Share your feedback, suggestions, and compliments with us</p>
+              <p className="text-gray-600 mt-2">
+                Share your feedback, suggestions, and compliments with us
+              </p>
             </div>
-            <Button 
+            <Button
               onClick={() => setShowNewFeedbackForm(true)}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -291,7 +335,7 @@ export default function CitizenFeedback() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -301,13 +345,19 @@ export default function CitizenFeedback() {
                 <div>
                   <p className="text-sm text-gray-600">Under Review</p>
                   <p className="text-2xl font-bold">
-                    {feedback.filter(f => f.status === FeedbackStatus.UNDER_REVIEW || f.status === FeedbackStatus.INVESTIGATING).length}
+                    {
+                      feedback.filter(
+                        (f) =>
+                          f.status === FeedbackStatus.UNDER_REVIEW ||
+                          f.status === FeedbackStatus.INVESTIGATING,
+                      ).length
+                    }
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -317,13 +367,17 @@ export default function CitizenFeedback() {
                 <div>
                   <p className="text-sm text-gray-600">Resolved</p>
                   <p className="text-2xl font-bold">
-                    {feedback.filter(f => f.status === FeedbackStatus.RESOLVED).length}
+                    {
+                      feedback.filter(
+                        (f) => f.status === FeedbackStatus.RESOLVED,
+                      ).length
+                    }
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -361,9 +415,9 @@ export default function CitizenFeedback() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    {Object.values(FeedbackType).map(type => (
+                    {Object.values(FeedbackType).map((type) => (
                       <SelectItem key={type} value={type}>
-                        {type.replace('_', ' ').toUpperCase()}
+                        {type.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -374,22 +428,25 @@ export default function CitizenFeedback() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    {Object.values(FeedbackStatus).map(status => (
+                    {Object.values(FeedbackStatus).map((status) => (
                       <SelectItem key={status} value={status}>
-                        {status.replace('_', ' ').toUpperCase()}
+                        {status.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <Select
+                  value={filterCategory}
+                  onValueChange={setFilterCategory}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by Category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {Object.values(FeedbackCategory).map(category => (
+                    {Object.values(FeedbackCategory).map((category) => (
                       <SelectItem key={category} value={category}>
-                        {category.replace('_', ' ').toUpperCase()}
+                        {category.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -402,25 +459,32 @@ export default function CitizenFeedback() {
         {/* Feedback List */}
         <div className="space-y-6">
           {filteredFeedback.map((item) => (
-            <Card key={item.id} className={`hover:shadow-lg transition-shadow ${getTypeColor(item.feedbackType)}`}>
+            <Card
+              key={item.id}
+              className={`hover:shadow-lg transition-shadow ${getTypeColor(item.feedbackType)}`}
+            >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="mt-1">
-                      {getTypeIcon(item.feedbackType)}
-                    </div>
+                    <div className="mt-1">{getTypeIcon(item.feedbackType)}</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{item.subject}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {item.subject}
+                        </h3>
                         {getStatusBadge(item.status)}
                         {getPriorityBadge(item.priority)}
                       </div>
-                      <p className="text-gray-600 mb-3 line-clamp-2">{item.message}</p>
-                      
+                      <p className="text-gray-600 mb-3 line-clamp-2">
+                        {item.message}
+                      </p>
+
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-gray-400" />
-                          <span>{item.isAnonymous ? 'Anonymous' : item.citizenName}</span>
+                          <span>
+                            {item.isAnonymous ? "Anonymous" : item.citizenName}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-400" />
@@ -428,7 +492,9 @@ export default function CitizenFeedback() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Flag className="h-4 w-4 text-gray-400" />
-                          <span>{item.category.replace('_', ' ').toUpperCase()}</span>
+                          <span>
+                            {item.category.replace("_", " ").toUpperCase()}
+                          </span>
                         </div>
                         {item.relatedCaseId && (
                           <div className="flex items-center gap-2">
@@ -437,14 +503,18 @@ export default function CitizenFeedback() {
                           </div>
                         )}
                       </div>
-                      
+
                       {item.response && (
                         <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                           <div className="flex items-start gap-2">
                             <MessageCircle className="h-4 w-4 text-blue-600 mt-0.5" />
                             <div className="flex-1">
-                              <p className="text-sm text-blue-800 font-medium">Response from {item.respondedBy}</p>
-                              <p className="text-sm text-blue-700 mt-1">{item.response}</p>
+                              <p className="text-sm text-blue-800 font-medium">
+                                Response from {item.respondedBy}
+                              </p>
+                              <p className="text-sm text-blue-700 mt-1">
+                                {item.response}
+                              </p>
                               <p className="text-xs text-blue-600 mt-1">
                                 {item.respondedAt?.toLocaleString()}
                               </p>
@@ -454,7 +524,7 @@ export default function CitizenFeedback() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2 ml-4">
                     <Dialog>
                       <DialogTrigger asChild>
@@ -469,7 +539,9 @@ export default function CitizenFeedback() {
                             {getTypeIcon(item.feedbackType)}
                             {item.subject}
                           </DialogTitle>
-                          <DialogDescription>Feedback ID: {item.id}</DialogDescription>
+                          <DialogDescription>
+                            Feedback ID: {item.id}
+                          </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-6">
                           <div className="flex items-center gap-4">
@@ -477,7 +549,11 @@ export default function CitizenFeedback() {
                               <User className="h-6 w-6 text-gray-600" />
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-semibold">{item.isAnonymous ? 'Anonymous Feedback' : item.citizenName}</h3>
+                              <h3 className="font-semibold">
+                                {item.isAnonymous
+                                  ? "Anonymous Feedback"
+                                  : item.citizenName}
+                              </h3>
                               {!item.isAnonymous && (
                                 <div className="text-sm text-gray-600">
                                   {item.email && <p>{item.email}</p>}
@@ -487,18 +563,24 @@ export default function CitizenFeedback() {
                             </div>
                             {getStatusBadge(item.status)}
                           </div>
-                          
+
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label>Feedback Type</Label>
                               <div className="flex items-center gap-2 mt-1">
                                 {getTypeIcon(item.feedbackType)}
-                                <span>{item.feedbackType.replace('_', ' ').toUpperCase()}</span>
+                                <span>
+                                  {item.feedbackType
+                                    .replace("_", " ")
+                                    .toUpperCase()}
+                                </span>
                               </div>
                             </div>
                             <div>
                               <Label>Category</Label>
-                              <p className="mt-1">{item.category.replace('_', ' ').toUpperCase()}</p>
+                              <p className="mt-1">
+                                {item.category.replace("_", " ").toUpperCase()}
+                              </p>
                             </div>
                             <div>
                               <Label>Priority</Label>
@@ -508,10 +590,12 @@ export default function CitizenFeedback() {
                             </div>
                             <div>
                               <Label>Submitted Date</Label>
-                              <p className="mt-1">{item.submittedAt.toLocaleString()}</p>
+                              <p className="mt-1">
+                                {item.submittedAt.toLocaleString()}
+                              </p>
                             </div>
                           </div>
-                          
+
                           {item.relatedCaseId && (
                             <div>
                               <Label>Related Case</Label>
@@ -521,20 +605,27 @@ export default function CitizenFeedback() {
                               </div>
                             </div>
                           )}
-                          
+
                           <div>
                             <Label>Message</Label>
-                            <p className="mt-1 text-gray-700 whitespace-pre-wrap">{item.message}</p>
+                            <p className="mt-1 text-gray-700 whitespace-pre-wrap">
+                              {item.message}
+                            </p>
                           </div>
-                          
+
                           {item.attachments && item.attachments.length > 0 && (
                             <div>
                               <Label>Attachments</Label>
                               <div className="grid grid-cols-2 gap-2 mt-2">
                                 {item.attachments.map((attachment, index) => (
-                                  <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                                  <div
+                                    key={index}
+                                    className="flex items-center gap-2 p-2 border rounded"
+                                  >
                                     <FileText className="h-4 w-4 text-gray-400" />
-                                    <span className="text-sm truncate">{attachment}</span>
+                                    <span className="text-sm truncate">
+                                      {attachment}
+                                    </span>
                                     <Button variant="outline" size="sm">
                                       <Download className="h-3 w-3" />
                                     </Button>
@@ -543,7 +634,7 @@ export default function CitizenFeedback() {
                               </div>
                             </div>
                           )}
-                          
+
                           {item.response && (
                             <div>
                               <Label>Official Response</Label>
@@ -554,7 +645,9 @@ export default function CitizenFeedback() {
                                     <p className="font-medium text-blue-800 mb-1">
                                       Response from {item.respondedBy}
                                     </p>
-                                    <p className="text-blue-700 mb-2">{item.response}</p>
+                                    <p className="text-blue-700 mb-2">
+                                      {item.response}
+                                    </p>
                                     <p className="text-sm text-blue-600">
                                       {item.respondedAt?.toLocaleString()}
                                     </p>
@@ -574,7 +667,10 @@ export default function CitizenFeedback() {
         </div>
 
         {/* New Feedback Form Dialog */}
-        <Dialog open={showNewFeedbackForm} onOpenChange={setShowNewFeedbackForm}>
+        <Dialog
+          open={showNewFeedbackForm}
+          onOpenChange={setShowNewFeedbackForm}
+        >
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Submit Feedback</DialogTitle>
@@ -582,10 +678,12 @@ export default function CitizenFeedback() {
                 Share your thoughts, suggestions, or concerns with us
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmitFeedback(formData);
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmitFeedback(formData);
+              }}
+            >
               <Tabs defaultValue="type" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="type">Feedback Type</TabsTrigger>
@@ -594,24 +692,35 @@ export default function CitizenFeedback() {
                 </TabsList>
                 <TabsContent value="type" className="space-y-6">
                   <div>
-                    <Label className="text-base font-semibold">What type of feedback would you like to provide?</Label>
+                    <Label className="text-base font-semibold">
+                      What type of feedback would you like to provide?
+                    </Label>
                     <div className="grid grid-cols-1 gap-4 mt-4">
                       {feedbackTypeOptions.map((option) => (
-                        <Card 
+                        <Card
                           key={option.value}
                           className={`cursor-pointer transition-all ${
-                            formData.feedbackType === option.value 
-                              ? 'ring-2 ring-red-500 bg-red-50' 
-                              : 'hover:shadow-md'
+                            formData.feedbackType === option.value
+                              ? "ring-2 ring-red-500 bg-red-50"
+                              : "hover:shadow-md"
                           }`}
-                          onClick={() => setFormData(prev => ({ ...prev, feedbackType: option.value }))}
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              feedbackType: option.value,
+                            }))
+                          }
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-4">
                               {option.icon}
                               <div className="flex-1">
-                                <h3 className="font-semibold text-lg">{option.label}</h3>
-                                <p className="text-gray-600 text-sm">{option.description}</p>
+                                <h3 className="font-semibold text-lg">
+                                  {option.label}
+                                </h3>
+                                <p className="text-gray-600 text-sm">
+                                  {option.description}
+                                </p>
                               </div>
                               {formData.feedbackType === option.value && (
                                 <CheckCircle className="h-5 w-5 text-red-500" />
@@ -630,43 +739,58 @@ export default function CitizenFeedback() {
                       <Input
                         id="subject"
                         required
-                        value={formData.subject || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                        value={formData.subject || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            subject: e.target.value,
+                          }))
+                        }
                         placeholder="Brief summary of your feedback"
                       />
                     </div>
                     <div>
                       <Label htmlFor="category">Category *</Label>
                       <Select
-                        value={formData.category || ''}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as FeedbackCategory }))}
+                        value={formData.category || ""}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            category: value as FeedbackCategory,
+                          }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.values(FeedbackCategory).map(category => (
+                          {Object.values(FeedbackCategory).map((category) => (
                             <SelectItem key={category} value={category}>
-                              {category.replace('_', ' ').toUpperCase()}
+                              {category.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="priority">Priority</Label>
                       <Select
                         value={formData.priority || Priority.MEDIUM}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as Priority }))}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            priority: value as Priority,
+                          }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.values(Priority).map(priority => (
+                          {Object.values(Priority).map((priority) => (
                             <SelectItem key={priority} value={priority}>
                               {priority.toUpperCase()}
                             </SelectItem>
@@ -675,36 +799,52 @@ export default function CitizenFeedback() {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="relatedCaseId">Related Case ID (Optional)</Label>
+                      <Label htmlFor="relatedCaseId">
+                        Related Case ID (Optional)
+                      </Label>
                       <Input
                         id="relatedCaseId"
-                        value={formData.relatedCaseId || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, relatedCaseId: e.target.value }))}
+                        value={formData.relatedCaseId || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            relatedCaseId: e.target.value,
+                          }))
+                        }
                         placeholder="e.g., CASE-001"
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="message">Message *</Label>
                     <Textarea
                       id="message"
                       required
                       rows={6}
-                      value={formData.message || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                      value={formData.message || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          message: e.target.value,
+                        }))
+                      }
                       placeholder="Please provide detailed information about your feedback..."
                     />
                   </div>
-                  
+
                   <div>
                     <Label>Attach Files (Optional)</Label>
                     <div className="flex items-center justify-center w-full mt-2">
                       <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-500">Click to upload supporting documents</p>
-                          <p className="text-xs text-gray-400">Max file size: 5MB</p>
+                          <p className="text-sm text-gray-500">
+                            Click to upload supporting documents
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Max file size: 5MB
+                          </p>
                         </div>
                         <input
                           type="file"
@@ -713,10 +853,15 @@ export default function CitizenFeedback() {
                           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                           onChange={(e) => {
                             if (e.target.files) {
-                              const fileNames = Array.from(e.target.files).map(file => file.name);
-                              setFormData(prev => ({
+                              const fileNames = Array.from(e.target.files).map(
+                                (file) => file.name,
+                              );
+                              setFormData((prev) => ({
                                 ...prev,
-                                attachments: [...(prev.attachments || []), ...fileNames]
+                                attachments: [
+                                  ...(prev.attachments || []),
+                                  ...fileNames,
+                                ],
                               }));
                             }
                           }}
@@ -730,21 +875,25 @@ export default function CitizenFeedback() {
                     <Checkbox
                       id="anonymous"
                       checked={formData.isAnonymous || false}
-                      onCheckedChange={(checked) => setFormData(prev => ({ 
-                        ...prev, 
-                        isAnonymous: checked as boolean 
-                      }))}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          isAnonymous: checked as boolean,
+                        }))
+                      }
                     />
                     <Label htmlFor="anonymous" className="text-sm font-medium">
                       Submit feedback anonymously
                     </Label>
                   </div>
-                  
+
                   {formData.isAnonymous ? (
                     <Alert>
                       <Info className="h-4 w-4" />
                       <AlertDescription>
-                        Your feedback will be submitted anonymously. We will not be able to contact you for follow-up questions or provide direct responses.
+                        Your feedback will be submitted anonymously. We will not
+                        be able to contact you for follow-up questions or
+                        provide direct responses.
                       </AlertDescription>
                     </Alert>
                   ) : (
@@ -754,38 +903,52 @@ export default function CitizenFeedback() {
                         <Input
                           id="email"
                           type="email"
-                          value={formData.email || user?.email || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                          value={formData.email || user?.email || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              email: e.target.value,
+                            }))
+                          }
                           placeholder="your.email@example.com"
                         />
-                        <p className="text-sm text-gray-500 mt-1">We'll use this to respond to your feedback</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          We'll use this to respond to your feedback
+                        </p>
                       </div>
                       <div>
                         <Label htmlFor="phone">Phone Number (Optional)</Label>
                         <Input
                           id="phone"
                           type="tel"
-                          value={formData.phone || user?.phone || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                          value={formData.phone || user?.phone || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              phone: e.target.value,
+                            }))
+                          }
                           placeholder="+1-234-567-8900"
                         />
                       </div>
                     </div>
                   )}
-                  
+
                   <Alert>
                     <Info className="h-4 w-4" />
                     <AlertDescription>
-                      We typically respond to feedback within 3-5 business days. For urgent matters, please contact us directly at (555) 123-4567.
+                      We typically respond to feedback within 3-5 business days.
+                      For urgent matters, please contact us directly at (555)
+                      123-4567.
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
               </Tabs>
-              
+
               <div className="flex justify-end gap-4 mt-6 pt-6 border-t">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setShowNewFeedbackForm(false);
                     setFormData({});
@@ -793,10 +956,15 @@ export default function CitizenFeedback() {
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   className="bg-red-600 hover:bg-red-700"
-                  disabled={isSubmitting || !formData.feedbackType || !formData.subject || !formData.message}
+                  disabled={
+                    isSubmitting ||
+                    !formData.feedbackType ||
+                    !formData.subject ||
+                    !formData.message
+                  }
                 >
                   {isSubmitting ? (
                     <>
@@ -819,8 +987,13 @@ export default function CitizenFeedback() {
           <Card>
             <CardContent className="p-12 text-center">
               <MessageSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No feedback found</h3>
-              <p className="text-gray-600 mb-4">You haven't submitted any feedback yet or no feedback matches your search criteria.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No feedback found
+              </h3>
+              <p className="text-gray-600 mb-4">
+                You haven't submitted any feedback yet or no feedback matches
+                your search criteria.
+              </p>
               <Button
                 onClick={() => setShowNewFeedbackForm(true)}
                 className="bg-red-600 hover:bg-red-700"

@@ -12,12 +12,12 @@ export interface User {
 }
 
 export enum UserRole {
-  SUPER_ADMIN = 'super_admin',
-  POLICE_HEAD = 'police_head',
-  HR_MANAGER = 'hr_manager',
-  PREVENTIVE_OFFICER = 'preventive_officer',
-  DETECTIVE_OFFICER = 'detective_officer',
-  CITIZEN = 'citizen'
+  SUPER_ADMIN = "super_admin",
+  POLICE_HEAD = "police_head",
+  HR_MANAGER = "hr_manager",
+  PREVENTIVE_OFFICER = "preventive_officer",
+  DETECTIVE_OFFICER = "detective_officer",
+  CITIZEN = "citizen",
 }
 
 export interface CrimeReport {
@@ -39,31 +39,31 @@ export interface CrimeReport {
 }
 
 export enum CrimeCategory {
-  THEFT = 'theft',
-  ASSAULT = 'assault',
-  BURGLARY = 'burglary',
-  FRAUD = 'fraud',
-  VANDALISM = 'vandalism',
-  DRUG_OFFENSE = 'drug_offense',
-  DOMESTIC_VIOLENCE = 'domestic_violence',
-  TRAFFIC_VIOLATION = 'traffic_violation',
-  OTHER = 'other'
+  THEFT = "theft",
+  ASSAULT = "assault",
+  BURGLARY = "burglary",
+  FRAUD = "fraud",
+  VANDALISM = "vandalism",
+  DRUG_OFFENSE = "drug_offense",
+  DOMESTIC_VIOLENCE = "domestic_violence",
+  TRAFFIC_VIOLATION = "traffic_violation",
+  OTHER = "other",
 }
 
 export enum CrimeStatus {
-  REPORTED = 'reported',
-  UNDER_INVESTIGATION = 'under_investigation',
-  ASSIGNED = 'assigned',
-  RESOLVED = 'resolved',
-  CLOSED = 'closed',
-  REJECTED = 'rejected'
+  REPORTED = "reported",
+  UNDER_INVESTIGATION = "under_investigation",
+  ASSIGNED = "assigned",
+  RESOLVED = "resolved",
+  CLOSED = "closed",
+  REJECTED = "rejected",
 }
 
 export enum Priority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export interface Witness {
@@ -123,23 +123,23 @@ export interface IncidentReport {
 }
 
 export enum IncidentType {
-  PATROL_OBSERVATION = 'patrol_observation',
-  CITIZEN_COMPLAINT = 'citizen_complaint',
-  TRAFFIC_INCIDENT = 'traffic_incident',
-  SUSPICIOUS_ACTIVITY = 'suspicious_activity',
-  PROPERTY_DAMAGE = 'property_damage',
-  NOISE_COMPLAINT = 'noise_complaint',
-  PUBLIC_DISTURBANCE = 'public_disturbance',
-  EMERGENCY_RESPONSE = 'emergency_response',
-  OTHER = 'other'
+  PATROL_OBSERVATION = "patrol_observation",
+  CITIZEN_COMPLAINT = "citizen_complaint",
+  TRAFFIC_INCIDENT = "traffic_incident",
+  SUSPICIOUS_ACTIVITY = "suspicious_activity",
+  PROPERTY_DAMAGE = "property_damage",
+  NOISE_COMPLAINT = "noise_complaint",
+  PUBLIC_DISTURBANCE = "public_disturbance",
+  EMERGENCY_RESPONSE = "emergency_response",
+  OTHER = "other",
 }
 
 export enum IncidentStatus {
-  REPORTED = 'reported',
-  INVESTIGATING = 'investigating',
-  ESCALATED = 'escalated',
-  RESOLVED = 'resolved',
-  CLOSED = 'closed'
+  REPORTED = "reported",
+  INVESTIGATING = "investigating",
+  ESCALATED = "escalated",
+  RESOLVED = "resolved",
+  CLOSED = "closed",
 }
 
 export interface Evidence {
@@ -178,17 +178,17 @@ export interface PatrolLog {
 }
 
 export enum ShiftType {
-  MORNING = 'morning',
-  AFTERNOON = 'afternoon',
-  NIGHT = 'night',
-  OVERTIME = 'overtime'
+  MORNING = "morning",
+  AFTERNOON = "afternoon",
+  NIGHT = "night",
+  OVERTIME = "overtime",
 }
 
 export enum PatrolStatus {
-  SCHEDULED = 'scheduled',
-  ACTIVE = 'active',
-  COMPLETED = 'completed',
-  SUSPENDED = 'suspended'
+  SCHEDULED = "scheduled",
+  ACTIVE = "active",
+  COMPLETED = "completed",
+  SUSPENDED = "suspended",
 }
 
 export interface PatrolActivity {
@@ -201,12 +201,12 @@ export interface PatrolActivity {
 }
 
 export enum ActivityType {
-  CHECKPOINT = 'checkpoint',
-  PATROL = 'patrol',
-  RESPONSE = 'response',
-  BREAK = 'break',
-  REPORT = 'report',
-  OTHER = 'other'
+  CHECKPOINT = "checkpoint",
+  PATROL = "patrol",
+  RESPONSE = "response",
+  BREAK = "break",
+  REPORT = "report",
+  OTHER = "other",
 }
 
 export interface CriminalRecord {
@@ -269,23 +269,23 @@ export interface Warrant {
 }
 
 export enum WarrantType {
-  ARREST = 'arrest',
-  SEARCH = 'search',
-  BENCH = 'bench'
+  ARREST = "arrest",
+  SEARCH = "search",
+  BENCH = "bench",
 }
 
 export enum WarrantStatus {
-  ACTIVE = 'active',
-  EXECUTED = 'executed',
-  EXPIRED = 'expired',
-  RECALLED = 'recalled'
+  ACTIVE = "active",
+  EXECUTED = "executed",
+  EXPIRED = "expired",
+  RECALLED = "recalled",
 }
 
 export enum RiskLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export interface InvestigationReport {
@@ -309,18 +309,18 @@ export interface InvestigationReport {
 }
 
 export enum ReportType {
-  PRELIMINARY = 'preliminary',
-  PROGRESS = 'progress',
-  FINAL = 'final',
-  SUPPLEMENTAL = 'supplemental'
+  PRELIMINARY = "preliminary",
+  PROGRESS = "progress",
+  FINAL = "final",
+  SUPPLEMENTAL = "supplemental",
 }
 
 export enum ReportStatus {
-  DRAFT = 'draft',
-  SUBMITTED = 'submitted',
-  UNDER_REVIEW = 'under_review',
-  APPROVED = 'approved',
-  REJECTED = 'rejected'
+  DRAFT = "draft",
+  SUBMITTED = "submitted",
+  UNDER_REVIEW = "under_review",
+  APPROVED = "approved",
+  REJECTED = "rejected",
 }
 
 export interface Interview {
@@ -336,11 +336,11 @@ export interface Interview {
 }
 
 export enum IntervieweeType {
-  WITNESS = 'witness',
-  SUSPECT = 'suspect',
-  VICTIM = 'victim',
-  EXPERT = 'expert',
-  OTHER = 'other'
+  WITNESS = "witness",
+  SUSPECT = "suspect",
+  VICTIM = "victim",
+  EXPERT = "expert",
+  OTHER = "other",
 }
 
 export interface TimelineEvent {
@@ -389,36 +389,36 @@ export interface OfficerProfile {
 }
 
 export enum OfficerRank {
-  CONSTABLE = 'constable',
-  CORPORAL = 'corporal',
-  SERGEANT = 'sergeant',
-  LIEUTENANT = 'lieutenant',
-  CAPTAIN = 'captain',
-  MAJOR = 'major',
-  COLONEL = 'colonel',
-  INSPECTOR = 'inspector',
-  CHIEF = 'chief'
+  CONSTABLE = "constable",
+  CORPORAL = "corporal",
+  SERGEANT = "sergeant",
+  LIEUTENANT = "lieutenant",
+  CAPTAIN = "captain",
+  MAJOR = "major",
+  COLONEL = "colonel",
+  INSPECTOR = "inspector",
+  CHIEF = "chief",
 }
 
 export enum Department {
-  PATROL = 'patrol',
-  CRIMINAL_INVESTIGATION = 'criminal_investigation',
-  TRAFFIC = 'traffic',
-  CYBER_CRIME = 'cyber_crime',
-  NARCOTICS = 'narcotics',
-  FORENSICS = 'forensics',
-  ADMINISTRATION = 'administration',
-  TRAINING = 'training',
-  INTERNAL_AFFAIRS = 'internal_affairs'
+  PATROL = "patrol",
+  CRIMINAL_INVESTIGATION = "criminal_investigation",
+  TRAFFIC = "traffic",
+  CYBER_CRIME = "cyber_crime",
+  NARCOTICS = "narcotics",
+  FORENSICS = "forensics",
+  ADMINISTRATION = "administration",
+  TRAINING = "training",
+  INTERNAL_AFFAIRS = "internal_affairs",
 }
 
 export enum EmploymentStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
-  TERMINATED = 'terminated',
-  RETIRED = 'retired',
-  ON_LEAVE = 'on_leave'
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
+  TERMINATED = "terminated",
+  RETIRED = "retired",
+  ON_LEAVE = "on_leave",
 }
 
 export interface Certification {
@@ -432,10 +432,10 @@ export interface Certification {
 }
 
 export enum CertificationStatus {
-  VALID = 'valid',
-  EXPIRED = 'expired',
-  SUSPENDED = 'suspended',
-  REVOKED = 'revoked'
+  VALID = "valid",
+  EXPIRED = "expired",
+  SUSPENDED = "suspended",
+  REVOKED = "revoked",
 }
 
 export interface Document {
@@ -449,14 +449,14 @@ export interface Document {
 }
 
 export enum DocumentType {
-  RESUME = 'resume',
-  ID_COPY = 'id_copy',
-  CERTIFICATE = 'certificate',
-  CONTRACT = 'contract',
-  MEDICAL_REPORT = 'medical_report',
-  BACKGROUND_CHECK = 'background_check',
-  TRAINING_RECORD = 'training_record',
-  OTHER = 'other'
+  RESUME = "resume",
+  ID_COPY = "id_copy",
+  CERTIFICATE = "certificate",
+  CONTRACT = "contract",
+  MEDICAL_REPORT = "medical_report",
+  BACKGROUND_CHECK = "background_check",
+  TRAINING_RECORD = "training_record",
+  OTHER = "other",
 }
 
 export interface PerformanceReview {
@@ -479,11 +479,11 @@ export interface PerformanceReview {
 }
 
 export enum Rating {
-  EXCELLENT = 'excellent',
-  GOOD = 'good',
-  SATISFACTORY = 'satisfactory',
-  NEEDS_IMPROVEMENT = 'needs_improvement',
-  UNSATISFACTORY = 'unsatisfactory'
+  EXCELLENT = "excellent",
+  GOOD = "good",
+  SATISFACTORY = "satisfactory",
+  NEEDS_IMPROVEMENT = "needs_improvement",
+  UNSATISFACTORY = "unsatisfactory",
 }
 
 export interface Competency {
@@ -493,9 +493,9 @@ export interface Competency {
 }
 
 export enum ReviewStatus {
-  DRAFT = 'draft',
-  COMPLETED = 'completed',
-  APPROVED = 'approved'
+  DRAFT = "draft",
+  COMPLETED = "completed",
+  APPROVED = "approved",
 }
 
 export interface StaffSchedule {
@@ -522,21 +522,21 @@ export interface Assignment {
 }
 
 export enum AssignmentType {
-  PATROL = 'patrol',
-  INVESTIGATION = 'investigation',
-  TRAFFIC_CONTROL = 'traffic_control',
-  SECURITY_DETAIL = 'security_detail',
-  COURT_DUTY = 'court_duty',
-  TRAINING = 'training',
-  ADMINISTRATIVE = 'administrative',
-  SPECIAL_OPERATIONS = 'special_operations'
+  PATROL = "patrol",
+  INVESTIGATION = "investigation",
+  TRAFFIC_CONTROL = "traffic_control",
+  SECURITY_DETAIL = "security_detail",
+  COURT_DUTY = "court_duty",
+  TRAINING = "training",
+  ADMINISTRATIVE = "administrative",
+  SPECIAL_OPERATIONS = "special_operations",
 }
 
 export enum ScheduleStatus {
-  SCHEDULED = 'scheduled',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed'
+  SCHEDULED = "scheduled",
+  CONFIRMED = "confirmed",
+  CANCELLED = "cancelled",
+  COMPLETED = "completed",
 }
 
 export interface HRReport {
@@ -552,14 +552,14 @@ export interface HRReport {
 }
 
 export enum HRReportType {
-  ATTENDANCE = 'attendance',
-  PERFORMANCE = 'performance',
-  STAFFING_LEVELS = 'staffing_levels',
-  CERTIFICATION_STATUS = 'certification_status',
-  PAYROLL = 'payroll',
-  TRAINING_COMPLETION = 'training_completion',
-  EMPLOYEE_DEMOGRAPHICS = 'employee_demographics',
-  DISCIPLINARY_ACTIONS = 'disciplinary_actions'
+  ATTENDANCE = "attendance",
+  PERFORMANCE = "performance",
+  STAFFING_LEVELS = "staffing_levels",
+  CERTIFICATION_STATUS = "certification_status",
+  PAYROLL = "payroll",
+  TRAINING_COMPLETION = "training_completion",
+  EMPLOYEE_DEMOGRAPHICS = "employee_demographics",
+  DISCIPLINARY_ACTIONS = "disciplinary_actions",
 }
 
 export interface ReportParameters {
@@ -574,9 +574,9 @@ export interface ReportParameters {
 }
 
 export enum HRReportStatus {
-  GENERATING = 'generating',
-  COMPLETED = 'completed',
-  FAILED = 'failed'
+  GENERATING = "generating",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
 
 // Citizen Types
@@ -603,28 +603,28 @@ export interface CitizenFeedback {
 }
 
 export enum FeedbackType {
-  COMPLAINT = 'complaint',
-  SUGGESTION = 'suggestion',
-  COMPLIMENT = 'compliment',
-  INQUIRY = 'inquiry',
-  SERVICE_REQUEST = 'service_request'
+  COMPLAINT = "complaint",
+  SUGGESTION = "suggestion",
+  COMPLIMENT = "compliment",
+  INQUIRY = "inquiry",
+  SERVICE_REQUEST = "service_request",
 }
 
 export enum FeedbackCategory {
-  OFFICER_CONDUCT = 'officer_conduct',
-  SERVICE_QUALITY = 'service_quality',
-  RESPONSE_TIME = 'response_time',
-  FACILITY_CONDITIONS = 'facility_conditions',
-  SAFETY_CONCERNS = 'safety_concerns',
-  GENERAL = 'general'
+  OFFICER_CONDUCT = "officer_conduct",
+  SERVICE_QUALITY = "service_quality",
+  RESPONSE_TIME = "response_time",
+  FACILITY_CONDITIONS = "facility_conditions",
+  SAFETY_CONCERNS = "safety_concerns",
+  GENERAL = "general",
 }
 
 export enum FeedbackStatus {
-  SUBMITTED = 'submitted',
-  UNDER_REVIEW = 'under_review',
-  INVESTIGATING = 'investigating',
-  RESOLVED = 'resolved',
-  CLOSED = 'closed'
+  SUBMITTED = "submitted",
+  UNDER_REVIEW = "under_review",
+  INVESTIGATING = "investigating",
+  RESOLVED = "resolved",
+  CLOSED = "closed",
 }
 
 export interface EmergencyContact {
@@ -640,14 +640,14 @@ export interface EmergencyContact {
 }
 
 export enum EmergencyType {
-  POLICE = 'police',
-  FIRE = 'fire',
-  MEDICAL = 'medical',
-  AMBULANCE = 'ambulance',
-  DISASTER_RESPONSE = 'disaster_response',
-  POISON_CONTROL = 'poison_control',
-  MENTAL_HEALTH = 'mental_health',
-  DOMESTIC_VIOLENCE = 'domestic_violence'
+  POLICE = "police",
+  FIRE = "fire",
+  MEDICAL = "medical",
+  AMBULANCE = "ambulance",
+  DISASTER_RESPONSE = "disaster_response",
+  POISON_CONTROL = "poison_control",
+  MENTAL_HEALTH = "mental_health",
+  DOMESTIC_VIOLENCE = "domestic_violence",
 }
 
 export interface SafetyInformation {
@@ -666,14 +666,14 @@ export interface SafetyInformation {
 }
 
 export enum SafetyCategory {
-  CRIME_PREVENTION = 'crime_prevention',
-  HOME_SECURITY = 'home_security',
-  PERSONAL_SAFETY = 'personal_safety',
-  CYBER_SECURITY = 'cyber_security',
-  TRAFFIC_SAFETY = 'traffic_safety',
-  EMERGENCY_PREPAREDNESS = 'emergency_preparedness',
-  COMMUNITY_PROGRAMS = 'community_programs',
-  AWARENESS_CAMPAIGNS = 'awareness_campaigns'
+  CRIME_PREVENTION = "crime_prevention",
+  HOME_SECURITY = "home_security",
+  PERSONAL_SAFETY = "personal_safety",
+  CYBER_SECURITY = "cyber_security",
+  TRAFFIC_SAFETY = "traffic_safety",
+  EMERGENCY_PREPAREDNESS = "emergency_preparedness",
+  COMMUNITY_PROGRAMS = "community_programs",
+  AWARENESS_CAMPAIGNS = "awareness_campaigns",
 }
 
 export interface SafetyResource {
@@ -685,12 +685,12 @@ export interface SafetyResource {
 }
 
 export enum ResourceType {
-  ARTICLE = 'article',
-  VIDEO = 'video',
-  PDF = 'pdf',
-  WEBSITE = 'website',
-  HOTLINE = 'hotline',
-  APP = 'app'
+  ARTICLE = "article",
+  VIDEO = "video",
+  PDF = "pdf",
+  WEBSITE = "website",
+  HOTLINE = "hotline",
+  APP = "app",
 }
 
 export interface CitizenReportStatus {

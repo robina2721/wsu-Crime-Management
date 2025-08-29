@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
 import {
   Shield,
   AlertTriangle,
@@ -20,8 +26,8 @@ import {
   Zap,
   Eye,
   UserCheck,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 export default function Index() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -29,74 +35,81 @@ export default function Index() {
   const features = [
     {
       icon: FileText,
-      title: 'Digital Crime Reporting',
-      description: 'File and track crime reports with our comprehensive digital reporting system.',
-      color: 'text-crime-red',
-      badge: 'New'
+      title: "Digital Crime Reporting",
+      description:
+        "File and track crime reports with our comprehensive digital reporting system.",
+      color: "text-crime-red",
+      badge: "New",
     },
     {
       icon: Shield,
-      title: 'Advanced Case Management',
-      description: 'Efficient case tracking and management for law enforcement officers.',
-      color: 'text-blue-600',
-      badge: 'Popular'
+      title: "Advanced Case Management",
+      description:
+        "Efficient case tracking and management for law enforcement officers.",
+      color: "text-blue-600",
+      badge: "Popular",
     },
     {
       icon: Users,
-      title: 'Multi-Role Access',
-      description: 'Role-based access for officers, administrators, and citizens.',
-      color: 'text-green-600',
-      badge: 'Secure'
+      title: "Multi-Role Access",
+      description:
+        "Role-based access for officers, administrators, and citizens.",
+      color: "text-green-600",
+      badge: "Secure",
     },
     {
       icon: AlertTriangle,
-      title: 'Emergency Response',
-      description: 'Quick response system for critical incidents and emergencies.',
-      color: 'text-crime-yellow',
-      badge: '24/7'
+      title: "Emergency Response",
+      description:
+        "Quick response system for critical incidents and emergencies.",
+      color: "text-crime-yellow",
+      badge: "24/7",
     },
     {
       icon: Lock,
-      title: 'Criminal Database',
-      description: 'Secure access to criminal records and investigation data.',
-      color: 'text-purple-600',
-      badge: 'Classified'
+      title: "Criminal Database",
+      description: "Secure access to criminal records and investigation data.",
+      color: "text-purple-600",
+      badge: "Classified",
     },
     {
       icon: Activity,
-      title: 'Real-Time Monitoring',
-      description: 'Live tracking of patrol activities and incident responses.',
-      color: 'text-indigo-600',
-      badge: 'Live'
-    }
+      title: "Real-Time Monitoring",
+      description: "Live tracking of patrol activities and incident responses.",
+      color: "text-indigo-600",
+      badge: "Live",
+    },
   ];
 
   const stats = [
-    { number: '500+', label: 'Cases Resolved', icon: FileText, change: '+12%' },
-    { number: '24/7', label: 'Monitoring', icon: Clock, change: 'Always' },
-    { number: '50+', label: 'Active Officers', icon: Shield, change: '+8%' },
-    { number: '10k+', label: 'Citizens Served', icon: Users, change: '+15%' }
+    { number: "500+", label: "Cases Resolved", icon: FileText, change: "+12%" },
+    { number: "24/7", label: "Monitoring", icon: Clock, change: "Always" },
+    { number: "50+", label: "Active Officers", icon: Shield, change: "+8%" },
+    { number: "10k+", label: "Citizens Served", icon: Users, change: "+15%" },
   ];
 
   const testimonials = [
     {
       name: "Chief Inspector Dawit Tadesse",
       role: "Police Head",
-      content: "This system has revolutionized our case management. Response times have improved by 40% since implementation.",
-      rating: 5
+      content:
+        "This system has revolutionized our case management. Response times have improved by 40% since implementation.",
+      rating: 5,
     },
     {
       name: "Detective Sara Alemayehu",
       role: "Detective Officer",
-      content: "The criminal database integration has made investigations so much more efficient. I can access records instantly.",
-      rating: 5
+      content:
+        "The criminal database integration has made investigations so much more efficient. I can access records instantly.",
+      rating: 5,
     },
     {
       name: "Kebede Alemu",
       role: "Citizen",
-      content: "Filing a crime report is now so easy. I can track the progress and get updates on my case status.",
-      rating: 5
-    }
+      content:
+        "Filing a crime report is now so easy. I can track the progress and get updates on my case status.",
+      rating: 5,
+    },
   ];
 
   const userRoles = [
@@ -104,20 +117,35 @@ export default function Index() {
       icon: Shield,
       title: "Law Enforcement",
       description: "Officers, Detectives, and Police Leadership",
-      features: ["Case Management", "Investigation Tools", "Criminal Database", "Patrol Logs"]
+      features: [
+        "Case Management",
+        "Investigation Tools",
+        "Criminal Database",
+        "Patrol Logs",
+      ],
     },
     {
       icon: UserCheck,
       title: "Administration",
       description: "System Administrators and HR Management",
-      features: ["User Management", "System Configuration", "Asset Management", "Reports"]
+      features: [
+        "User Management",
+        "System Configuration",
+        "Asset Management",
+        "Reports",
+      ],
     },
     {
       icon: Users,
       title: "Citizens",
       description: "Community Members and Witnesses",
-      features: ["Crime Reporting", "Case Status", "Emergency Contact", "Safe Communication"]
-    }
+      features: [
+        "Crime Reporting",
+        "Case Status",
+        "Emergency Contact",
+        "Safe Communication",
+      ],
+    },
   ];
 
   return (
@@ -129,7 +157,9 @@ export default function Index() {
             <div className="flex items-center space-x-3">
               <Shield className="w-8 h-8 text-crime-red" />
               <div>
-                <h1 className="text-xl font-bold text-white">Crime Management System</h1>
+                <h1 className="text-xl font-bold text-white">
+                  Crime Management System
+                </h1>
                 <p className="text-gray-300 text-sm">Wolaita Sodo City</p>
               </div>
             </div>
@@ -167,18 +197,24 @@ export default function Index() {
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Welcome to
               <span className="text-crime-yellow block">Wolaita Sodo City</span>
-              <span className="text-crime-red block">Crime Management System</span>
+              <span className="text-crime-red block">
+                Crime Management System
+              </span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-              Empowering law enforcement and community safety through advanced technology.
-              Our comprehensive platform streamlines crime reporting, investigation management,
-              and emergency response for a safer Wolaita Sodo City.
+              Empowering law enforcement and community safety through advanced
+              technology. Our comprehensive platform streamlines crime
+              reporting, investigation management, and emergency response for a
+              safer Wolaita Sodo City.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link to="/login">
-                <Button size="lg" className="bg-crime-red hover:bg-crime-red-dark text-white px-8 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200">
+                <Button
+                  size="lg"
+                  className="bg-crime-red hover:bg-crime-red-dark text-white px-8 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
+                >
                   <Shield className="mr-2 w-5 h-5" />
                   Access Secure Portal
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -218,10 +254,15 @@ export default function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-              <Card key={index} className="bg-white/95 backdrop-blur border-crime-red/20 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <Card
+                key={index}
+                className="bg-white/95 backdrop-blur border-crime-red/20 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+              >
                 <CardContent className="p-6">
                   <stat.icon className="w-8 h-8 mx-auto mb-3 text-crime-red" />
-                  <h3 className="text-3xl font-bold text-crime-black mb-1">{stat.number}</h3>
+                  <h3 className="text-3xl font-bold text-crime-black mb-1">
+                    {stat.number}
+                  </h3>
                   <p className="text-gray-600 mb-2">{stat.label}</p>
                   <Badge variant="outline" className="text-xs text-green-600">
                     {stat.change}
@@ -241,33 +282,51 @@ export default function Index() {
               Comprehensive Crime Management Platform
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Cutting-edge technology meets law enforcement expertise. Our platform provides all the tools
-              necessary for effective crime prevention, investigation, and community safety.
+              Cutting-edge technology meets law enforcement expertise. Our
+              platform provides all the tools necessary for effective crime
+              prevention, investigation, and community safety.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="bg-white/95 backdrop-blur border-crime-red/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+              <Card
+                key={index}
+                className="bg-white/95 backdrop-blur border-crime-red/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
+              >
                 <CardHeader className="relative">
                   <div className="absolute top-4 right-4">
-                    <Badge className={`
-                      ${feature.badge === 'New' ? 'bg-green-500 text-white' :
-                        feature.badge === 'Popular' ? 'bg-blue-500 text-white' :
-                        feature.badge === 'Secure' ? 'bg-red-500 text-white' :
-                        feature.badge === '24/7' ? 'bg-purple-500 text-white' :
-                        feature.badge === 'Classified' ? 'bg-gray-800 text-white' :
-                        'bg-indigo-500 text-white'
+                    <Badge
+                      className={`
+                      ${
+                        feature.badge === "New"
+                          ? "bg-green-500 text-white"
+                          : feature.badge === "Popular"
+                            ? "bg-blue-500 text-white"
+                            : feature.badge === "Secure"
+                              ? "bg-red-500 text-white"
+                              : feature.badge === "24/7"
+                                ? "bg-purple-500 text-white"
+                                : feature.badge === "Classified"
+                                  ? "bg-gray-800 text-white"
+                                  : "bg-indigo-500 text-white"
                       }
-                    `}>
+                    `}
+                    >
                       {feature.badge}
                     </Badge>
                   </div>
-                  <feature.icon className={`w-12 h-12 ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`} />
-                  <CardTitle className="text-crime-black">{feature.title}</CardTitle>
+                  <feature.icon
+                    className={`w-12 h-12 ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
+                  />
+                  <CardTitle className="text-crime-black">
+                    {feature.title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-gray-600">{feature.description}</CardDescription>
+                  <CardDescription className="text-gray-600">
+                    {feature.description}
+                  </CardDescription>
                 </CardContent>
               </Card>
             ))}
@@ -283,22 +342,33 @@ export default function Index() {
               Designed for Every User
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Role-based access ensures each user gets the tools they need while maintaining security.
+              Role-based access ensures each user gets the tools they need while
+              maintaining security.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {userRoles.map((role, index) => (
-              <Card key={index} className="bg-white/95 backdrop-blur border-crime-red/20 hover:shadow-xl transition-all duration-300">
+              <Card
+                key={index}
+                className="bg-white/95 backdrop-blur border-crime-red/20 hover:shadow-xl transition-all duration-300"
+              >
                 <CardHeader className="text-center">
                   <role.icon className="w-16 h-16 mx-auto mb-4 text-crime-red" />
-                  <CardTitle className="text-xl text-crime-black">{role.title}</CardTitle>
-                  <CardDescription className="text-gray-600">{role.description}</CardDescription>
+                  <CardTitle className="text-xl text-crime-black">
+                    {role.title}
+                  </CardTitle>
+                  <CardDescription className="text-gray-600">
+                    {role.description}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {role.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center text-sm text-gray-700">
+                      <li
+                        key={idx}
+                        className="flex items-center text-sm text-gray-700"
+                      >
                         <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
                         {feature}
                       </li>
@@ -327,16 +397,25 @@ export default function Index() {
             <CardContent className="p-8">
               <div className="text-center">
                 <div className="flex justify-center mb-4">
-                  {[...Array(testimonials[activeTestimonial].rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
-                  ))}
+                  {[...Array(testimonials[activeTestimonial].rating)].map(
+                    (_, i) => (
+                      <Star
+                        key={i}
+                        className="w-5 h-5 text-yellow-500 fill-current"
+                      />
+                    ),
+                  )}
                 </div>
                 <blockquote className="text-xl text-gray-700 mb-6 italic">
                   "{testimonials[activeTestimonial].content}"
                 </blockquote>
                 <div className="text-center">
-                  <p className="font-semibold text-crime-black">{testimonials[activeTestimonial].name}</p>
-                  <p className="text-gray-600">{testimonials[activeTestimonial].role}</p>
+                  <p className="font-semibold text-crime-black">
+                    {testimonials[activeTestimonial].name}
+                  </p>
+                  <p className="text-gray-600">
+                    {testimonials[activeTestimonial].role}
+                  </p>
                 </div>
               </div>
 
@@ -346,7 +425,9 @@ export default function Index() {
                     key={index}
                     onClick={() => setActiveTestimonial(index)}
                     className={`w-3 h-3 rounded-full transition-colors ${
-                      index === activeTestimonial ? 'bg-crime-red' : 'bg-gray-300'
+                      index === activeTestimonial
+                        ? "bg-crime-red"
+                        : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -370,13 +451,17 @@ export default function Index() {
             Ready to Make Wolaita Sodo Safer?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join our mission for community safety. Access our secure system to manage cases,
-            file reports, monitor activities, and contribute to a safer city.
+            Join our mission for community safety. Access our secure system to
+            manage cases, file reports, monitor activities, and contribute to a
+            safer city.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/login">
-              <Button size="lg" className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-medium shadow-lg transform hover:scale-105 transition-all duration-200">
+              <Button
+                size="lg"
+                className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-medium shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
                 <Shield className="mr-2 w-5 h-5" />
                 Enter Secure Portal
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -404,7 +489,9 @@ export default function Index() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <Shield className="w-6 h-6 text-crime-red" />
-              <span className="text-white font-medium">Wolaita Sodo City Police Department</span>
+              <span className="text-white font-medium">
+                Wolaita Sodo City Police Department
+              </span>
             </div>
 
             <div className="flex items-center space-x-6 text-gray-300">
@@ -420,7 +507,10 @@ export default function Index() {
           </div>
 
           <div className="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
-            <p>&copy; 2024 Wolaita Sodo City Crime Management System. All rights reserved.</p>
+            <p>
+              &copy; 2024 Wolaita Sodo City Crime Management System. All rights
+              reserved.
+            </p>
           </div>
         </div>
       </footer>

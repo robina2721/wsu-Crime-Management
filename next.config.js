@@ -12,15 +12,15 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
   // Enable standalone output for deployment
-  output: 'standalone',
+  output: "standalone",
   // Image optimization
   images: {
-    domains: ['placeholder.svg'],
+    domains: ["placeholder.svg"],
   },
   // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

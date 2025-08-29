@@ -27,7 +27,7 @@ if (container._reactRootContainer) {
 root.render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );
 
 // Handle hot module replacement
@@ -37,7 +37,7 @@ if (import.meta.hot) {
     root.render(
       <StrictMode>
         <App />
-      </StrictMode>
+      </StrictMode>,
     );
   });
 }
