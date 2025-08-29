@@ -66,96 +66,21 @@ export default function UserManagement() {
   }, [users, searchTerm, roleFilter, statusFilter]);
 
   const fetchUsers = async () => {
-    // Mock data - In production, fetch from API
-    const mockUsers: User[] = [
-      {
-        id: '1',
-        username: 'admin',
-        password: '',
-        role: UserRole.SUPER_ADMIN,
-        fullName: 'System Administrator',
-        email: 'admin@wolaita-sodo.gov.et',
-        phone: '+251-911-000-001',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '2',
-        username: 'police_head',
-        password: '',
-        role: UserRole.POLICE_HEAD,
-        fullName: 'Chief Inspector Dawit Tadesse',
-        email: 'chief@wolaita-sodo.gov.et',
-        phone: '+251-911-000-002',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '3',
-        username: 'detective',
-        password: '',
-        role: UserRole.DETECTIVE_OFFICER,
-        fullName: 'Detective Sara Alemayehu',
-        email: 'detective@wolaita-sodo.gov.et',
-        phone: '+251-911-000-003',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '4',
-        username: 'officer',
-        password: '',
-        role: UserRole.PREVENTIVE_OFFICER,
-        fullName: 'Officer Mulugeta Kebede',
-        email: 'officer@wolaita-sodo.gov.et',
-        phone: '+251-911-000-004',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '5',
-        username: 'hr_manager',
-        password: '',
-        role: UserRole.HR_MANAGER,
-        fullName: 'HR Manager Hanan Mohammed',
-        email: 'hr@wolaita-sodo.gov.et',
-        phone: '+251-911-000-005',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '6',
-        username: 'citizen',
-        password: '',
-        role: UserRole.CITIZEN,
-        fullName: 'Citizen Yohannes Bekele',
-        email: 'citizen@example.com',
-        phone: '+251-911-000-006',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '7',
-        username: 'officer2',
-        password: '',
-        role: UserRole.PREVENTIVE_OFFICER,
-        fullName: 'Officer Almaz Worku',
-        email: 'officer2@wolaita-sodo.gov.et',
-        phone: '+251-911-000-007',
-        isActive: false,
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date()
+    try {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUsers(data.data.users.map((u: any) => ({
+          ...u,
+          createdAt: new Date(u.createdAt),
+          updatedAt: new Date(u.updatedAt)
+        })));
       }
-    ];
-
-    setUsers(mockUsers);
-    setIsLoading(false);
+    } catch (e) {
+      console.error('Failed to load users', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const fetchPendingAccounts = async () => {
