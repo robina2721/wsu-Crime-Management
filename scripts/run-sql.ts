@@ -1,17 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { db } from "../server/db";
+import { pool } from "../server/db";
 
-function execSQL(file: string) {
+async function execSQL(file: string) {
   const sql = fs.readFileSync(file, "utf8");
-  return new Promise<void>((resolve, reject) => {
-    db.serialize(() => {
-      db.exec(sql, (err) => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
-  });
+  await pool.query(sql);
 }
 
 (async () => {
