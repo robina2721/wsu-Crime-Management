@@ -71,45 +71,8 @@ import {
   StatusUpdate,
 } from "../../shared/types";
 
-// Mock data for demonstration
-const mockReports: CrimeReport[] = [
-  {
-    id: "1",
-    title: "Bicycle Theft",
-    description:
-      "My bicycle was stolen from outside the grocery store while I was shopping",
-    category: CrimeCategory.THEFT,
-    status: CrimeStatus.UNDER_INVESTIGATION,
-    priority: Priority.MEDIUM,
-    location: "123 Main Street, Downtown",
-    dateReported: new Date("2024-01-10"),
-    dateIncident: new Date("2024-01-10"),
-    reportedBy: "citizen1",
-    assignedTo: "officer123",
-    evidence: ["photo1.jpg", "receipt.pdf"],
-    witnesses: [],
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-12"),
-  },
-  {
-    id: "2",
-    title: "Suspicious Activity",
-    description:
-      "Noticed unfamiliar people looking into car windows in the parking lot",
-    category: CrimeCategory.OTHER,
-    status: CrimeStatus.RESOLVED,
-    priority: Priority.LOW,
-    location: "City Mall Parking Lot",
-    dateReported: new Date("2024-01-05"),
-    dateIncident: new Date("2024-01-05"),
-    reportedBy: "citizen1",
-    assignedTo: "officer456",
-    evidence: [],
-    witnesses: [],
-    createdAt: new Date("2024-01-05"),
-    updatedAt: new Date("2024-01-08"),
-  },
-];
+// Real data will be loaded from /api/crimes
+const mockReports: CrimeReport[] = [] as any;
 
 const mockReportStatuses: CitizenReportStatus[] = [
   {
@@ -186,9 +149,8 @@ const mockReportStatuses: CitizenReportStatus[] = [
 
 export default function CitizenPortal() {
   const { user } = useAuth();
-  const [reports, setReports] = useState<CrimeReport[]>(mockReports);
-  const [reportStatuses, setReportStatuses] =
-    useState<CitizenReportStatus[]>(mockReportStatuses);
+  const [reports, setReports] = useState<CrimeReport[]>([]);
+  const [reportStatuses, setReportStatuses] = useState<CitizenReportStatus[]>([]);
   const [showNewReportForm, setShowNewReportForm] = useState(false);
   const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(
     null,
@@ -200,6 +162,28 @@ export default function CitizenPortal() {
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    const loadReports = async () => {
+      try {
+        const res = await fetch('/api/crimes');
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const list = data.data.reports.map((r: any) => ({
+            ...r,
+            dateReported: new Date(r.dateReported),
+            dateIncident: new Date(r.dateIncident),
+            createdAt: new Date(r.createdAt),
+            updatedAt: new Date(r.updatedAt)
+          }));
+          setReports(list);
+        }
+      } catch (e) {
+        console.error('Failed to load reports', e);
+      }
+    };
+    loadReports();
+  }, []);
 
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
@@ -272,45 +256,41 @@ export default function CitizenPortal() {
     return icons[category] || "📋";
   };
 
-  const handleSubmitReport = (data: Partial<CrimeReport>) => {
-    const newReport: CrimeReport = {
-      id: Date.now().toString(),
-      title: data.title || "",
-      description: data.description || "",
-      category: data.category || CrimeCategory.OTHER,
-      status: CrimeStatus.REPORTED,
-      priority: data.priority || Priority.MEDIUM,
-      location: data.location || "",
-      dateReported: new Date(),
-      dateIncident: data.dateIncident || new Date(),
-      reportedBy: user?.id || "citizen1",
-      evidence: data.evidence || [],
-      witnesses: witnesses,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const newStatus: CitizenReportStatus = {
-      reportId: newReport.id,
-      currentStatus: CrimeStatus.REPORTED,
-      statusHistory: [
-        {
-          status: CrimeStatus.REPORTED,
-          timestamp: new Date(),
-          updatedBy: "System",
-          notes: "Report submitted successfully",
-          isVisibleToCitizen: true,
-        },
-      ],
-      lastUpdate: new Date(),
-      canProvideUpdates: true,
-    };
-
-    setReports((prev) => [newReport, ...prev]);
-    setReportStatuses((prev) => [newStatus, ...prev]);
-    setFormData({});
-    setWitnesses([]);
-    setShowNewReportForm(false);
+  const handleSubmitReport = async (data: Partial<CrimeReport>) => {
+    try {
+      const payload = {
+        title: data.title || "",
+        description: data.description || "",
+        category: data.category || CrimeCategory.OTHER,
+        location: data.location || "",
+        dateIncident: (data.dateIncident || new Date()).toString(),
+        reportedBy: user?.id || "citizen"
+      };
+      const res = await fetch('/api/crimes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const created = await res.json();
+        const r = created.data;
+        const normalized: CrimeReport = {
+          ...r,
+          dateReported: new Date(r.dateReported),
+          dateIncident: new Date(r.dateIncident),
+          createdAt: new Date(r.createdAt),
+          updatedAt: new Date(r.updatedAt),
+          evidence: [],
+          witnesses: []
+        };
+        setReports(prev => [normalized, ...prev]);
+        setFormData({});
+        setWitnesses([]);
+        setShowNewReportForm(false);
+      }
+    } catch (e) {
+      console.error('Failed to submit report', e);
+    }
   };
 
   const handleFileUpload = async (files: FileList) => {
