@@ -9,14 +9,14 @@ import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Filter, 
-  MapPin, 
-  Clock, 
-  User, 
+import {
+  FileText,
+  Plus,
+  Search,
+  Filter,
+  MapPin,
+  Clock,
+  User,
   AlertTriangle,
   CheckCircle,
   Eye,
@@ -26,6 +26,7 @@ import {
   Camera,
   Users
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 export default function IncidentReports() {
   const { user, hasRole, hasAnyRole } = useAuth();
@@ -58,73 +59,26 @@ export default function IncidentReports() {
   }, [incidents, searchTerm, typeFilter, statusFilter]);
 
   const fetchIncidents = async () => {
-    // Mock data - In production, fetch from API
-    const mockIncidents: IncidentReport[] = [
-      {
-        id: 'INC-001',
-        title: 'Suspicious Vehicle in Downtown Area',
-        description: 'Unmarked van parked for extended period near government building. License plate partially obscured.',
-        incidentType: IncidentType.SUSPICIOUS_ACTIVITY,
-        severity: Priority.MEDIUM,
-        location: 'Main Street, near City Hall',
-        dateOccurred: new Date('2024-01-16T14:30:00'),
-        reportedBy: '4',
-        reporterName: 'Officer Mulugeta Kebede',
-        status: IncidentStatus.INVESTIGATING,
-        followUpRequired: true,
-        createdAt: new Date('2024-01-16T14:45:00'),
-        updatedAt: new Date('2024-01-16T15:00:00')
-      },
-      {
-        id: 'INC-002',
-        title: 'Noise Complaint - Residential Area',
-        description: 'Loud music and disturbance reported by multiple residents in Block 5.',
-        incidentType: IncidentType.NOISE_COMPLAINT,
-        severity: Priority.LOW,
-        location: 'Residential Block 5, Apartment 12B',
-        dateOccurred: new Date('2024-01-16T22:15:00'),
-        reportedBy: '7',
-        reporterName: 'Officer Almaz Worku',
-        status: IncidentStatus.RESOLVED,
-        followUpRequired: false,
-        createdAt: new Date('2024-01-16T22:30:00'),
-        updatedAt: new Date('2024-01-16T23:00:00')
-      },
-      {
-        id: 'INC-003',
-        title: 'Traffic Accident - Minor Collision',
-        description: 'Two-vehicle collision at intersection. No injuries reported. Vehicles blocking traffic.',
-        incidentType: IncidentType.TRAFFIC_INCIDENT,
-        severity: Priority.MEDIUM,
-        location: 'Intersection of Market St & First Ave',
-        dateOccurred: new Date('2024-01-16T16:45:00'),
-        reportedBy: '4',
-        reporterName: 'Officer Mulugeta Kebede',
-        status: IncidentStatus.REPORTED,
-        followUpRequired: true,
-        relatedCaseId: '3',
-        createdAt: new Date('2024-01-16T17:00:00'),
-        updatedAt: new Date('2024-01-16T17:00:00')
-      },
-      {
-        id: 'INC-004',
-        title: 'Emergency Response - Medical Assistance',
-        description: 'Elderly citizen collapsed on street. Ambulance called, area secured.',
-        incidentType: IncidentType.EMERGENCY_RESPONSE,
-        severity: Priority.HIGH,
-        location: 'Park Avenue, near Central Plaza',
-        dateOccurred: new Date('2024-01-16T11:20:00'),
-        reportedBy: '7',
-        reporterName: 'Officer Almaz Worku',
-        status: IncidentStatus.CLOSED,
-        followUpRequired: false,
-        createdAt: new Date('2024-01-16T11:25:00'),
-        updatedAt: new Date('2024-01-16T12:00:00')
+    try {
+      const res = await api.get('/incidents');
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const list = (data.data?.incidents || data.data || []).map((i: any) => ({
+          ...i,
+          dateOccurred: new Date(i.dateOccurred),
+          createdAt: new Date(i.createdAt),
+          updatedAt: new Date(i.updatedAt)
+        }));
+        setIncidents(list);
+      } else {
+        setIncidents([]);
       }
-    ];
-
-    setIncidents(mockIncidents);
-    setIsLoading(false);
+    } catch (e) {
+      console.error('Failed to load incidents', e);
+      setIncidents([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filterIncidents = () => {
