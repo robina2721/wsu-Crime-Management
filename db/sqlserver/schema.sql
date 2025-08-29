@@ -35,3 +35,42 @@ IF NOT EXISTS (SELECT name FROM sys.indexes WHERE name = 'idx_crimes_category')
 CREATE INDEX idx_crimes_category ON crimes(category);
 IF NOT EXISTS (SELECT name FROM sys.indexes WHERE name = 'idx_crimes_priority')
 CREATE INDEX idx_crimes_priority ON crimes(priority);
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='incidents' and xtype='U')
+CREATE TABLE incidents (
+  id NVARCHAR(50) PRIMARY KEY,
+  title NVARCHAR(255) NOT NULL,
+  description NVARCHAR(MAX) NOT NULL,
+  incident_type NVARCHAR(50) NOT NULL,
+  severity NVARCHAR(50) NOT NULL,
+  location NVARCHAR(255) NOT NULL,
+  date_occurred DATETIME2 NOT NULL,
+  reported_by NVARCHAR(50) NOT NULL,
+  reporter_name NVARCHAR(200) NOT NULL,
+  status NVARCHAR(50) NOT NULL,
+  follow_up_required BIT NOT NULL DEFAULT 0,
+  related_case_id NVARCHAR(50) NULL,
+  created_at DATETIME2 NOT NULL,
+  updated_at DATETIME2 NOT NULL
+);
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='pending_accounts' and xtype='U')
+CREATE TABLE pending_accounts (
+  id NVARCHAR(50) PRIMARY KEY,
+  full_name NVARCHAR(200) NOT NULL,
+  username NVARCHAR(100) NOT NULL,
+  email NVARCHAR(200) NULL,
+  phone NVARCHAR(50) NULL,
+  requested_role NVARCHAR(50) NOT NULL,
+  submitted_date DATETIME2 NOT NULL,
+  status NVARCHAR(20) NOT NULL,
+  documents NVARCHAR(MAX) NULL,
+  notes NVARCHAR(MAX) NULL,
+  created_at DATETIME2 NOT NULL,
+  updated_at DATETIME2 NOT NULL
+);
+
+IF NOT EXISTS (SELECT name FROM sys.indexes WHERE name = 'idx_incidents_status')
+CREATE INDEX idx_incidents_status ON incidents(status);
+IF NOT EXISTS (SELECT name FROM sys.indexes WHERE name = 'idx_incidents_type')
+CREATE INDEX idx_incidents_type ON incidents(incident_type);
