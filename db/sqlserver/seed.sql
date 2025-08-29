@@ -34,3 +34,23 @@ VALUES ('2','Domestic Violence Incident','Reported domestic violence case requir
 IF NOT EXISTS (SELECT 1 FROM crimes WHERE id = '3')
 INSERT INTO crimes (id, title, description, category, status, priority, location, date_reported, date_incident, reported_by, assigned_to, created_at, updated_at)
 VALUES ('3','Vehicle Break-in','Car window broken and items stolen from vehicle','burglary','reported','medium','Parking Lot, City Center',DATEADD(day,-5,GETDATE()),DATEADD(hour,-2,DATEADD(day,-5,GETDATE())),'6',NULL,DATEADD(day,-5,GETDATE()),DATEADD(day,-5,GETDATE()));
+
+IF NOT EXISTS (SELECT 1 FROM incidents WHERE id = 'INC-001')
+INSERT INTO incidents (id, title, description, incident_type, severity, location, date_occurred, reported_by, reporter_name, status, follow_up_required, related_case_id, created_at, updated_at)
+VALUES ('INC-001','Suspicious Vehicle in Downtown Area','Unmarked van parked for extended period near government building. License plate partially obscured.','suspicious_activity','medium','Main Street, near City Hall',DATEADD(day,-1,GETDATE()),'4','Officer Mulugeta Kebede','investigating',1,NULL,GETDATE(),GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM incidents WHERE id = 'INC-002')
+INSERT INTO incidents (id, title, description, incident_type, severity, location, date_occurred, reported_by, reporter_name, status, follow_up_required, related_case_id, created_at, updated_at)
+VALUES ('INC-002','Noise Complaint - Residential Area','Loud music and disturbance reported by multiple residents in Block 5.','noise_complaint','low','Residential Block 5, Apartment 12B',DATEADD(day,-1,GETDATE()),'7','Officer Almaz Worku','resolved',0,NULL,GETDATE(),GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM pending_accounts WHERE id = 'P1')
+INSERT INTO pending_accounts (id, full_name, username, email, phone, requested_role, submitted_date, status, documents, notes, created_at, updated_at)
+VALUES ('P1','Officer Candidate Bereket Haile','bereket_h','bereket.haile@example.com','+251-911-000-100','preventive_officer',DATEADD(day,-2,GETDATE()),'pending','["police_certificate.pdf","training_completion.pdf"]','Recent police academy graduate with high scores',GETDATE(),GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM pending_accounts WHERE id = 'P2')
+INSERT INTO pending_accounts (id, full_name, username, email, phone, requested_role, submitted_date, status, documents, notes, created_at, updated_at)
+VALUES ('P2','Detective Trainee Meron Gebre','meron_g','meron.gebre@example.com','+251-911-000-101','detective_officer',DATEADD(day,-4,GETDATE()),'pending','["detective_certification.pdf","background_check.pdf"]','Specialized in cybercrime investigation',GETDATE(),GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM pending_accounts WHERE id = 'P3')
+INSERT INTO pending_accounts (id, full_name, username, email, phone, requested_role, submitted_date, status, documents, notes, created_at, updated_at)
+VALUES ('P3','Citizen Registration - Kebede Alemu','kebede_a','kebede.alemu@example.com',NULL,'citizen',DATEADD(day,-1,GETDATE()),'pending',NULL,'Standard citizen registration for crime reporting access',GETDATE(),GETDATE());
