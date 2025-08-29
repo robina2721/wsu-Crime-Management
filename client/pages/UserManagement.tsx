@@ -151,10 +151,16 @@ export default function UserManagement() {
 
   const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
     try {
-      // In production, call API to update user status
-      setUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, isActive } : user
-      ));
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive })
+      });
+      if (res.ok) {
+        setUsers(prev => prev.map(user =>
+          user.id === userId ? { ...user, isActive } : user
+        ));
+      }
     } catch (error) {
       console.error('Error updating user status:', error);
     }
