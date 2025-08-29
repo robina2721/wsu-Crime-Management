@@ -75,78 +75,7 @@ import { api } from '@/lib/api';
 // Real data will be loaded from /api/crimes
 const mockReports: CrimeReport[] = [] as any;
 
-const mockReportStatuses: CitizenReportStatus[] = [
-  {
-    reportId: "1",
-    currentStatus: CrimeStatus.UNDER_INVESTIGATION,
-    statusHistory: [
-      {
-        status: CrimeStatus.REPORTED,
-        timestamp: new Date("2024-01-10T10:00:00"),
-        updatedBy: "System",
-        notes: "Report submitted successfully",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.ASSIGNED,
-        timestamp: new Date("2024-01-10T14:30:00"),
-        updatedBy: "Sergeant Johnson",
-        notes: "Case assigned to Officer Smith for investigation",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.UNDER_INVESTIGATION,
-        timestamp: new Date("2024-01-11T09:15:00"),
-        updatedBy: "Officer Smith",
-        notes: "Investigation commenced. CCTV footage being reviewed.",
-        isVisibleToCitizen: true,
-      },
-    ],
-    assignedOfficer: {
-      id: "officer123",
-      name: "Officer John Smith",
-      badgeNumber: "BADGE123",
-      contactInfo: "For urgent matters, call (555) 123-4567",
-    },
-    lastUpdate: new Date("2024-01-11T09:15:00"),
-    estimatedResolution: new Date("2024-01-20"),
-    canProvideUpdates: true,
-  },
-  {
-    reportId: "2",
-    currentStatus: CrimeStatus.RESOLVED,
-    statusHistory: [
-      {
-        status: CrimeStatus.REPORTED,
-        timestamp: new Date("2024-01-05T16:00:00"),
-        updatedBy: "System",
-        notes: "Report submitted successfully",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.ASSIGNED,
-        timestamp: new Date("2024-01-05T18:00:00"),
-        updatedBy: "Dispatcher",
-        notes: "Patrol unit dispatched to location",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.RESOLVED,
-        timestamp: new Date("2024-01-08T10:00:00"),
-        updatedBy: "Officer Davis",
-        notes: "Increased patrol in the area. No further incidents reported.",
-        isVisibleToCitizen: true,
-      },
-    ],
-    assignedOfficer: {
-      id: "officer456",
-      name: "Officer Sarah Davis",
-      badgeNumber: "BADGE456",
-    },
-    lastUpdate: new Date("2024-01-08T10:00:00"),
-    canProvideUpdates: false,
-  },
-];
+const mockReportStatuses: CitizenReportStatus[] = [];
 
 export default function CitizenPortal() {
   const { user } = useAuth();
