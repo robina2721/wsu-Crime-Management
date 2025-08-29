@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@shared/types';
+import { api } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -48,13 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await api.post('/auth/login', { username, password });
 
       // Check if response is ok before trying to parse
       if (!response.ok) {

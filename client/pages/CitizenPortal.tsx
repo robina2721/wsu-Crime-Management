@@ -70,6 +70,7 @@ import {
   CitizenReportStatus,
   StatusUpdate,
 } from "../../shared/types";
+import { api } from '@/lib/api';
 
 // Real data will be loaded from /api/crimes
 const mockReports: CrimeReport[] = [] as any;
@@ -166,7 +167,7 @@ export default function CitizenPortal() {
   useEffect(() => {
     const loadReports = async () => {
       try {
-        const res = await fetch('/api/crimes');
+        const res = await api.get('/crimes');
         const data = await res.json();
         if (res.ok && data.success) {
           const list = data.data.reports.map((r: any) => ({
@@ -266,11 +267,7 @@ export default function CitizenPortal() {
         dateIncident: (data.dateIncident || new Date()).toString(),
         reportedBy: user?.id || "citizen"
       };
-      const res = await fetch('/api/crimes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const res = await api.post('/crimes', payload);
       if (res.ok) {
         const created = await res.json();
         const r = created.data;

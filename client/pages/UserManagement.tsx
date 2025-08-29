@@ -8,14 +8,14 @@ import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Switch } from '../components/ui/switch';
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  Plus, 
-  Edit, 
-  Shield, 
-  UserCheck, 
+import {
+  Users,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Shield,
+  UserCheck,
   UserX,
   Phone,
   Mail,
@@ -29,6 +29,7 @@ import {
   UserPlus,
   Trash2
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface PendingAccount {
   id: string;
@@ -67,7 +68,7 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
+      const res = await api.get('/users');
       const data = await res.json();
       if (res.ok && data.success) {
         setUsers(data.data.users.map((u: any) => ({
@@ -151,11 +152,7 @@ export default function UserManagement() {
 
   const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
     try {
-      const res = await fetch(`/api/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive })
-      });
+      const res = await api.put(`/users/${userId}`, { isActive });
       if (res.ok) {
         setUsers(prev => prev.map(user =>
           user.id === userId ? { ...user, isActive } : user

@@ -7,13 +7,13 @@ import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit, 
-  UserCheck, 
-  Clock, 
+import {
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  UserCheck,
+  Clock,
   MapPin,
   FileText,
   AlertTriangle,
@@ -23,6 +23,7 @@ import {
   User,
   Plus
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 export default function CaseManagement() {
   const { user, hasRole, hasAnyRole } = useAuth();
@@ -47,7 +48,7 @@ export default function CaseManagement() {
 
   const fetchCases = async () => {
     try {
-      const response = await fetch('/api/crimes');
+      const response = await api.get('/crimes');
       const data = await response.json();
       if (data.success) {
         setCases(data.data.reports);
@@ -91,11 +92,7 @@ export default function CaseManagement() {
 
   const handleStatusUpdate = async (caseId: string, newStatus: CrimeStatus) => {
     try {
-      const response = await fetch(`/api/crimes/${caseId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+      const response = await api.put(`/crimes/${caseId}`, { status: newStatus });
 
       if (response.ok) {
         await fetchCases();
@@ -107,11 +104,7 @@ export default function CaseManagement() {
 
   const handleAssignCase = async (caseId: string, officerId: string) => {
     try {
-      const response = await fetch(`/api/crimes/${caseId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assignedTo: officerId })
-      });
+      const response = await api.put(`/crimes/${caseId}`, { assignedTo: officerId });
 
       if (response.ok) {
         await fetchCases();
