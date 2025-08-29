@@ -16,11 +16,11 @@
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["frontend/client/*"],
+      "@/*": ["client/*"],
       "@shared/*": ["shared/*"],
-      "@/components/*": ["frontend/client/components/*"],
-      "@/lib/*": ["frontend/client/lib/*"],
-      "@/pages/*": ["frontend/client/pages/*"]
+      "@/components/*": ["client/components/*"],
+      "@/lib/*": ["client/lib/*"],
+      "@/pages/*": ["client/pages/*"]
     },
     "forceConsistentCasingInFileNames": true
   },
