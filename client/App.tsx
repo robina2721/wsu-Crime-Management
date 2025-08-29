@@ -23,6 +23,12 @@ import PatrolLogs from "./pages/PatrolLogs";
 import CriminalDatabase from "./pages/CriminalDatabase";
 import InvestigationReports from "./pages/InvestigationReports";
 import MyCases from "./pages/MyCases";
+import HRManagement from "./pages/HRManagement";
+import StaffScheduling from "./pages/StaffScheduling";
+import HRReports from "./pages/HRReports";
+import CitizenPortal from "./pages/CitizenPortal";
+import CitizenFeedback from "./pages/CitizenFeedback";
+import SafetyInformation from "./pages/SafetyInformation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
