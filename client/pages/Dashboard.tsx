@@ -23,7 +23,9 @@ import {
   Package,
   CheckCircle,
   UserPlus,
-  Briefcase
+  Briefcase,
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
 
 export default function Dashboard() {
