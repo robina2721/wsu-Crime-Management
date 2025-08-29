@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
-import AppSPA from "../client/AppSPA";
+import dynamic from "next/dynamic";
+
+const AppSPA = dynamic(() => import("../client/AppSPA"), { ssr: false });
 
 export default function Page() {
   return <AppSPA />;
