@@ -72,8 +72,6 @@ import {
 } from "../../shared/types";
 import { api } from '@/lib/api';
 
-// Real data will be loaded from /api/crimes
-const mockReports: CrimeReport[] = [] as any;
 
 const mockReportStatuses: CitizenReportStatus[] = [];
 
