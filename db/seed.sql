@@ -1,0 +1,12 @@
+INSERT OR IGNORE INTO users (id, username, password, role, full_name, email, phone, is_active, created_at, updated_at) VALUES
+  ('1', 'admin', 'admin123', 'super_admin', 'System Administrator', 'admin@wolaita-sodo.gov.et', '+251-911-000-001', 1, datetime('now'), datetime('now')),
+  ('2', 'police_head', 'police123', 'police_head', 'Chief Inspector Dawit Tadesse', 'chief@wolaita-sodo.gov.et', '+251-911-000-002', 1, datetime('now'), datetime('now')),
+  ('3', 'detective', 'detective123', 'detective_officer', 'Detective Sara Alemayehu', 'detective@wolaita-sodo.gov.et', '+251-911-000-003', 1, datetime('now'), datetime('now')),
+  ('4', 'officer', 'officer123', 'preventive_officer', 'Officer Mulugeta Kebede', 'officer@wolaita-sodo.gov.et', '+251-911-000-004', 1, datetime('now'), datetime('now')),
+  ('5', 'hr_manager', 'hr123', 'hr_manager', 'HR Manager Hanan Mohammed', 'hr@wolaita-sodo.gov.et', '+251-911-000-005', 1, datetime('now'), datetime('now')),
+  ('6', 'citizen', 'citizen123', 'citizen', 'Citizen Yohannes Bekele', 'citizen@example.com', '+251-911-000-006', 1, datetime('now'), datetime('now'));
+
+INSERT INTO crimes (id, title, description, category, status, priority, location, date_reported, date_incident, reported_by, assigned_to, created_at, updated_at) VALUES
+  ('1', 'Theft at Market Street', 'Mobile phone stolen from vendor at the main market area', 'theft', 'under_investigation', 'medium', 'Market Street, Downtown', datetime('now','-7 days'), datetime('now','-7 days','-1 hours'), '6', '3', datetime('now','-7 days'), datetime('now','-7 days')),
+  ('2', 'Domestic Violence Incident', 'Reported domestic violence case requiring immediate attention', 'domestic_violence', 'assigned', 'high', 'Residential Area, Block 5', datetime('now','-6 days'), datetime('now','-6 days','-1 hours'), '6', '4', datetime('now','-6 days'), datetime('now','-6 days')),
+  ('3', 'Vehicle Break-in', 'Car window broken and items stolen from vehicle', 'burglary', 'reported', 'medium', 'Parking Lot, City Center', datetime('now','-5 days'), datetime('now','-5 days','-2 hours'), '6', NULL, datetime('now','-5 days'), datetime('now','-5 days'));
