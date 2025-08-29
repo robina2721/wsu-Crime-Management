@@ -1,5 +1,3 @@
-PRAGMA foreign_keys = ON;
-
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
@@ -8,9 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
   full_name TEXT NOT NULL,
   email TEXT,
   phone TEXT,
-  is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS crimes (
@@ -21,13 +19,12 @@ CREATE TABLE IF NOT EXISTS crimes (
   status TEXT NOT NULL,
   priority TEXT NOT NULL,
   location TEXT NOT NULL,
-  date_reported TEXT NOT NULL,
-  date_incident TEXT NOT NULL,
-  reported_by TEXT NOT NULL,
-  assigned_to TEXT,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-  FOREIGN KEY(reported_by) REFERENCES users(id)
+  date_reported TIMESTAMPTZ NOT NULL,
+  date_incident TIMESTAMPTZ NOT NULL,
+  reported_by TEXT NOT NULL REFERENCES users(id),
+  assigned_to TEXT NULL,
+  created_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_crimes_status ON crimes(status);
