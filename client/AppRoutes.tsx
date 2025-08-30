@@ -33,7 +33,9 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/"
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Index />}
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Index />
+        }
       />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
@@ -57,7 +59,11 @@ const AppRoutes = () => {
         path="/staff-management"
         element={
           <ProtectedRoute
-            requiredRoles={[UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.HR_MANAGER]}
+            requiredRoles={[
+              UserRole.SUPER_ADMIN,
+              UserRole.POLICE_HEAD,
+              UserRole.HR_MANAGER,
+            ]}
           >
             <StaffManagement />
           </ProtectedRoute>
@@ -81,7 +87,9 @@ const AppRoutes = () => {
       <Route
         path="/asset-management"
         element={
-          <ProtectedRoute requiredRoles={[UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]}>
+          <ProtectedRoute
+            requiredRoles={[UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]}
+          >
             <AssetManagement />
           </ProtectedRoute>
         }
@@ -90,7 +98,11 @@ const AppRoutes = () => {
         path="/user-management"
         element={
           <ProtectedRoute
-            requiredRoles={[UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.HR_MANAGER]}
+            requiredRoles={[
+              UserRole.SUPER_ADMIN,
+              UserRole.POLICE_HEAD,
+              UserRole.HR_MANAGER,
+            ]}
           >
             <UserManagement />
           </ProtectedRoute>
@@ -123,7 +135,11 @@ const AppRoutes = () => {
         path="/patrol-logs"
         element={
           <ProtectedRoute
-            requiredRoles={[UserRole.PREVENTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}
+            requiredRoles={[
+              UserRole.PREVENTIVE_OFFICER,
+              UserRole.POLICE_HEAD,
+              UserRole.SUPER_ADMIN,
+            ]}
           >
             <PatrolLogs />
           </ProtectedRoute>
@@ -133,7 +149,11 @@ const AppRoutes = () => {
         path="/criminal-database"
         element={
           <ProtectedRoute
-            requiredRoles={[UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}
+            requiredRoles={[
+              UserRole.DETECTIVE_OFFICER,
+              UserRole.POLICE_HEAD,
+              UserRole.SUPER_ADMIN,
+            ]}
           >
             <CriminalDatabase />
           </ProtectedRoute>
@@ -143,7 +163,11 @@ const AppRoutes = () => {
         path="/investigation-reports"
         element={
           <ProtectedRoute
-            requiredRoles={[UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]}
+            requiredRoles={[
+              UserRole.DETECTIVE_OFFICER,
+              UserRole.POLICE_HEAD,
+              UserRole.SUPER_ADMIN,
+            ]}
           >
             <InvestigationReports />
           </ProtectedRoute>
@@ -167,7 +191,9 @@ const AppRoutes = () => {
       <Route
         path="/hr-management"
         element={
-          <ProtectedRoute requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}>
+          <ProtectedRoute
+            requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}
+          >
             <HRManagement />
           </ProtectedRoute>
         }
@@ -175,7 +201,9 @@ const AppRoutes = () => {
       <Route
         path="/staff-scheduling"
         element={
-          <ProtectedRoute requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}>
+          <ProtectedRoute
+            requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}
+          >
             <StaffScheduling />
           </ProtectedRoute>
         }
@@ -183,7 +211,9 @@ const AppRoutes = () => {
       <Route
         path="/hr-reports"
         element={
-          <ProtectedRoute requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}>
+          <ProtectedRoute
+            requiredRoles={[UserRole.HR_MANAGER, UserRole.SUPER_ADMIN]}
+          >
             <HRReports />
           </ProtectedRoute>
         }

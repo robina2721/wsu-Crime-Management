@@ -70,15 +70,16 @@ import {
   CitizenReportStatus,
   StatusUpdate,
 } from "../../shared/types";
-import { api } from '@/lib/api';
-
+import { api } from "@/lib/api";
 
 const mockReportStatuses: CitizenReportStatus[] = [];
 
 export default function CitizenPortal() {
   const { user } = useAuth();
   const [reports, setReports] = useState<CrimeReport[]>([]);
-  const [reportStatuses, setReportStatuses] = useState<CitizenReportStatus[]>([]);
+  const [reportStatuses, setReportStatuses] = useState<CitizenReportStatus[]>(
+    [],
+  );
   const [showNewReportForm, setShowNewReportForm] = useState(false);
   const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(
     null,
@@ -94,7 +95,7 @@ export default function CitizenPortal() {
   useEffect(() => {
     const loadReports = async () => {
       try {
-        const res = await api.get('/crimes?reportedBy=me');
+        const res = await api.get("/crimes?reportedBy=me");
         const data = await res.json();
         if (res.ok && data.success) {
           const list = data.data.reports.map((r: any) => ({
@@ -102,12 +103,12 @@ export default function CitizenPortal() {
             dateReported: new Date(r.dateReported),
             dateIncident: new Date(r.dateIncident),
             createdAt: new Date(r.createdAt),
-            updatedAt: new Date(r.updatedAt)
+            updatedAt: new Date(r.updatedAt),
           }));
           setReports(list);
         }
       } catch (e) {
-        console.error('Failed to load reports', e);
+        console.error("Failed to load reports", e);
       }
     };
     loadReports();
@@ -115,18 +116,25 @@ export default function CitizenPortal() {
 
   useEffect(() => {
     // Subscribe to real-time crime updates for this user
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
     if (!token) return;
     const url = `/api/realtime/crimes?token=${encodeURIComponent(token)}`;
     const es = new EventSource(url);
     es.onmessage = (e) => {
       try {
         const payload = JSON.parse(e.data);
-        if (payload?.type === 'crime_update' && payload.data) {
+        if (payload?.type === "crime_update" && payload.data) {
           const r = payload.data;
-          setReports(prev => {
-            const idx = prev.findIndex(x => x.id === r.id);
-            const normalized = { ...r, dateReported: new Date(r.dateReported), dateIncident: new Date(r.dateIncident), createdAt: new Date(r.createdAt), updatedAt: new Date(r.updatedAt) } as any;
+          setReports((prev) => {
+            const idx = prev.findIndex((x) => x.id === r.id);
+            const normalized = {
+              ...r,
+              dateReported: new Date(r.dateReported),
+              dateIncident: new Date(r.dateIncident),
+              createdAt: new Date(r.createdAt),
+              updatedAt: new Date(r.updatedAt),
+            } as any;
             if (idx >= 0) {
               const copy = [...prev];
               copy[idx] = { ...copy[idx], ...normalized };
@@ -137,8 +145,12 @@ export default function CitizenPortal() {
         }
       } catch {}
     };
-    es.onerror = () => { /* auto-reconnect by browser */ };
-    return () => { es.close(); };
+    es.onerror = () => {
+      /* auto-reconnect by browser */
+    };
+    return () => {
+      es.close();
+    };
   }, []);
 
   const filteredReports = reports.filter((report) => {
@@ -220,9 +232,9 @@ export default function CitizenPortal() {
         category: data.category || CrimeCategory.OTHER,
         location: data.location || "",
         dateIncident: (data.dateIncident || new Date()).toString(),
-        reportedBy: user?.id || "citizen"
+        reportedBy: user?.id || "citizen",
       };
-      const res = await api.post('/crimes', payload);
+      const res = await api.post("/crimes", payload);
       if (res.ok) {
         const created = await res.json();
         const r = created.data;
@@ -233,15 +245,15 @@ export default function CitizenPortal() {
           createdAt: new Date(r.createdAt),
           updatedAt: new Date(r.updatedAt),
           evidence: [],
-          witnesses: []
+          witnesses: [],
         };
-        setReports(prev => [normalized, ...prev]);
+        setReports((prev) => [normalized, ...prev]);
         setFormData({});
         setWitnesses([]);
         setShowNewReportForm(false);
       }
     } catch (e) {
-      console.error('Failed to submit report', e);
+      console.error("Failed to submit report", e);
     }
   };
 

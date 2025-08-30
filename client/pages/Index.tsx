@@ -30,7 +30,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import { useI18n } from '@/contexts/I18nContext';
+import { useI18n } from "@/contexts/I18nContext";
 
 export default function Index() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -161,19 +161,23 @@ export default function Index() {
             <div className="flex items-center space-x-3">
               <Shield className="w-8 h-8 text-crime-red" />
               <div>
-                <h1 className="text-xl font-bold text-white">{t('app.title')}</h1>
-                <p className="text-gray-300 text-sm">{t('city.name')}</p>
+                <h1 className="text-xl font-bold text-white">
+                  {t("app.title")}
+                </h1>
+                <p className="text-gray-300 text-sm">{t("city.name")}</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
               <LanguageToggle />
               <Link to="/signup">
-                <Button className="bg-crime-yellow text-crime-black hover:bg-yellow-500 font-semibold">Sign Up</Button>
+                <Button className="bg-crime-yellow text-crime-black hover:bg-yellow-500 font-semibold">
+                  Sign Up
+                </Button>
               </Link>
               <Link to="/login">
                 <Button className="bg-crime-red hover:bg-crime-red-dark text-white transition-all hover:scale-[1.02]">
-                  {t('login.accessSystem')}
+                  {t("login.accessSystem")}
                 </Button>
               </Link>
             </div>
@@ -196,14 +200,14 @@ export default function Index() {
             <div className="mb-6">
               <Badge className="bg-crime-yellow text-crime-black px-4 py-2 text-sm font-medium mb-4">
                 <Award className="w-4 h-4 mr-2" />
-                {t('hero.leadingBadge')}
+                {t("hero.leadingBadge")}
               </Badge>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-              {t('hero.welcome')}
-              <span className="text-crime-yellow block">{t('city.name')}</span>
-              <span className="text-crime-red block">{t('app.title')}</span>
+              {t("hero.welcome")}
+              <span className="text-crime-yellow block">{t("city.name")}</span>
+              <span className="text-crime-red block">{t("app.title")}</span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -220,7 +224,7 @@ export default function Index() {
                   className="bg-crime-red hover:bg-crime-red-dark text-white px-8 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
                   <Shield className="mr-2 w-5 h-5" />
-                  {t('hero.securePortal')}
+                  {t("hero.securePortal")}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
@@ -230,7 +234,7 @@ export default function Index() {
                   className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
                   <Phone className="mr-2 w-5 h-5" />
-                  {t('hero.emergency')}
+                  {t("hero.emergency")}
                 </Button>
               </a>
             </div>
@@ -239,15 +243,15 @@ export default function Index() {
             <div className="flex flex-wrap justify-center items-center gap-8 text-gray-400">
               <div className="flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-                <span>{t('trust.iso')}</span>
+                <span>{t("trust.iso")}</span>
               </div>
               <div className="flex items-center">
                 <Lock className="w-5 h-5 mr-2 text-blue-400" />
-                <span>{t('trust.encryption')}</span>
+                <span>{t("trust.encryption")}</span>
               </div>
               <div className="flex items-center">
                 <Globe className="w-5 h-5 mr-2 text-purple-400" />
-                <span>{t('trust.support')}</span>
+                <span>{t("trust.support")}</span>
               </div>
             </div>
           </div>
@@ -284,10 +288,10 @@ export default function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {t('features.platformTitle')}
+              {t("features.platformTitle")}
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {t('features.platformDesc')}
+              {t("features.platformDesc")}
             </p>
           </div>
 
@@ -342,10 +346,10 @@ export default function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {t('roles.designedFor')}
+              {t("roles.designedFor")}
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              {t('roles.designedForDesc')}
+              {t("roles.designedForDesc")}
             </p>
           </div>
 
@@ -388,9 +392,11 @@ export default function Index() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {t('testimonials.heading')}
+              {t("testimonials.heading")}
             </h2>
-            <p className="text-xl text-gray-300">{t('testimonials.subheading')}</p>
+            <p className="text-xl text-gray-300">
+              {t("testimonials.subheading")}
+            </p>
           </div>
 
           <Card className="bg-white/95 backdrop-blur border-crime-red/20">
@@ -443,14 +449,16 @@ export default function Index() {
           <div className="mb-8">
             <Badge className="bg-crime-yellow text-crime-black px-4 py-2 text-sm font-medium mb-4">
               <Zap className="w-4 h-4 mr-2" />
-              {t('cta.badge')}
+              {t("cta.badge")}
             </Badge>
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            {t('cta.heading')}
+            {t("cta.heading")}
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">{t('cta.subheading')}</p>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            {t("cta.subheading")}
+          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/login">
@@ -459,7 +467,7 @@ export default function Index() {
                 className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-medium shadow-lg transform hover:scale-105 transition-all duration-200"
               >
                 <Shield className="mr-2 w-5 h-5" />
-                {t('cta.enterPortal')}
+                {t("cta.enterPortal")}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
@@ -469,7 +477,7 @@ export default function Index() {
               className="border-2 border-white text-white hover:bg-white hover:text-crime-black px-8 py-4 text-lg shadow-lg"
             >
               <Eye className="mr-2 w-5 h-5" />
-              {t('cta.learnMore')}
+              {t("cta.learnMore")}
             </Button>
           </div>
 
@@ -485,24 +493,24 @@ export default function Index() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <Shield className="w-6 h-6 text-crime-red" />
-              <span className="text-white font-medium">{t('footer.dept')}</span>
+              <span className="text-white font-medium">{t("footer.dept")}</span>
             </div>
 
             <div className="flex items-center space-x-6 text-gray-300">
               <div className="flex items-center">
                 <Phone className="w-4 h-4 mr-2" />
-                <span>{t('footer.emergency')}</span>
+                <span>{t("footer.emergency")}</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="w-4 h-4 mr-2" />
-                <span>{t('footer.location')}</span>
+                <span>{t("footer.location")}</span>
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-700 mt-6 pt-6 grid gap-4 md:grid-cols-2 items-start">
             <div className="text-center md:text-left text-gray-400">
-              <p>{t('footer.copyright')}</p>
+              <p>{t("footer.copyright")}</p>
             </div>
             <div className="flex justify-center md:justify-end gap-4 text-sm text-gray-300">
               <Link to="/">Home</Link>

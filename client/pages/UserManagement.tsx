@@ -1,15 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { User, UserRole } from '@shared/types';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Switch } from '../components/ui/switch';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { User, UserRole } from "@shared/types";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { Switch } from "../components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 import {
   Users,
   Search,
@@ -29,9 +52,9 @@ import {
   Clock,
   Key,
   UserPlus,
-  Trash2
-} from 'lucide-react';
-import { api } from '@/lib/api';
+  Trash2,
+} from "lucide-react";
+import { api } from "@/lib/api";
 
 interface PendingAccount {
   id: string;
@@ -41,7 +64,7 @@ interface PendingAccount {
   phone?: string;
   requestedRole: UserRole;
   submittedDate: Date;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   documents?: string[];
   notes?: string;
 }
@@ -51,15 +74,32 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [pendingAccounts, setPendingAccounts] = useState<PendingAccount[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState<{fullName: string; username: string; role: UserRole; email?: string; phone?: string; password: string}>({ fullName: '', username: '', role: UserRole.CITIZEN, email: '', phone: '', password: '' });
+  const [newUser, setNewUser] = useState<{
+    fullName: string;
+    username: string;
+    role: UserRole;
+    email?: string;
+    phone?: string;
+    password: string;
+  }>({
+    fullName: "",
+    username: "",
+    role: UserRole.CITIZEN,
+    email: "",
+    phone: "",
+    password: "",
+  });
 
   const canManageUsers = hasRole(UserRole.SUPER_ADMIN);
-  const canApproveAccounts = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
+  const canApproveAccounts = hasAnyRole([
+    UserRole.SUPER_ADMIN,
+    UserRole.POLICE_HEAD,
+  ]);
 
   useEffect(() => {
     fetchUsers();
@@ -72,17 +112,19 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get('/users');
+      const res = await api.get("/users");
       const data = await res.json();
       if (res.ok && data.success) {
-        setUsers(data.data.users.map((u: any) => ({
-          ...u,
-          createdAt: new Date(u.createdAt),
-          updatedAt: new Date(u.updatedAt)
-        })));
+        setUsers(
+          data.data.users.map((u: any) => ({
+            ...u,
+            createdAt: new Date(u.createdAt),
+            updatedAt: new Date(u.updatedAt),
+          })),
+        );
       }
     } catch (e) {
-      console.error('Failed to load users', e);
+      console.error("Failed to load users", e);
     } finally {
       setIsLoading(false);
     }
@@ -92,39 +134,39 @@ export default function UserManagement() {
     // Mock pending accounts data
     const mockPending: PendingAccount[] = [
       {
-        id: 'P1',
-        fullName: 'Officer Candidate Bereket Haile',
-        username: 'bereket_h',
-        email: 'bereket.haile@example.com',
-        phone: '+251-911-000-100',
+        id: "P1",
+        fullName: "Officer Candidate Bereket Haile",
+        username: "bereket_h",
+        email: "bereket.haile@example.com",
+        phone: "+251-911-000-100",
         requestedRole: UserRole.PREVENTIVE_OFFICER,
-        submittedDate: new Date('2024-01-14'),
-        status: 'pending',
-        documents: ['police_certificate.pdf', 'training_completion.pdf'],
-        notes: 'Recent police academy graduate with high scores'
+        submittedDate: new Date("2024-01-14"),
+        status: "pending",
+        documents: ["police_certificate.pdf", "training_completion.pdf"],
+        notes: "Recent police academy graduate with high scores",
       },
       {
-        id: 'P2',
-        fullName: 'Detective Trainee Meron Gebre',
-        username: 'meron_g',
-        email: 'meron.gebre@example.com',
-        phone: '+251-911-000-101',
+        id: "P2",
+        fullName: "Detective Trainee Meron Gebre",
+        username: "meron_g",
+        email: "meron.gebre@example.com",
+        phone: "+251-911-000-101",
         requestedRole: UserRole.DETECTIVE_OFFICER,
-        submittedDate: new Date('2024-01-12'),
-        status: 'pending',
-        documents: ['detective_certification.pdf', 'background_check.pdf'],
-        notes: 'Specialized in cybercrime investigation'
+        submittedDate: new Date("2024-01-12"),
+        status: "pending",
+        documents: ["detective_certification.pdf", "background_check.pdf"],
+        notes: "Specialized in cybercrime investigation",
       },
       {
-        id: 'P3',
-        fullName: 'Citizen Registration - Kebede Alemu',
-        username: 'kebede_a',
-        email: 'kebede.alemu@example.com',
+        id: "P3",
+        fullName: "Citizen Registration - Kebede Alemu",
+        username: "kebede_a",
+        email: "kebede.alemu@example.com",
         requestedRole: UserRole.CITIZEN,
-        submittedDate: new Date('2024-01-16'),
-        status: 'pending',
-        notes: 'Standard citizen registration for crime reporting access'
-      }
+        submittedDate: new Date("2024-01-16"),
+        status: "pending",
+        notes: "Standard citizen registration for crime reporting access",
+      },
     ];
 
     setPendingAccounts(mockPending);
@@ -134,20 +176,21 @@ export default function UserManagement() {
     let filtered = [...users];
 
     if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (user) =>
+          user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (roleFilter !== 'all') {
-      filtered = filtered.filter(user => user.role === roleFilter);
+    if (roleFilter !== "all") {
+      filtered = filtered.filter((user) => user.role === roleFilter);
     }
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(user => 
-        statusFilter === 'active' ? user.isActive : !user.isActive
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((user) =>
+        statusFilter === "active" ? user.isActive : !user.isActive,
       );
     }
 
@@ -158,57 +201,81 @@ export default function UserManagement() {
     try {
       const res = await api.put(`/users/${userId}`, { isActive });
       if (res.ok) {
-        setUsers(prev => prev.map(user =>
-          user.id === userId ? { ...user, isActive } : user
-        ));
+        setUsers((prev) =>
+          prev.map((user) =>
+            user.id === userId ? { ...user, isActive } : user,
+          ),
+        );
       }
     } catch (error) {
-      console.error('Error updating user status:', error);
+      console.error("Error updating user status:", error);
     }
   };
 
   const handleApproveAccount = async (accountId: string) => {
     try {
       // In production, call API to approve account
-      setPendingAccounts(prev => prev.map(account => 
-        account.id === accountId ? { ...account, status: 'approved' } : account
-      ));
+      setPendingAccounts((prev) =>
+        prev.map((account) =>
+          account.id === accountId
+            ? { ...account, status: "approved" }
+            : account,
+        ),
+      );
     } catch (error) {
-      console.error('Error approving account:', error);
+      console.error("Error approving account:", error);
     }
   };
 
   const handleRejectAccount = async (accountId: string) => {
     try {
       // In production, call API to reject account
-      setPendingAccounts(prev => prev.map(account => 
-        account.id === accountId ? { ...account, status: 'rejected' } : account
-      ));
+      setPendingAccounts((prev) =>
+        prev.map((account) =>
+          account.id === accountId
+            ? { ...account, status: "rejected" }
+            : account,
+        ),
+      );
     } catch (error) {
-      console.error('Error rejecting account:', error);
+      console.error("Error rejecting account:", error);
     }
   };
 
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.SUPER_ADMIN: return 'bg-crime-red text-white';
-      case UserRole.POLICE_HEAD: return 'bg-crime-yellow text-crime-black';
-      case UserRole.DETECTIVE_OFFICER: return 'bg-blue-500 text-white';
-      case UserRole.PREVENTIVE_OFFICER: return 'bg-green-500 text-white';
-      case UserRole.HR_MANAGER: return 'bg-purple-500 text-white';
-      case UserRole.CITIZEN: return 'bg-gray-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case UserRole.SUPER_ADMIN:
+        return "bg-crime-red text-white";
+      case UserRole.POLICE_HEAD:
+        return "bg-crime-yellow text-crime-black";
+      case UserRole.DETECTIVE_OFFICER:
+        return "bg-blue-500 text-white";
+      case UserRole.PREVENTIVE_OFFICER:
+        return "bg-green-500 text-white";
+      case UserRole.HR_MANAGER:
+        return "bg-purple-500 text-white";
+      case UserRole.CITIZEN:
+        return "bg-gray-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
     }
   };
 
   const userStats = {
     total: users.length,
-    active: users.filter(u => u.isActive).length,
-    inactive: users.filter(u => !u.isActive).length,
-    admins: users.filter(u => u.role === UserRole.SUPER_ADMIN).length,
-    officers: users.filter(u => [UserRole.POLICE_HEAD, UserRole.DETECTIVE_OFFICER, UserRole.PREVENTIVE_OFFICER].includes(u.role)).length,
-    citizens: users.filter(u => u.role === UserRole.CITIZEN).length,
-    pendingApprovals: pendingAccounts.filter(p => p.status === 'pending').length
+    active: users.filter((u) => u.isActive).length,
+    inactive: users.filter((u) => !u.isActive).length,
+    admins: users.filter((u) => u.role === UserRole.SUPER_ADMIN).length,
+    officers: users.filter((u) =>
+      [
+        UserRole.POLICE_HEAD,
+        UserRole.DETECTIVE_OFFICER,
+        UserRole.PREVENTIVE_OFFICER,
+      ].includes(u.role),
+    ).length,
+    citizens: users.filter((u) => u.role === UserRole.CITIZEN).length,
+    pendingApprovals: pendingAccounts.filter((p) => p.status === "pending")
+      .length,
   };
 
   if (isLoading) {
@@ -225,7 +292,9 @@ export default function UserManagement() {
       <div className="bg-crime-black text-white p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">User Management</h1>
-          <p className="text-gray-300">Comprehensive user administration and role management</p>
+          <p className="text-gray-300">
+            Comprehensive user administration and role management
+          </p>
         </div>
       </div>
 
@@ -235,49 +304,63 @@ export default function UserManagement() {
           <Card>
             <CardContent className="p-6 text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.total}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.total}
+              </h3>
               <p className="text-gray-600">Total Users</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.active}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.active}
+              </h3>
               <p className="text-gray-600">Active</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <XCircle className="w-8 h-8 mx-auto mb-2 text-red-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.inactive}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.inactive}
+              </h3>
               <p className="text-gray-600">Inactive</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Settings className="w-8 h-8 mx-auto mb-2 text-crime-red" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.admins}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.admins}
+              </h3>
               <p className="text-gray-600">Admins</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Shield className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.officers}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.officers}
+              </h3>
               <p className="text-gray-600">Officers</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.citizens}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.citizens}
+              </h3>
               <p className="text-gray-600">Citizens</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-crime-yellow" />
-              <h3 className="text-2xl font-bold text-crime-black">{userStats.pendingApprovals}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {userStats.pendingApprovals}
+              </h3>
               <p className="text-gray-600">Pending</p>
             </CardContent>
           </Card>
@@ -310,18 +393,28 @@ export default function UserManagement() {
                       className="pl-10"
                     />
                   </div>
-                  
+
                   <Select value={roleFilter} onValueChange={setRoleFilter}>
                     <SelectTrigger>
                       <SelectValue placeholder="Role" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value={UserRole.SUPER_ADMIN}>Super Admin</SelectItem>
-                      <SelectItem value={UserRole.POLICE_HEAD}>Police Head</SelectItem>
-                      <SelectItem value={UserRole.DETECTIVE_OFFICER}>Detective Officer</SelectItem>
-                      <SelectItem value={UserRole.PREVENTIVE_OFFICER}>Preventive Officer</SelectItem>
-                      <SelectItem value={UserRole.HR_MANAGER}>HR Manager</SelectItem>
+                      <SelectItem value={UserRole.SUPER_ADMIN}>
+                        Super Admin
+                      </SelectItem>
+                      <SelectItem value={UserRole.POLICE_HEAD}>
+                        Police Head
+                      </SelectItem>
+                      <SelectItem value={UserRole.DETECTIVE_OFFICER}>
+                        Detective Officer
+                      </SelectItem>
+                      <SelectItem value={UserRole.PREVENTIVE_OFFICER}>
+                        Preventive Officer
+                      </SelectItem>
+                      <SelectItem value={UserRole.HR_MANAGER}>
+                        HR Manager
+                      </SelectItem>
                       <SelectItem value={UserRole.CITIZEN}>Citizen</SelectItem>
                     </SelectContent>
                   </Select>
@@ -338,7 +431,10 @@ export default function UserManagement() {
                   </Select>
 
                   {canManageUsers && (
-                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAddDialogOpen(true)}>
+                    <Button
+                      className="bg-crime-red hover:bg-crime-red-dark text-white"
+                      onClick={() => setIsAddDialogOpen(true)}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Add User
                     </Button>
@@ -351,50 +447,123 @@ export default function UserManagement() {
               <>
                 {/* Add User Dialog */}
                 <div>
-                  <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <Dialog
+                    open={isAddDialogOpen}
+                    onOpenChange={setIsAddDialogOpen}
+                  >
                     <DialogContent className="max-w-lg">
                       <DialogHeader>
                         <DialogTitle>Add New User</DialogTitle>
-                        <DialogDescription>Create a new user account.</DialogDescription>
+                        <DialogDescription>
+                          Create a new user account.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="fullName">Full Name</Label>
-                          <Input id="fullName" value={newUser.fullName} onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })} placeholder="Full name" />
+                          <Input
+                            id="fullName"
+                            value={newUser.fullName}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                fullName: e.target.value,
+                              })
+                            }
+                            placeholder="Full name"
+                          />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="username">Username</Label>
-                            <Input id="username" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} placeholder="username" />
+                            <Input
+                              id="username"
+                              value={newUser.username}
+                              onChange={(e) =>
+                                setNewUser({
+                                  ...newUser,
+                                  username: e.target.value,
+                                })
+                              }
+                              placeholder="username"
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} placeholder="password" />
+                            <Input
+                              id="password"
+                              type="password"
+                              value={newUser.password}
+                              onChange={(e) =>
+                                setNewUser({
+                                  ...newUser,
+                                  password: e.target.value,
+                                })
+                              }
+                              placeholder="password"
+                            />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="email@example.com" />
+                            <Input
+                              id="email"
+                              value={newUser.email}
+                              onChange={(e) =>
+                                setNewUser({
+                                  ...newUser,
+                                  email: e.target.value,
+                                })
+                              }
+                              placeholder="email@example.com"
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="phone">Phone</Label>
-                            <Input id="phone" value={newUser.phone} onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })} placeholder="+251-..." />
+                            <Input
+                              id="phone"
+                              value={newUser.phone}
+                              onChange={(e) =>
+                                setNewUser({
+                                  ...newUser,
+                                  phone: e.target.value,
+                                })
+                              }
+                              placeholder="+251-..."
+                            />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Role</Label>
-                          <Select value={newUser.role} onValueChange={(val) => setNewUser({ ...newUser, role: val as UserRole })}>
+                          <Select
+                            value={newUser.role}
+                            onValueChange={(val) =>
+                              setNewUser({ ...newUser, role: val as UserRole })
+                            }
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value={UserRole.SUPER_ADMIN}>Super Admin</SelectItem>
-                              <SelectItem value={UserRole.POLICE_HEAD}>Police Head</SelectItem>
-                              <SelectItem value={UserRole.DETECTIVE_OFFICER}>Detective Officer</SelectItem>
-                              <SelectItem value={UserRole.PREVENTIVE_OFFICER}>Preventive Officer</SelectItem>
-                              <SelectItem value={UserRole.HR_MANAGER}>HR Manager</SelectItem>
-                              <SelectItem value={UserRole.CITIZEN}>Citizen</SelectItem>
+                              <SelectItem value={UserRole.SUPER_ADMIN}>
+                                Super Admin
+                              </SelectItem>
+                              <SelectItem value={UserRole.POLICE_HEAD}>
+                                Police Head
+                              </SelectItem>
+                              <SelectItem value={UserRole.DETECTIVE_OFFICER}>
+                                Detective Officer
+                              </SelectItem>
+                              <SelectItem value={UserRole.PREVENTIVE_OFFICER}>
+                                Preventive Officer
+                              </SelectItem>
+                              <SelectItem value={UserRole.HR_MANAGER}>
+                                HR Manager
+                              </SelectItem>
+                              <SelectItem value={UserRole.CITIZEN}>
+                                Citizen
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -402,9 +571,14 @@ export default function UserManagement() {
                           <Button
                             className="bg-crime-red text-white"
                             onClick={async () => {
-                              if (!newUser.fullName || !newUser.username || !newUser.password) return;
+                              if (
+                                !newUser.fullName ||
+                                !newUser.username ||
+                                !newUser.password
+                              )
+                                return;
                               try {
-                                const res = await api.post('/users', {
+                                const res = await api.post("/users", {
                                   username: newUser.username,
                                   password: newUser.password,
                                   role: newUser.role,
@@ -418,20 +592,32 @@ export default function UserManagement() {
                                   const normalized: User = {
                                     ...u,
                                     createdAt: new Date(u.createdAt),
-                                    updatedAt: new Date(u.updatedAt)
+                                    updatedAt: new Date(u.updatedAt),
                                   };
-                                  setUsers(prev => [normalized, ...prev]);
+                                  setUsers((prev) => [normalized, ...prev]);
                                   setIsAddDialogOpen(false);
-                                  setNewUser({ fullName: '', username: '', role: UserRole.CITIZEN, email: '', phone: '', password: '' });
+                                  setNewUser({
+                                    fullName: "",
+                                    username: "",
+                                    role: UserRole.CITIZEN,
+                                    email: "",
+                                    phone: "",
+                                    password: "",
+                                  });
                                 }
                               } catch (e) {
-                                console.error('Failed to create user', e);
+                                console.error("Failed to create user", e);
                               }
                             }}
                           >
                             Save User
                           </Button>
-                          <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsAddDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
                         </div>
                       </div>
                     </DialogContent>
@@ -451,7 +637,10 @@ export default function UserManagement() {
               <CardContent>
                 <div className="space-y-4">
                   {filteredUsers.map((user_) => (
-                    <div key={user_.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div
+                      key={user_.id}
+                      className="border rounded-lg p-6 hover:shadow-md transition-shadow"
+                    >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
@@ -459,15 +648,27 @@ export default function UserManagement() {
                               <Shield className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                              <h3 className="text-lg font-semibold text-crime-black">{user_.fullName}</h3>
+                              <h3 className="text-lg font-semibold text-crime-black">
+                                {user_.fullName}
+                              </h3>
                               <p className="text-gray-600">@{user_.username}</p>
                             </div>
                             <Badge className={getRoleBadgeColor(user_.role)}>
-                              {user_.role.replace('_', ' ').toUpperCase()}
+                              {user_.role.replace("_", " ").toUpperCase()}
                             </Badge>
-                            <Badge className={user_.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                              {user_.isActive ? <CheckCircle className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />}
-                              {user_.isActive ? 'Active' : 'Inactive'}
+                            <Badge
+                              className={
+                                user_.isActive
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }
+                            >
+                              {user_.isActive ? (
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                              ) : (
+                                <XCircle className="w-3 h-3 mr-1" />
+                              )}
+                              {user_.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </div>
 
@@ -486,7 +687,8 @@ export default function UserManagement() {
                             )}
                             <div className="flex items-center">
                               <Calendar className="w-4 h-4 mr-2" />
-                              Joined {new Date(user_.createdAt).toLocaleDateString()}
+                              Joined{" "}
+                              {new Date(user_.createdAt).toLocaleDateString()}
                             </div>
                           </div>
                         </div>
@@ -496,9 +698,13 @@ export default function UserManagement() {
                             <div className="flex items-center space-x-2">
                               <Switch
                                 checked={user_.isActive}
-                                onCheckedChange={(checked) => handleToggleUserStatus(user_.id, checked)}
+                                onCheckedChange={(checked) =>
+                                  handleToggleUserStatus(user_.id, checked)
+                                }
                               />
-                              <span className="text-sm text-gray-600">Active</span>
+                              <span className="text-sm text-gray-600">
+                                Active
+                              </span>
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm">
@@ -510,7 +716,11 @@ export default function UserManagement() {
                                 Reset Password
                               </Button>
                               {user_.id !== user?.id && (
-                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700"
+                                >
                                   <Trash2 className="w-4 h-4 mr-1" />
                                   Delete
                                 </Button>
@@ -525,8 +735,12 @@ export default function UserManagement() {
                   {filteredUsers.length === 0 && (
                     <div className="text-center py-12">
                       <Users className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No users found</h3>
-                      <p className="text-gray-500">Try adjusting your search and filter criteria</p>
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                        No users found
+                      </h3>
+                      <p className="text-gray-500">
+                        Try adjusting your search and filter criteria
+                      </p>
                     </div>
                   )}
                 </div>
@@ -540,10 +754,16 @@ export default function UserManagement() {
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Pending Account Approvals</CardTitle>
-                    <CardDescription>Review and approve new account requests</CardDescription>
+                    <CardDescription>
+                      Review and approve new account requests
+                    </CardDescription>
                   </div>
                   <Badge className="bg-crime-yellow text-crime-black">
-                    {pendingAccounts.filter(p => p.status === 'pending').length} Pending
+                    {
+                      pendingAccounts.filter((p) => p.status === "pending")
+                        .length
+                    }{" "}
+                    Pending
                   </Badge>
                 </div>
               </CardHeader>
@@ -555,15 +775,27 @@ export default function UserManagement() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <UserPlus className="w-6 h-6 text-crime-red" />
-                            <h3 className="text-lg font-semibold text-crime-black">{account.fullName}</h3>
-                            <Badge className={getRoleBadgeColor(account.requestedRole)}>
-                              {account.requestedRole.replace('_', ' ').toUpperCase()}
+                            <h3 className="text-lg font-semibold text-crime-black">
+                              {account.fullName}
+                            </h3>
+                            <Badge
+                              className={getRoleBadgeColor(
+                                account.requestedRole,
+                              )}
+                            >
+                              {account.requestedRole
+                                .replace("_", " ")
+                                .toUpperCase()}
                             </Badge>
-                            <Badge className={
-                              account.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              account.status === 'approved' ? 'bg-green-100 text-green-800' :
-                              'bg-red-100 text-red-800'
-                            }>
+                            <Badge
+                              className={
+                                account.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : account.status === "approved"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                              }
+                            >
                               {account.status.toUpperCase()}
                             </Badge>
                           </div>
@@ -581,7 +813,10 @@ export default function UserManagement() {
                             )}
                             <div className="flex items-center">
                               <Calendar className="w-4 h-4 mr-2" />
-                              Submitted {new Date(account.submittedDate).toLocaleDateString()}
+                              Submitted{" "}
+                              {new Date(
+                                account.submittedDate,
+                              ).toLocaleDateString()}
                             </div>
                             <div className="flex items-center">
                               <Settings className="w-4 h-4 mr-2" />
@@ -591,36 +826,45 @@ export default function UserManagement() {
 
                           {account.notes && (
                             <div className="bg-blue-50 p-3 rounded-lg mb-3">
-                              <p className="text-sm text-blue-800">{account.notes}</p>
+                              <p className="text-sm text-blue-800">
+                                {account.notes}
+                              </p>
                             </div>
                           )}
 
-                          {account.documents && account.documents.length > 0 && (
-                            <div className="mb-3">
-                              <p className="text-sm font-medium text-gray-700 mb-2">Submitted Documents:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {account.documents.map((doc, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {doc}
-                                  </Badge>
-                                ))}
+                          {account.documents &&
+                            account.documents.length > 0 && (
+                              <div className="mb-3">
+                                <p className="text-sm font-medium text-gray-700 mb-2">
+                                  Submitted Documents:
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {account.documents.map((doc, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {doc}
+                                    </Badge>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                         </div>
 
-                        {canApproveAccounts && account.status === 'pending' && (
+                        {canApproveAccounts && account.status === "pending" && (
                           <div className="flex gap-2 ml-4">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="bg-green-600 hover:bg-green-700 text-white"
                               onClick={() => handleApproveAccount(account.id)}
                             >
                               <CheckCircle className="w-4 h-4 mr-1" />
                               Approve
                             </Button>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               className="text-red-600 hover:text-red-700"
                               onClick={() => handleRejectAccount(account.id)}
@@ -637,8 +881,12 @@ export default function UserManagement() {
                   {pendingAccounts.length === 0 && (
                     <div className="text-center py-12">
                       <UserPlus className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No pending approvals</h3>
-                      <p className="text-gray-500">All account requests have been processed</p>
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                        No pending approvals
+                      </h3>
+                      <p className="text-gray-500">
+                        All account requests have been processed
+                      </p>
                     </div>
                   )}
                 </div>
@@ -650,7 +898,9 @@ export default function UserManagement() {
             <Card>
               <CardHeader>
                 <CardTitle>Role Management</CardTitle>
-                <CardDescription>Manage user roles and permissions</CardDescription>
+                <CardDescription>
+                  Manage user roles and permissions
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
@@ -661,19 +911,26 @@ export default function UserManagement() {
                           <div className="flex items-center gap-3 mb-2">
                             <Shield className="w-6 h-6 text-crime-red" />
                             <h3 className="text-lg font-semibold text-crime-black">
-                              {role.replace('_', ' ').toUpperCase()}
+                              {role.replace("_", " ").toUpperCase()}
                             </h3>
                             <Badge className={getRoleBadgeColor(role)}>
-                              {users.filter(u => u.role === role).length} Users
+                              {users.filter((u) => u.role === role).length}{" "}
+                              Users
                             </Badge>
                           </div>
                           <p className="text-gray-600 mb-4">
-                            {role === UserRole.SUPER_ADMIN && 'Full system administration access and control'}
-                            {role === UserRole.POLICE_HEAD && 'Senior police management with oversight responsibilities'}
-                            {role === UserRole.DETECTIVE_OFFICER && 'Investigation specialist with case management access'}
-                            {role === UserRole.PREVENTIVE_OFFICER && 'Patrol and crime prevention duties'}
-                            {role === UserRole.HR_MANAGER && 'Human resources and personnel management'}
-                            {role === UserRole.CITIZEN && 'Public access for crime reporting and tracking'}
+                            {role === UserRole.SUPER_ADMIN &&
+                              "Full system administration access and control"}
+                            {role === UserRole.POLICE_HEAD &&
+                              "Senior police management with oversight responsibilities"}
+                            {role === UserRole.DETECTIVE_OFFICER &&
+                              "Investigation specialist with case management access"}
+                            {role === UserRole.PREVENTIVE_OFFICER &&
+                              "Patrol and crime prevention duties"}
+                            {role === UserRole.HR_MANAGER &&
+                              "Human resources and personnel management"}
+                            {role === UserRole.CITIZEN &&
+                              "Public access for crime reporting and tracking"}
                           </p>
                         </div>
                         {canManageUsers && (
