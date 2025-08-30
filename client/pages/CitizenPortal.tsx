@@ -94,7 +94,7 @@ export default function CitizenPortal() {
   useEffect(() => {
     const loadReports = async () => {
       try {
-        const res = await api.get('/crimes');
+        const res = await api.get('/crimes?reportedBy=me');
         const data = await res.json();
         if (res.ok && data.success) {
           const list = data.data.reports.map((r: any) => ({
@@ -111,6 +111,34 @@ export default function CitizenPortal() {
       }
     };
     loadReports();
+  }, []);
+
+  useEffect(() => {
+    // Subscribe to real-time crime updates for this user
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) return;
+    const url = `/api/realtime/crimes?token=${encodeURIComponent(token)}`;
+    const es = new EventSource(url);
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload?.type === 'crime_update' && payload.data) {
+          const r = payload.data;
+          setReports(prev => {
+            const idx = prev.findIndex(x => x.id === r.id);
+            const normalized = { ...r, dateReported: new Date(r.dateReported), dateIncident: new Date(r.dateIncident), createdAt: new Date(r.createdAt), updatedAt: new Date(r.updatedAt) } as any;
+            if (idx >= 0) {
+              const copy = [...prev];
+              copy[idx] = { ...copy[idx], ...normalized };
+              return copy;
+            }
+            return [normalized, ...prev];
+          });
+        }
+      } catch {}
+    };
+    es.onerror = () => { /* auto-reconnect by browser */ };
+    return () => { es.close(); };
   }, []);
 
   const filteredReports = reports.filter((report) => {
