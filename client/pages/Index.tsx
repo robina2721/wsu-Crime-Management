@@ -169,7 +169,7 @@ export default function Index() {
             <div className="flex items-center space-x-3">
               <LanguageToggle />
               <Link to="/signup">
-                <Button variant="outline" className="border-white/40 text-white hover:bg-white hover:text-crime-black">Sign Up</Button>
+                <Button className="bg-crime-yellow text-crime-black hover:bg-yellow-500 font-semibold">Sign Up</Button>
               </Link>
               <Link to="/login">
                 <Button className="bg-crime-red hover:bg-crime-red-dark text-white transition-all hover:scale-[1.02]">
@@ -224,14 +224,15 @@ export default function Index() {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-crime-black px-8 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
-              >
-                <Phone className="mr-2 w-5 h-5" />
-                {t('hero.emergency')}
-              </Button>
+              <a href="tel:911">
+                <Button
+                  size="lg"
+                  className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                >
+                  <Phone className="mr-2 w-5 h-5" />
+                  {t('hero.emergency')}
+                </Button>
+              </a>
             </div>
 
             {/* Trust indicators */}
