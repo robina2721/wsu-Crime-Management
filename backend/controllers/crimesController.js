@@ -26,11 +26,15 @@ export async function listHandler(req) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
     let reportedBy = searchParams.get("reportedBy") || undefined;
-    if (reportedBy === 'me') {
+    let assignedTo = searchParams.get("assignedTo") || undefined;
+    if (reportedBy === 'me' || assignedTo === 'me') {
       const u = await getAuthUser(req);
-      if (u) reportedBy = u.id;
+      if (u) {
+        if (reportedBy === 'me') reportedBy = u.id;
+        if (assignedTo === 'me') assignedTo = u.id;
+      }
     }
-    const reports = await listCrimes({ status, category, priority, reportedBy }, limit, offset);
+    const reports = await listCrimes({ status, category, priority, reportedBy, assignedTo }, limit, offset);
     return NextResponse.json({ success: true, data: { reports, total: reports.length, limit, offset } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -85,12 +89,41 @@ export async function updateHandler(req, params) {
   try {
     const user = await getAuthUser(req);
     if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    const allowed = new Set(["detective_officer","police_head","super_admin"]);
-    if (!allowed.has(user.role)) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
 
-    const updates = await req.json();
+    const body = await req.json();
+
+    // Load existing report
+    const current = await getCrime(params.id);
+    if (!current) return NextResponse.json({ success: false, error: "Crime report not found" }, { status: 404 });
+
+    const isSupervisor = new Set(["detective_officer","police_head","super_admin"]).has(user.role);
+
+    // Assignment changes are restricted to supervisors (detective/head/admin)
+    if (Object.prototype.hasOwnProperty.call(body, 'assignedTo') && !isSupervisor) {
+      return NextResponse.json({ success: false, error: "Forbidden: insufficient permissions to assign" }, { status: 403 });
+    }
+
+    // Preventive officers can update status only if the case is assigned to them
+    if (user.role === 'preventive_officer') {
+      if (current.assignedTo !== user.id) {
+        return NextResponse.json({ success: false, error: "Forbidden: case not assigned to you" }, { status: 403 });
+      }
+      const allowedUpdates = {};
+      if (Object.prototype.hasOwnProperty.call(body, 'status')) allowedUpdates.status = body.status;
+      if (Object.keys(allowedUpdates).length === 0) {
+        return NextResponse.json({ success: false, error: "No allowed fields to update" }, { status: 400 });
+      }
+      const updated = await updateCrime(params.id, allowedUpdates);
+      notifyCrimeUpdate(updated);
+      return NextResponse.json({ success: true, data: updated, message: "Crime report updated successfully" });
+    }
+
+    // Supervisors: allow whitelisted fields (model enforces allowed set). Auto-set status to 'assigned' when assigning.
+    const updates = { ...body };
+    if (Object.prototype.hasOwnProperty.call(updates, 'assignedTo') && !Object.prototype.hasOwnProperty.call(updates, 'status')) {
+      updates.status = 'assigned';
+    }
     const updated = await updateCrime(params.id, updates);
-    if (!updated) return NextResponse.json({ success: false, error: "Crime report not found" }, { status: 404 });
     notifyCrimeUpdate(updated);
     return NextResponse.json({ success: true, data: updated, message: "Crime report updated successfully" });
   } catch (err) {
