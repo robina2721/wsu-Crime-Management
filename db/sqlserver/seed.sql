@@ -39,6 +39,10 @@ IF NOT EXISTS (SELECT 1 FROM incidents WHERE id = 'INC-001')
 INSERT INTO incidents (id, title, description, incident_type, severity, location, date_occurred, reported_by, reporter_name, status, follow_up_required, related_case_id, created_at, updated_at)
 VALUES ('INC-001','Suspicious Vehicle in Downtown Area','Unmarked van parked for extended period near government building. License plate partially obscured.','suspicious_activity','medium','Main Street, near City Hall',DATEADD(day,-1,GETDATE()),'4','Officer Mulugeta Kebede','investigating',1,NULL,GETDATE(),GETDATE());
 
+IF NOT EXISTS (SELECT 1 FROM users WHERE id = '7')
+INSERT INTO users (id, username, password, role, full_name, email, phone, is_active, created_at, updated_at)
+VALUES ('7','officer_almaz','officer789','preventive_officer','Officer Almaz Worku','almaz.worku@example.com','+251-911-000-007',1,GETDATE(),GETDATE());
+
 IF NOT EXISTS (SELECT 1 FROM incidents WHERE id = 'INC-002')
 INSERT INTO incidents (id, title, description, incident_type, severity, location, date_occurred, reported_by, reporter_name, status, follow_up_required, related_case_id, created_at, updated_at)
 VALUES ('INC-002','Noise Complaint - Residential Area','Loud music and disturbance reported by multiple residents in Block 5.','noise_complaint','low','Residential Block 5, Apartment 12B',DATEADD(day,-1,GETDATE()),'7','Officer Almaz Worku','resolved',0,NULL,GETDATE(),GETDATE());
