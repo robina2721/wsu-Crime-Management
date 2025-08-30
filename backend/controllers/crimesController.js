@@ -1,5 +1,6 @@
 import { listCrimes, getCrime, createCrime, updateCrime, deleteCrime } from "../../backend/models/crimeModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
+import { notifyCrimeUpdate } from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
 
 function getAuthUserId(req) {
@@ -24,7 +25,12 @@ export async function listHandler(req) {
     const priority = searchParams.get("priority") || undefined;
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
-    const reports = await listCrimes({ status, category, priority }, limit, offset);
+    let reportedBy = searchParams.get("reportedBy") || undefined;
+    if (reportedBy === 'me') {
+      const u = await getAuthUser(req);
+      if (u) reportedBy = u.id;
+    }
+    const reports = await listCrimes({ status, category, priority, reportedBy }, limit, offset);
     return NextResponse.json({ success: true, data: { reports, total: reports.length, limit, offset } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -66,6 +72,7 @@ export async function createHandler(req) {
       reportedBy: user.id,
     };
     const created = await createCrime(payload);
+    notifyCrimeUpdate(created);
     return NextResponse.json({ success: true, data: created, message: "Crime report created successfully" }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -84,6 +91,7 @@ export async function updateHandler(req, params) {
     const updates = await req.json();
     const updated = await updateCrime(params.id, updates);
     if (!updated) return NextResponse.json({ success: false, error: "Crime report not found" }, { status: 404 });
+    notifyCrimeUpdate(updated);
     return NextResponse.json({ success: true, data: updated, message: "Crime report updated successfully" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
