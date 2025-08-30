@@ -368,10 +368,12 @@ export default function AssetManagement() {
               </Select>
 
               {canManageAssets && (
-                <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Asset
-                </Button>
+                <>
+                  <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAddOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Asset
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
