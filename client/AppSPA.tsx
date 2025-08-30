@@ -20,6 +20,7 @@ export default function AppSPA() {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <Navbar />
               <AppRoutes />
             </BrowserRouter>
           </AuthProvider>
