@@ -7,13 +7,13 @@ export default function LanguageToggle({ className = '' }: { className?: string 
   return (
     <div className={className}>
       <Select value={lang} onValueChange={(v) => setLang(v as any)}>
-        <SelectTrigger className="h-9 w-[170px] bg-white/90 shadow-sm">
+        <SelectTrigger className="h-9 w-[110px] bg-white/90 shadow-sm">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="en">English</SelectItem>
-          <SelectItem value="am">Amharic (አማርኛ)</SelectItem>
-          <SelectItem value="wo">Wolaytatto (Wolaita)</SelectItem>
+          <SelectItem value="en">ENG</SelectItem>
+          <SelectItem value="am">AMH</SelectItem>
+          <SelectItem value="wo">WOL</SelectItem>
         </SelectContent>
       </Select>
     </div>
