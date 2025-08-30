@@ -29,8 +29,11 @@ import {
   Activity,
 } from "lucide-react";
 
+import { useI18n } from '@/contexts/I18nContext';
+
 export default function Index() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const { t } = useI18n();
 
   const features = [
     {
