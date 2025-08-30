@@ -336,7 +336,7 @@ export default function UserManagement() {
                   </Select>
 
                   {canManageUsers && (
-                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
+                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAddDialogOpen(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add User
                     </Button>
