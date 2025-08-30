@@ -20,12 +20,13 @@ export default function Login() {
   const [error, setError] = useState('');
   
   const { login } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      setError('Please fill in all fields');
+      setError(t('login.errorFillFields'));
       return;
     }
 
@@ -36,7 +37,7 @@ export default function Login() {
     if (success) {
       navigate('/dashboard');
     } else {
-      setError('Invalid credentials');
+      setError(t('login.invalidCredentials'));
     }
     setIsLoading(false);
   };
@@ -60,20 +61,18 @@ export default function Login() {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-crime-black">Crime Management System</CardTitle>
-            <CardDescription className="text-gray-600">
-              Wolaita Sodo City Security Portal
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold text-crime-black">{t('login.portalTitle')}</CardTitle>
+            <CardDescription className="text-gray-600">{t('login.portalSubtitle')}</CardDescription>
           </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-crime-black font-medium">Access Level</Label>
+              <Label htmlFor="role" className="text-crime-black font-medium">{t('login.accessLevel')}</Label>
               <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)}>
                 <SelectTrigger className="border-gray-300 focus:border-crime-red">
-                  <SelectValue placeholder="Select your role" />
+                  <SelectValue placeholder={t('login.selectRole')} />
                 </SelectTrigger>
                 <SelectContent>
                   {roleOptions.map((role) => (
@@ -87,27 +86,27 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-crime-black font-medium">Username</Label>
+              <Label htmlFor="username" className="text-crime-black font-medium">{t('login.username')}</Label>
               <Input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder={t('login.usernamePlaceholder')}
                 className="border-gray-300 focus:border-crime-red"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-crime-black font-medium">Password</Label>
+              <Label htmlFor="password" className="text-crime-black font-medium">{t('login.password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   className="border-gray-300 focus:border-crime-red pr-10"
                   required
                 />
@@ -133,21 +132,17 @@ export default function Login() {
               disabled={isLoading}
               className="w-full bg-crime-red hover:bg-crime-red-dark text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
-              {isLoading ? 'Authenticating...' : 'Secure Login'}
+              {isLoading ? t('login.authenticating') : t('login.secureLogin')}
             </Button>
           </form>
 
           <div className="border-t pt-4">
-            <p className="text-center text-sm text-gray-600">
-              Emergency Contact: <span className="font-medium text-crime-red">911</span>
-            </p>
+            <p className="text-center text-sm text-gray-600">{t('login.emergencyContact')}</p>
           </div>
         </CardContent>
       </Card>
 
-      <div className="absolute bottom-4 left-4 text-white/60 text-xs">
-        Wolaita Sodo City Police Department © 2024
-      </div>
+      <div className="absolute bottom-4 left-4 text-white/60 text-xs">{t('footer.dept')} © 2024</div>
     </div>
   );
 }
