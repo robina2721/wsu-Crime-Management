@@ -35,6 +35,7 @@ const AppRoutes = () => {
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Index />}
       />
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route
         path="/dashboard"
         element={
