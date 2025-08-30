@@ -8,6 +8,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Shield, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import LanguageToggle from '@/components/LanguageToggle';
 
 import { useI18n } from '@/contexts/I18nContext';
 
