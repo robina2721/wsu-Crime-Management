@@ -345,6 +345,99 @@ export default function UserManagement() {
               </CardContent>
             </Card>
 
+            {canManageUsers && (
+              <>
+                {/* Add User Dialog */}
+                <div>
+                  <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle>Add New User</DialogTitle>
+                        <DialogDescription>Create a new user account.</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="fullName">Full Name</Label>
+                          <Input id="fullName" value={newUser.fullName} onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })} placeholder="Full name" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="username">Username</Label>
+                            <Input id="username" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} placeholder="username" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input id="password" type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} placeholder="password" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="email@example.com" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input id="phone" value={newUser.phone} onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })} placeholder="+251-..." />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Role</Label>
+                          <Select value={newUser.role} onValueChange={(val) => setNewUser({ ...newUser, role: val as UserRole })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={UserRole.SUPER_ADMIN}>Super Admin</SelectItem>
+                              <SelectItem value={UserRole.POLICE_HEAD}>Police Head</SelectItem>
+                              <SelectItem value={UserRole.DETECTIVE_OFFICER}>Detective Officer</SelectItem>
+                              <SelectItem value={UserRole.PREVENTIVE_OFFICER}>Preventive Officer</SelectItem>
+                              <SelectItem value={UserRole.HR_MANAGER}>HR Manager</SelectItem>
+                              <SelectItem value={UserRole.CITIZEN}>Citizen</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                          <Button
+                            className="bg-crime-red text-white"
+                            onClick={async () => {
+                              if (!newUser.fullName || !newUser.username || !newUser.password) return;
+                              try {
+                                const res = await api.post('/users', {
+                                  username: newUser.username,
+                                  password: newUser.password,
+                                  role: newUser.role,
+                                  fullName: newUser.fullName,
+                                  email: newUser.email,
+                                  phone: newUser.phone,
+                                });
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  const u = data.data;
+                                  const normalized: User = {
+                                    ...u,
+                                    createdAt: new Date(u.createdAt),
+                                    updatedAt: new Date(u.updatedAt)
+                                  };
+                                  setUsers(prev => [normalized, ...prev]);
+                                  setIsAddDialogOpen(false);
+                                  setNewUser({ fullName: '', username: '', role: UserRole.CITIZEN, email: '', phone: '', password: '' });
+                                }
+                              } catch (e) {
+                                console.error('Failed to create user', e);
+                              }
+                            }}
+                          >
+                            Save User
+                          </Button>
+                          <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </>
+            )}
+
             {/* Users List */}
             <Card>
               <CardHeader>
