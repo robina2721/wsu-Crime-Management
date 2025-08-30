@@ -52,9 +52,12 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-crime-black via-gray-900 to-crime-red-dark flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-crime-black via-gray-900 to-crime-red-dark flex items-center justify-center p-4 relative">
       <div className="absolute inset-0 bg-black/20"></div>
-      
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
+
       <Card className="w-full max-w-md relative z-10 border-crime-red shadow-2xl">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-crime-red rounded-full flex items-center justify-center">
