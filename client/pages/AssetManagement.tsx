@@ -490,6 +490,87 @@ export default function AssetManagement() {
           </CardContent>
         </Card>
       </div>
+
+      {canManageAssets && (
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Asset</DialogTitle>
+              <DialogDescription>Enter details for the new asset.</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm">Name</label>
+                <Input value={newAsset.name || ''} onChange={e => setNewAsset(a => ({ ...a, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">Category</label>
+                <Select value={newAsset.category as string} onValueChange={(v) => setNewAsset(a => ({ ...a, category: v as any }))}>
+                  <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={AssetCategory.VEHICLES}>Vehicles</SelectItem>
+                    <SelectItem value={AssetCategory.WEAPONS}>Weapons</SelectItem>
+                    <SelectItem value={AssetCategory.COMMUNICATION}>Communication</SelectItem>
+                    <SelectItem value={AssetCategory.TECHNOLOGY}>Technology</SelectItem>
+                    <SelectItem value={AssetCategory.EQUIPMENT}>Equipment</SelectItem>
+                    <SelectItem value={AssetCategory.INFRASTRUCTURE}>Infrastructure</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm">Type</label>
+                <Input value={newAsset.type || ''} onChange={e => setNewAsset(a => ({ ...a, type: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">Serial Number</label>
+                <Input value={newAsset.serialNumber || ''} onChange={e => setNewAsset(a => ({ ...a, serialNumber: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">Current Value</label>
+                <Input type="number" value={Number(newAsset.currentValue || 0)} onChange={e => setNewAsset(a => ({ ...a, currentValue: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <label className="text-sm">Status</label>
+                <Select value={newAsset.status as string} onValueChange={(v) => setNewAsset(a => ({ ...a, status: v as any }))}>
+                  <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={AssetStatus.AVAILABLE}>Available</SelectItem>
+                    <SelectItem value={AssetStatus.IN_USE}>In Use</SelectItem>
+                    <SelectItem value={AssetStatus.MAINTENANCE}>Maintenance</SelectItem>
+                    <SelectItem value={AssetStatus.RETIRED}>Retired</SelectItem>
+                    <SelectItem value={AssetStatus.LOST}>Lost</SelectItem>
+                    <SelectItem value={AssetStatus.DAMAGED}>Damaged</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm">Condition</label>
+                <Select value={newAsset.condition as string} onValueChange={(v) => setNewAsset(a => ({ ...a, condition: v as any }))}>
+                  <SelectTrigger><SelectValue placeholder="Condition" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={AssetCondition.EXCELLENT}>Excellent</SelectItem>
+                    <SelectItem value={AssetCondition.GOOD}>Good</SelectItem>
+                    <SelectItem value={AssetCondition.FAIR}>Fair</SelectItem>
+                    <SelectItem value={AssetCondition.POOR}>Poor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Location</label>
+                <Input value={newAsset.location || ''} onChange={e => setNewAsset(a => ({ ...a, location: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Description</label>
+                <Input value={newAsset.description || ''} onChange={e => setNewAsset(a => ({ ...a, description: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddAsset}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
