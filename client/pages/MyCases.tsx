@@ -29,6 +29,7 @@ import {
   Pause,
   Archive
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 export default function MyCases() {
   const { user, hasRole, hasAnyRole } = useAuth();
