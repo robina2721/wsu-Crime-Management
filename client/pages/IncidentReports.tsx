@@ -111,33 +111,40 @@ export default function IncidentReports() {
   const handleCreateIncident = async () => {
     if (!user) return;
 
-    const incident: IncidentReport = {
-      id: `INC-${String(incidents.length + 1).padStart(3, '0')}`,
-      title: newIncident.title,
-      description: newIncident.description,
-      incidentType: newIncident.incidentType,
-      severity: newIncident.severity,
-      location: newIncident.location,
-      dateOccurred: new Date(newIncident.dateOccurred),
-      reportedBy: user.id,
-      reporterName: user.fullName,
-      status: IncidentStatus.REPORTED,
-      followUpRequired: newIncident.followUpRequired,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    setIncidents(prev => [incident, ...prev]);
-    setIsCreateDialogOpen(false);
-    setNewIncident({
-      title: '',
-      description: '',
-      incidentType: IncidentType.PATROL_OBSERVATION,
-      severity: Priority.LOW,
-      location: '',
-      dateOccurred: new Date().toISOString().slice(0, 16),
-      followUpRequired: false
-    });
+    try {
+      const payload = {
+        title: newIncident.title,
+        description: newIncident.description,
+        incidentType: newIncident.incidentType,
+        severity: newIncident.severity,
+        location: newIncident.location,
+        dateOccurred: newIncident.dateOccurred,
+        followUpRequired: newIncident.followUpRequired,
+      };
+      const res = await api.post('/incidents', payload);
+      if (!res.ok) return;
+      const data = await res.json();
+      const r = data.data;
+      const created: IncidentReport = {
+        ...r,
+        dateOccurred: new Date(r.dateOccurred),
+        createdAt: new Date(r.createdAt),
+        updatedAt: new Date(r.updatedAt)
+      };
+      setIncidents(prev => [created, ...prev]);
+      setIsCreateDialogOpen(false);
+      setNewIncident({
+        title: '',
+        description: '',
+        incidentType: IncidentType.PATROL_OBSERVATION,
+        severity: Priority.LOW,
+        location: '',
+        dateOccurred: new Date().toISOString().slice(0, 16),
+        followUpRequired: false
+      });
+    } catch (e) {
+      console.error('Failed to create incident', e);
+    }
   };
 
   const getStatusBadgeColor = (status: IncidentStatus) => {
