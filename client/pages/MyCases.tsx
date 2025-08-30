@@ -47,6 +47,7 @@ export default function MyCases() {
     if (canViewCases) {
       fetchMyCases();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -54,78 +55,23 @@ export default function MyCases() {
   }, [cases, statusFilter, priorityFilter]);
 
   const fetchMyCases = async () => {
-    // Mock data - In production, fetch cases assigned to current user
-    const mockCases: CrimeReport[] = [
-      {
-        id: '1',
-        title: 'Theft at Market Street',
-        description: 'Mobile phone stolen from vendor at the main market area. Suspect seen fleeing towards north district.',
-        category: CrimeCategory.THEFT,
-        status: CrimeStatus.UNDER_INVESTIGATION,
-        priority: Priority.MEDIUM,
-        location: 'Market Street, Downtown',
-        dateReported: new Date('2024-01-15T10:30:00Z'),
-        dateIncident: new Date('2024-01-15T09:00:00Z'),
-        reportedBy: '6',
-        assignedTo: user?.id,
-        evidence: ['photo1.jpg', 'witness_statement.pdf'],
-        createdAt: new Date('2024-01-15T10:30:00Z'),
-        updatedAt: new Date('2024-01-16T14:22:00Z')
-      },
-      {
-        id: '2',
-        title: 'Domestic Violence Incident',
-        description: 'Reported domestic violence case requiring immediate attention and investigation.',
-        category: CrimeCategory.DOMESTIC_VIOLENCE,
-        status: CrimeStatus.ASSIGNED,
-        priority: Priority.HIGH,
-        location: 'Residential Area, Block 5',
-        dateReported: new Date('2024-01-16T08:15:00Z'),
-        dateIncident: new Date('2024-01-16T07:45:00Z'),
-        reportedBy: '6',
-        assignedTo: user?.id,
-        evidence: ['medical_report.pdf'],
-        createdAt: new Date('2024-01-16T08:15:00Z'),
-        updatedAt: new Date('2024-01-16T09:30:00Z')
-      },
-      {
-        id: '4',
-        title: 'Fraud Investigation',
-        description: 'Multiple reports of credit card fraud in the downtown business district.',
-        category: CrimeCategory.FRAUD,
-        status: CrimeStatus.UNDER_INVESTIGATION,
-        priority: Priority.HIGH,
-        location: 'Downtown Business District',
-        dateReported: new Date('2024-01-14T16:20:00Z'),
-        dateIncident: new Date('2024-01-14T14:00:00Z'),
-        reportedBy: '6',
-        assignedTo: user?.id,
-        evidence: ['transaction_records.pdf', 'cctv_footage.mp4'],
-        createdAt: new Date('2024-01-14T16:20:00Z'),
-        updatedAt: new Date('2024-01-17T10:15:00Z')
-      },
-      {
-        id: '5',
-        title: 'Vandalism at School',
-        description: 'Property damage reported at local elementary school. Graffiti and broken windows.',
-        category: CrimeCategory.VANDALISM,
-        status: CrimeStatus.RESOLVED,
-        priority: Priority.LOW,
-        location: 'Wolaita Elementary School',
-        dateReported: new Date('2024-01-12T09:00:00Z'),
-        dateIncident: new Date('2024-01-11T20:30:00Z'),
-        reportedBy: '6',
-        assignedTo: user?.id,
-        evidence: ['damage_photos.jpg'],
-        createdAt: new Date('2024-01-12T09:00:00Z'),
-        updatedAt: new Date('2024-01-13T15:45:00Z')
-      }
-    ];
-
-    // Filter cases assigned to current user
-    const userCases = mockCases.filter(case_ => case_.assignedTo === user?.id);
-    setCases(userCases);
-    setIsLoading(false);
+    try {
+      const res = await api.get('/crimes?assignedTo=me&limit=50&offset=0');
+      if (!res.ok) throw new Error('Failed to load cases');
+      const data = await res.json();
+      const reports: CrimeReport[] = (data?.data?.reports || []).map((r: any) => ({
+        ...r,
+        dateReported: new Date(r.dateReported),
+        dateIncident: new Date(r.dateIncident),
+        createdAt: new Date(r.createdAt),
+        updatedAt: new Date(r.updatedAt)
+      }));
+      setCases(reports);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filterCases = () => {
@@ -144,12 +90,10 @@ export default function MyCases() {
 
   const handleStatusUpdate = async (caseId: string, newStatus: CrimeStatus) => {
     try {
-      // In production, call API to update case status
-      setCases(prev => prev.map(case_ => 
-        case_.id === caseId 
-          ? { ...case_, status: newStatus, updatedAt: new Date() }
-          : case_
-      ));
+      const res = await api.put(`/crimes/${caseId}`, { status: newStatus });
+      if (!res.ok) throw new Error('Failed to update status');
+      // Refresh list to reflect changes
+      await fetchMyCases();
     } catch (error) {
       console.error('Error updating case status:', error);
     }
