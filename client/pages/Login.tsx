@@ -55,6 +55,11 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-crime-black via-gray-900 to-crime-red-dark flex items-center justify-center p-4 relative">
       <div className="absolute inset-0 bg-black/20"></div>
+      <div className="absolute top-4 left-4 z-50">
+        <Link to="/">
+          <Button variant="outline" className="h-9 border-white/40 text-white hover:bg-white hover:text-crime-black">← Home</Button>
+        </Link>
+      </div>
       <div className="absolute top-4 right-4 z-50">
         <LanguageToggle />
       </div>
