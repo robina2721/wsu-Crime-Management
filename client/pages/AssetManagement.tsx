@@ -1,20 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { UserRole } from '@shared/types';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Input } from '../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { 
-  Package, 
-  Search, 
-  Filter, 
-  Plus, 
-  Edit, 
-  Car, 
-  Shield, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { UserRole } from "@shared/types";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  Package,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Car,
+  Shield,
   Radio,
   Computer,
   Camera,
@@ -27,8 +51,8 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Clock
-} from 'lucide-react';
+  Clock,
+} from "lucide-react";
 
 interface Asset {
   id: string;
@@ -51,42 +75,49 @@ interface Asset {
 }
 
 enum AssetCategory {
-  VEHICLES = 'vehicles',
-  WEAPONS = 'weapons',
-  COMMUNICATION = 'communication',
-  TECHNOLOGY = 'technology',
-  EQUIPMENT = 'equipment',
-  INFRASTRUCTURE = 'infrastructure'
+  VEHICLES = "vehicles",
+  WEAPONS = "weapons",
+  COMMUNICATION = "communication",
+  TECHNOLOGY = "technology",
+  EQUIPMENT = "equipment",
+  INFRASTRUCTURE = "infrastructure",
 }
 
 enum AssetStatus {
-  AVAILABLE = 'available',
-  IN_USE = 'in_use',
-  MAINTENANCE = 'maintenance',
-  RETIRED = 'retired',
-  LOST = 'lost',
-  DAMAGED = 'damaged'
+  AVAILABLE = "available",
+  IN_USE = "in_use",
+  MAINTENANCE = "maintenance",
+  RETIRED = "retired",
+  LOST = "lost",
+  DAMAGED = "damaged",
 }
 
 enum AssetCondition {
-  EXCELLENT = 'excellent',
-  GOOD = 'good',
-  FAIR = 'fair',
-  POOR = 'poor'
+  EXCELLENT = "excellent",
+  GOOD = "good",
+  FAIR = "fair",
+  POOR = "poor",
 }
 
 export default function AssetManagement() {
   const { user, hasRole, hasAnyRole } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [conditionFilter, setConditionFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [conditionFilter, setConditionFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
 
-  const canManageAssets = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
-  const canViewAssets = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.HR_MANAGER]);
+  const canManageAssets = hasAnyRole([
+    UserRole.SUPER_ADMIN,
+    UserRole.POLICE_HEAD,
+  ]);
+  const canViewAssets = hasAnyRole([
+    UserRole.SUPER_ADMIN,
+    UserRole.POLICE_HEAD,
+    UserRole.HR_MANAGER,
+  ]);
 
   useEffect(() => {
     fetchAssets();
@@ -96,131 +127,93 @@ export default function AssetManagement() {
     filterAssets();
   }, [assets, searchTerm, categoryFilter, statusFilter, conditionFilter]);
 
-  const fetchAssets = async () => {
-    // Mock data - In production, fetch from API
-    const mockAssets: Asset[] = [
-      {
-        id: '1',
-        name: 'Police Patrol Vehicle #001',
-        category: AssetCategory.VEHICLES,
-        type: 'Patrol Car',
-        serialNumber: 'PV-2023-001',
-        purchaseDate: new Date('2023-01-15'),
-        purchasePrice: 35000,
-        currentValue: 28000,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.GOOD,
-        location: 'North District Station',
-        assignedTo: '4',
-        assignedToName: 'Officer Mulugeta Kebede',
-        lastMaintenance: new Date('2024-01-01'),
-        nextMaintenance: new Date('2024-04-01'),
-        warrantyExpiry: new Date('2026-01-15'),
-        description: 'Standard patrol vehicle equipped with radio and emergency equipment'
-      },
-      {
-        id: '2',
-        name: 'Service Pistol #SP-101',
-        category: AssetCategory.WEAPONS,
-        type: 'Handgun',
-        serialNumber: 'SP-2023-101',
-        purchaseDate: new Date('2023-03-20'),
-        purchasePrice: 800,
-        currentValue: 700,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.EXCELLENT,
-        location: 'Armory',
-        assignedTo: '3',
-        assignedToName: 'Detective Sara Alemayehu',
-        lastMaintenance: new Date('2024-01-10'),
-        nextMaintenance: new Date('2024-07-10'),
-        description: 'Standard issue service weapon'
-      },
-      {
-        id: '3',
-        name: 'Radio Communication Set #RC-05',
-        category: AssetCategory.COMMUNICATION,
-        type: 'Two-Way Radio',
-        serialNumber: 'RC-2023-005',
-        purchaseDate: new Date('2023-02-10'),
-        purchasePrice: 450,
-        currentValue: 350,
-        status: AssetStatus.AVAILABLE,
-        condition: AssetCondition.GOOD,
-        location: 'Communications Room',
-        description: 'Digital two-way radio with encryption capabilities'
-      },
-      {
-        id: '4',
-        name: 'Surveillance Camera System',
-        category: AssetCategory.TECHNOLOGY,
-        type: 'CCTV System',
-        serialNumber: 'CCTV-2023-001',
-        purchaseDate: new Date('2023-06-01'),
-        purchasePrice: 12000,
-        currentValue: 10000,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.EXCELLENT,
-        location: 'Station Building',
-        description: '16-channel surveillance system with night vision'
-      },
-      {
-        id: '5',
-        name: 'Body Armor Vest #BA-25',
-        category: AssetCategory.EQUIPMENT,
-        type: 'Protective Equipment',
-        serialNumber: 'BA-2023-025',
-        purchaseDate: new Date('2023-04-15'),
-        purchasePrice: 600,
-        currentValue: 480,
-        status: AssetStatus.MAINTENANCE,
-        condition: AssetCondition.FAIR,
-        location: 'Equipment Storage',
-        lastMaintenance: new Date('2024-01-15'),
-        description: 'Level IIIA body armor vest'
-      },
-      {
-        id: '6',
-        name: 'Main Station Building',
-        category: AssetCategory.INFRASTRUCTURE,
-        type: 'Building',
-        serialNumber: 'BLDG-001',
-        purchaseDate: new Date('2020-01-01'),
-        purchasePrice: 500000,
-        currentValue: 480000,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.GOOD,
-        location: 'City Center',
-        description: 'Main police station headquarters'
-      }
-    ];
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newAsset, setNewAsset] = useState<Partial<Asset>>({
+    name: "",
+    category: AssetCategory.EQUIPMENT,
+    type: "",
+    serialNumber: "",
+    currentValue: 0,
+    status: AssetStatus.AVAILABLE,
+    condition: AssetCondition.GOOD,
+    location: "",
+    description: "",
+  });
 
-    setAssets(mockAssets);
-    setIsLoading(false);
+  const fetchAssets = async () => {
+    try {
+      const res = await api.get("/assets");
+      const data = await res.json();
+      if (data.success) {
+        setAssets(data.data.assets || []);
+      }
+    } catch (e) {
+      console.error("Failed to load assets", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddAsset = async () => {
+    try {
+      const res = await api.post("/assets", {
+        name: newAsset.name,
+        category: newAsset.category,
+        type: newAsset.type,
+        serialNumber: newAsset.serialNumber,
+        currentValue: newAsset.currentValue,
+        status: newAsset.status,
+        condition: newAsset.condition,
+        location: newAsset.location,
+        description: newAsset.description,
+      });
+      if (res.ok) {
+        setIsAddOpen(false);
+        setNewAsset({
+          name: "",
+          category: AssetCategory.EQUIPMENT,
+          type: "",
+          serialNumber: "",
+          currentValue: 0,
+          status: AssetStatus.AVAILABLE,
+          condition: AssetCondition.GOOD,
+          location: "",
+          description: "",
+        });
+        await fetchAssets();
+      }
+    } catch (e) {
+      console.error("Failed to add asset", e);
+    }
   };
 
   const filterAssets = () => {
     let filtered = [...assets];
 
     if (searchTerm) {
-      filtered = filtered.filter(asset => 
-        asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.assignedToName?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (asset) =>
+          asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          asset.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          asset.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          asset.assignedToName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(asset => asset.category === categoryFilter);
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((asset) => asset.category === categoryFilter);
     }
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(asset => asset.status === statusFilter);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((asset) => asset.status === statusFilter);
     }
 
-    if (conditionFilter !== 'all') {
-      filtered = filtered.filter(asset => asset.condition === conditionFilter);
+    if (conditionFilter !== "all") {
+      filtered = filtered.filter(
+        (asset) => asset.condition === conditionFilter,
+      );
     }
 
     setFilteredAssets(filtered);
@@ -228,58 +221,87 @@ export default function AssetManagement() {
 
   const getCategoryIcon = (category: AssetCategory) => {
     switch (category) {
-      case AssetCategory.VEHICLES: return Car;
-      case AssetCategory.WEAPONS: return Shield;
-      case AssetCategory.COMMUNICATION: return Radio;
-      case AssetCategory.TECHNOLOGY: return Computer;
-      case AssetCategory.EQUIPMENT: return Package;
-      case AssetCategory.INFRASTRUCTURE: return Building;
-      default: return Package;
+      case AssetCategory.VEHICLES:
+        return Car;
+      case AssetCategory.WEAPONS:
+        return Shield;
+      case AssetCategory.COMMUNICATION:
+        return Radio;
+      case AssetCategory.TECHNOLOGY:
+        return Computer;
+      case AssetCategory.EQUIPMENT:
+        return Package;
+      case AssetCategory.INFRASTRUCTURE:
+        return Building;
+      default:
+        return Package;
     }
   };
 
   const getStatusBadgeColor = (status: AssetStatus) => {
     switch (status) {
-      case AssetStatus.AVAILABLE: return 'bg-green-100 text-green-800';
-      case AssetStatus.IN_USE: return 'bg-blue-100 text-blue-800';
-      case AssetStatus.MAINTENANCE: return 'bg-yellow-100 text-yellow-800';
-      case AssetStatus.RETIRED: return 'bg-gray-100 text-gray-800';
-      case AssetStatus.LOST: return 'bg-red-100 text-red-800';
-      case AssetStatus.DAMAGED: return 'bg-crime-red text-white';
-      default: return 'bg-gray-100 text-gray-800';
+      case AssetStatus.AVAILABLE:
+        return "bg-green-100 text-green-800";
+      case AssetStatus.IN_USE:
+        return "bg-blue-100 text-blue-800";
+      case AssetStatus.MAINTENANCE:
+        return "bg-yellow-100 text-yellow-800";
+      case AssetStatus.RETIRED:
+        return "bg-gray-100 text-gray-800";
+      case AssetStatus.LOST:
+        return "bg-red-100 text-red-800";
+      case AssetStatus.DAMAGED:
+        return "bg-crime-red text-white";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getConditionBadgeColor = (condition: AssetCondition) => {
     switch (condition) {
-      case AssetCondition.EXCELLENT: return 'bg-green-500 text-white';
-      case AssetCondition.GOOD: return 'bg-blue-500 text-white';
-      case AssetCondition.FAIR: return 'bg-yellow-500 text-white';
-      case AssetCondition.POOR: return 'bg-red-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case AssetCondition.EXCELLENT:
+        return "bg-green-500 text-white";
+      case AssetCondition.GOOD:
+        return "bg-blue-500 text-white";
+      case AssetCondition.FAIR:
+        return "bg-yellow-500 text-white";
+      case AssetCondition.POOR:
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
     }
   };
 
   const getStatusIcon = (status: AssetStatus) => {
     switch (status) {
-      case AssetStatus.AVAILABLE: return CheckCircle;
-      case AssetStatus.IN_USE: return User;
-      case AssetStatus.MAINTENANCE: return Wrench;
-      case AssetStatus.RETIRED: return XCircle;
-      case AssetStatus.LOST: return AlertTriangle;
-      case AssetStatus.DAMAGED: return XCircle;
-      default: return Package;
+      case AssetStatus.AVAILABLE:
+        return CheckCircle;
+      case AssetStatus.IN_USE:
+        return User;
+      case AssetStatus.MAINTENANCE:
+        return Wrench;
+      case AssetStatus.RETIRED:
+        return XCircle;
+      case AssetStatus.LOST:
+        return AlertTriangle;
+      case AssetStatus.DAMAGED:
+        return XCircle;
+      default:
+        return Package;
     }
   };
 
   const assetStats = {
     total: assets.length,
-    available: assets.filter(a => a.status === AssetStatus.AVAILABLE).length,
-    inUse: assets.filter(a => a.status === AssetStatus.IN_USE).length,
-    maintenance: assets.filter(a => a.status === AssetStatus.MAINTENANCE).length,
+    available: assets.filter((a) => a.status === AssetStatus.AVAILABLE).length,
+    inUse: assets.filter((a) => a.status === AssetStatus.IN_USE).length,
+    maintenance: assets.filter((a) => a.status === AssetStatus.MAINTENANCE)
+      .length,
     totalValue: assets.reduce((sum, asset) => sum + asset.currentValue, 0),
-    vehicles: assets.filter(a => a.category === AssetCategory.VEHICLES).length,
-    equipment: assets.filter(a => a.category === AssetCategory.EQUIPMENT).length
+    vehicles: assets.filter((a) => a.category === AssetCategory.VEHICLES)
+      .length,
+    equipment: assets.filter((a) => a.category === AssetCategory.EQUIPMENT)
+      .length,
   };
 
   if (isLoading) {
@@ -296,7 +318,9 @@ export default function AssetManagement() {
       <div className="bg-crime-black text-white p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Asset Management</h1>
-          <p className="text-gray-300">Organizational asset tracking and inventory management</p>
+          <p className="text-gray-300">
+            Organizational asset tracking and inventory management
+          </p>
         </div>
       </div>
 
@@ -306,49 +330,63 @@ export default function AssetManagement() {
           <Card>
             <CardContent className="p-6 text-center">
               <Package className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{assetStats.total}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {assetStats.total}
+              </h3>
               <p className="text-gray-600">Total Assets</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{assetStats.available}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {assetStats.available}
+              </h3>
               <p className="text-gray-600">Available</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <User className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{assetStats.inUse}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {assetStats.inUse}
+              </h3>
               <p className="text-gray-600">In Use</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Wrench className="w-8 h-8 mx-auto mb-2 text-yellow-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{assetStats.maintenance}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {assetStats.maintenance}
+              </h3>
               <p className="text-gray-600">Maintenance</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <DollarSign className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="text-xl font-bold text-crime-black">${assetStats.totalValue.toLocaleString()}</h3>
+              <h3 className="text-xl font-bold text-crime-black">
+                ${assetStats.totalValue.toLocaleString()}
+              </h3>
               <p className="text-gray-600">Total Value</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Car className="w-8 h-8 mx-auto mb-2 text-crime-red" />
-              <h3 className="text-2xl font-bold text-crime-black">{assetStats.vehicles}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {assetStats.vehicles}
+              </h3>
               <p className="text-gray-600">Vehicles</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Shield className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{assetStats.equipment}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {assetStats.equipment}
+              </h3>
               <p className="text-gray-600">Equipment</p>
             </CardContent>
           </Card>
@@ -373,19 +411,29 @@ export default function AssetManagement() {
                   className="pl-10"
                 />
               </div>
-              
+
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value={AssetCategory.VEHICLES}>Vehicles</SelectItem>
+                  <SelectItem value={AssetCategory.VEHICLES}>
+                    Vehicles
+                  </SelectItem>
                   <SelectItem value={AssetCategory.WEAPONS}>Weapons</SelectItem>
-                  <SelectItem value={AssetCategory.COMMUNICATION}>Communication</SelectItem>
-                  <SelectItem value={AssetCategory.TECHNOLOGY}>Technology</SelectItem>
-                  <SelectItem value={AssetCategory.EQUIPMENT}>Equipment</SelectItem>
-                  <SelectItem value={AssetCategory.INFRASTRUCTURE}>Infrastructure</SelectItem>
+                  <SelectItem value={AssetCategory.COMMUNICATION}>
+                    Communication
+                  </SelectItem>
+                  <SelectItem value={AssetCategory.TECHNOLOGY}>
+                    Technology
+                  </SelectItem>
+                  <SelectItem value={AssetCategory.EQUIPMENT}>
+                    Equipment
+                  </SelectItem>
+                  <SelectItem value={AssetCategory.INFRASTRUCTURE}>
+                    Infrastructure
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -395,22 +443,31 @@ export default function AssetManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value={AssetStatus.AVAILABLE}>Available</SelectItem>
+                  <SelectItem value={AssetStatus.AVAILABLE}>
+                    Available
+                  </SelectItem>
                   <SelectItem value={AssetStatus.IN_USE}>In Use</SelectItem>
-                  <SelectItem value={AssetStatus.MAINTENANCE}>Maintenance</SelectItem>
+                  <SelectItem value={AssetStatus.MAINTENANCE}>
+                    Maintenance
+                  </SelectItem>
                   <SelectItem value={AssetStatus.RETIRED}>Retired</SelectItem>
                   <SelectItem value={AssetStatus.LOST}>Lost</SelectItem>
                   <SelectItem value={AssetStatus.DAMAGED}>Damaged</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select value={conditionFilter} onValueChange={setConditionFilter}>
+              <Select
+                value={conditionFilter}
+                onValueChange={setConditionFilter}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Condition" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Conditions</SelectItem>
-                  <SelectItem value={AssetCondition.EXCELLENT}>Excellent</SelectItem>
+                  <SelectItem value={AssetCondition.EXCELLENT}>
+                    Excellent
+                  </SelectItem>
                   <SelectItem value={AssetCondition.GOOD}>Good</SelectItem>
                   <SelectItem value={AssetCondition.FAIR}>Fair</SelectItem>
                   <SelectItem value={AssetCondition.POOR}>Poor</SelectItem>
@@ -418,10 +475,15 @@ export default function AssetManagement() {
               </Select>
 
               {canManageAssets && (
-                <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Asset
-                </Button>
+                <>
+                  <Button
+                    className="bg-crime-red hover:bg-crime-red-dark text-white"
+                    onClick={() => setIsAddOpen(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Asset
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
@@ -440,25 +502,34 @@ export default function AssetManagement() {
               {filteredAssets.map((asset) => {
                 const CategoryIcon = getCategoryIcon(asset.category);
                 const StatusIcon = getStatusIcon(asset.status);
-                
+
                 return (
-                  <div key={asset.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div
+                    key={asset.id}
+                    className="border rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <CategoryIcon className="w-6 h-6 text-crime-red" />
-                          <h3 className="text-lg font-semibold text-crime-black">{asset.name}</h3>
+                          <h3 className="text-lg font-semibold text-crime-black">
+                            {asset.name}
+                          </h3>
                           <Badge className={getStatusBadgeColor(asset.status)}>
                             <StatusIcon className="w-3 h-3 mr-1" />
-                            {asset.status.replace('_', ' ').toUpperCase()}
+                            {asset.status.replace("_", " ").toUpperCase()}
                           </Badge>
-                          <Badge className={getConditionBadgeColor(asset.condition)}>
+                          <Badge
+                            className={getConditionBadgeColor(asset.condition)}
+                          >
                             {asset.condition.toUpperCase()}
                           </Badge>
                         </div>
-                        
-                        <p className="text-gray-600 mb-3">{asset.description}</p>
-                        
+
+                        <p className="text-gray-600 mb-3">
+                          {asset.description}
+                        </p>
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                           <div>
                             <span className="font-medium">Serial:</span>
@@ -489,7 +560,8 @@ export default function AssetManagement() {
                             <div className="flex items-center text-sm">
                               <User className="w-4 h-4 mr-2 text-blue-600" />
                               <span className="text-blue-800">
-                                Assigned to: <strong>{asset.assignedToName}</strong>
+                                Assigned to:{" "}
+                                <strong>{asset.assignedToName}</strong>
                               </span>
                             </div>
                           </div>
@@ -498,7 +570,10 @@ export default function AssetManagement() {
                         {asset.nextMaintenance && (
                           <div className="mt-3 flex items-center text-sm text-gray-600">
                             <Clock className="w-4 h-4 mr-2" />
-                            Next maintenance: {new Date(asset.nextMaintenance).toLocaleDateString()}
+                            Next maintenance:{" "}
+                            {new Date(
+                              asset.nextMaintenance,
+                            ).toLocaleDateString()}
                           </div>
                         )}
                       </div>
@@ -510,7 +585,10 @@ export default function AssetManagement() {
                             Edit
                           </Button>
                           {asset.status === AssetStatus.AVAILABLE && (
-                            <Button size="sm" className="bg-crime-yellow hover:bg-yellow-600 text-crime-black">
+                            <Button
+                              size="sm"
+                              className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
+                            >
                               Assign
                             </Button>
                           )}
@@ -529,14 +607,176 @@ export default function AssetManagement() {
               {filteredAssets.length === 0 && (
                 <div className="text-center py-12">
                   <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No assets found</h3>
-                  <p className="text-gray-500">Try adjusting your search and filter criteria</p>
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    No assets found
+                  </h3>
+                  <p className="text-gray-500">
+                    Try adjusting your search and filter criteria
+                  </p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {canManageAssets && (
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Asset</DialogTitle>
+              <DialogDescription>
+                Enter details for the new asset.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm">Name</label>
+                <Input
+                  value={newAsset.name || ""}
+                  onChange={(e) =>
+                    setNewAsset((a) => ({ ...a, name: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm">Category</label>
+                <Select
+                  value={newAsset.category as string}
+                  onValueChange={(v) =>
+                    setNewAsset((a) => ({ ...a, category: v as any }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={AssetCategory.VEHICLES}>
+                      Vehicles
+                    </SelectItem>
+                    <SelectItem value={AssetCategory.WEAPONS}>
+                      Weapons
+                    </SelectItem>
+                    <SelectItem value={AssetCategory.COMMUNICATION}>
+                      Communication
+                    </SelectItem>
+                    <SelectItem value={AssetCategory.TECHNOLOGY}>
+                      Technology
+                    </SelectItem>
+                    <SelectItem value={AssetCategory.EQUIPMENT}>
+                      Equipment
+                    </SelectItem>
+                    <SelectItem value={AssetCategory.INFRASTRUCTURE}>
+                      Infrastructure
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm">Type</label>
+                <Input
+                  value={newAsset.type || ""}
+                  onChange={(e) =>
+                    setNewAsset((a) => ({ ...a, type: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm">Serial Number</label>
+                <Input
+                  value={newAsset.serialNumber || ""}
+                  onChange={(e) =>
+                    setNewAsset((a) => ({ ...a, serialNumber: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm">Current Value</label>
+                <Input
+                  type="number"
+                  value={Number(newAsset.currentValue || 0)}
+                  onChange={(e) =>
+                    setNewAsset((a) => ({
+                      ...a,
+                      currentValue: Number(e.target.value),
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm">Status</label>
+                <Select
+                  value={newAsset.status as string}
+                  onValueChange={(v) =>
+                    setNewAsset((a) => ({ ...a, status: v as any }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={AssetStatus.AVAILABLE}>
+                      Available
+                    </SelectItem>
+                    <SelectItem value={AssetStatus.IN_USE}>In Use</SelectItem>
+                    <SelectItem value={AssetStatus.MAINTENANCE}>
+                      Maintenance
+                    </SelectItem>
+                    <SelectItem value={AssetStatus.RETIRED}>Retired</SelectItem>
+                    <SelectItem value={AssetStatus.LOST}>Lost</SelectItem>
+                    <SelectItem value={AssetStatus.DAMAGED}>Damaged</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm">Condition</label>
+                <Select
+                  value={newAsset.condition as string}
+                  onValueChange={(v) =>
+                    setNewAsset((a) => ({ ...a, condition: v as any }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={AssetCondition.EXCELLENT}>
+                      Excellent
+                    </SelectItem>
+                    <SelectItem value={AssetCondition.GOOD}>Good</SelectItem>
+                    <SelectItem value={AssetCondition.FAIR}>Fair</SelectItem>
+                    <SelectItem value={AssetCondition.POOR}>Poor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Location</label>
+                <Input
+                  value={newAsset.location || ""}
+                  onChange={(e) =>
+                    setNewAsset((a) => ({ ...a, location: e.target.value }))
+                  }
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Description</label>
+                <Input
+                  value={newAsset.description || ""}
+                  onChange={(e) =>
+                    setNewAsset((a) => ({ ...a, description: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddAsset}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
