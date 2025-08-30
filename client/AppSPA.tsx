@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { I18nProvider } from "./contexts/I18nContext";
-import LanguageToggle from "./components/LanguageToggle";
 import AppRoutes from "./AppRoutes";
 import React from "react";
 
