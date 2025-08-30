@@ -53,6 +53,8 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState<{fullName: string; username: string; role: UserRole; email?: string; phone?: string; password: string}>({ fullName: '', username: '', role: UserRole.CITIZEN, email: '', phone: '', password: '' });
 
   const canManageUsers = hasRole(UserRole.SUPER_ADMIN);
   const canApproveAccounts = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
