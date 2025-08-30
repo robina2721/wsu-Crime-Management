@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { api } from '@/lib/api';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { 
   Search, 
@@ -39,6 +40,17 @@ export default function CriminalDatabase() {
   const [selectedCriminal, setSelectedCriminal] = useState<CriminalRecord | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newRecord, setNewRecord] = useState({
+    fullName: '',
+    dateOfBirth: '',
+    nationalId: '',
+    address: '',
+    phone: '',
+    riskLevel: RiskLevel.LOW,
+    isActive: true,
+    photo: null as File | null,
+  });
 
   const canAccessDatabase = hasAnyRole([UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]);
   const canModifyRecords = hasAnyRole([UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]);
@@ -53,7 +65,7 @@ export default function CriminalDatabase() {
     filterCriminals();
   }, [criminals, searchTerm, riskFilter, statusFilter]);
 
-  const fetchCriminals = async () => {
+  const fetchCriminals_MOCK = async () => {
     // Mock data - In production, fetch from secure criminal database API
     const mockCriminals: CriminalRecord[] = [
       {
@@ -222,6 +234,18 @@ export default function CriminalDatabase() {
     setIsLoading(false);
   };
 
+  const fetchCriminals = async () => {
+    try {
+      const res = await api.get('/criminals');
+      const data = await res.json();
+      if (data.success) setCriminals(data.data.criminals || []);
+    } catch (e) {
+      console.error('Failed to load criminal records', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filterCriminals = () => {
     let filtered = [...criminals];
 
@@ -314,7 +338,7 @@ export default function CriminalDatabase() {
                 Classified Access
               </Badge>
               {canModifyRecords && (
-                <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
+                <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAddOpen(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Record
                 </Button>
@@ -766,6 +790,87 @@ export default function CriminalDatabase() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {canModifyRecords && (
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Criminal Record</DialogTitle>
+              <DialogDescription>Admins can upload a photo. Supported: .jpg, .jpeg, .png, .gif, .webp</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="text-sm">Full Name</label>
+                <Input value={newRecord.fullName} onChange={e => setNewRecord(r => ({ ...r, fullName: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">Date of Birth</label>
+                <Input type="date" value={newRecord.dateOfBirth} onChange={e => setNewRecord(r => ({ ...r, dateOfBirth: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">National ID</label>
+                <Input value={newRecord.nationalId} onChange={e => setNewRecord(r => ({ ...r, nationalId: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Address</label>
+                <Input value={newRecord.address} onChange={e => setNewRecord(r => ({ ...r, address: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">Phone</label>
+                <Input value={newRecord.phone} onChange={e => setNewRecord(r => ({ ...r, phone: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm">Risk Level</label>
+                <Select value={newRecord.riskLevel} onValueChange={(v) => setNewRecord(r => ({ ...r, riskLevel: v as any }))}>
+                  <SelectTrigger><SelectValue placeholder="Risk Level" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={RiskLevel.LOW}>Low</SelectItem>
+                    <SelectItem value={RiskLevel.MEDIUM}>Medium</SelectItem>
+                    <SelectItem value={RiskLevel.HIGH}>High</SelectItem>
+                    <SelectItem value={RiskLevel.CRITICAL}>Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm">Status</label>
+                <Select value={newRecord.isActive ? 'active' : 'inactive'} onValueChange={(v) => setNewRecord(r => ({ ...r, isActive: v === 'active' }))}>
+                  <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Photo</label>
+                <input type="file" accept="image/*" onChange={e => setNewRecord(r => ({ ...r, photo: e.target.files?.[0] || null }))} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                try {
+                  const fd = new FormData();
+                  fd.append('fullName', newRecord.fullName);
+                  if (newRecord.dateOfBirth) fd.append('dateOfBirth', newRecord.dateOfBirth);
+                  if (newRecord.nationalId) fd.append('nationalId', newRecord.nationalId);
+                  if (newRecord.address) fd.append('address', newRecord.address);
+                  if (newRecord.phone) fd.append('phone', newRecord.phone);
+                  fd.append('riskLevel', newRecord.riskLevel as any);
+                  fd.append('isActive', String(newRecord.isActive));
+                  if (newRecord.photo) fd.append('photo', newRecord.photo);
+                  const res = await api.post('/criminals', fd);
+                  if (res.ok) {
+                    setIsAddOpen(false);
+                    setNewRecord({ fullName: '', dateOfBirth: '', nationalId: '', address: '', phone: '', riskLevel: RiskLevel.LOW, isActive: true, photo: null });
+                    await fetchCriminals();
+                  }
+                } catch (e) { console.error(e); }
+              }}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
