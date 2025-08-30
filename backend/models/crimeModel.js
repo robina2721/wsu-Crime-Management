@@ -7,6 +7,7 @@ export async function listCrimes(filters, limit, offset) {
   if (filters.category) { where.push(`category = @p${params.length + 1}`); params.push(filters.category); }
   if (filters.priority) { where.push(`priority = @p${params.length + 1}`); params.push(filters.priority); }
   if (filters.reportedBy) { where.push(`reported_by = @p${params.length + 1}`); params.push(filters.reportedBy); }
+  if (filters.assignedTo) { where.push(`assigned_to = @p${params.length + 1}`); params.push(filters.assignedTo); }
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   params.push(offset); params.push(limit);
   const rows = await queryRows(
