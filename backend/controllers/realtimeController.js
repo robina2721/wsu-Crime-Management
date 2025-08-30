@@ -62,12 +62,15 @@ export async function crimesStreamHandler(req) {
 
 export function notifyCrimeUpdate(crime) {
   try {
-    const userId = crime?.reportedBy;
-    if (!userId) return;
-    const subs = subscribersByUser.get(userId);
-    if (!subs || subs.size === 0) return;
-    for (const sub of subs) {
-      try { sub.send({ type: 'crime_update', data: crime }); } catch {}
+    const recipients = new Set();
+    if (crime?.reportedBy) recipients.add(crime.reportedBy);
+    if (crime?.assignedTo) recipients.add(crime.assignedTo);
+    for (const userId of recipients) {
+      const subs = subscribersByUser.get(userId);
+      if (!subs || subs.size === 0) continue;
+      for (const sub of subs) {
+        try { sub.send({ type: 'crime_update', data: crime }); } catch {}
+      }
     }
   } catch {}
 }
