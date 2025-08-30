@@ -238,7 +238,16 @@ export default function CriminalDatabase() {
     try {
       const res = await api.get('/criminals');
       const data = await res.json();
-      if (data.success) setCriminals(data.data.criminals || []);
+      if (data.success) {
+        const normalized = (data.data.criminals || []).map((c: any) => ({
+          ...c,
+          personalInfo: {
+            ...c.personalInfo,
+            dateOfBirth: c.personalInfo?.dateOfBirth ? new Date(c.personalInfo.dateOfBirth) : null,
+          },
+        }));
+        setCriminals(normalized);
+      }
     } catch (e) {
       console.error('Failed to load criminal records', e);
     } finally {
