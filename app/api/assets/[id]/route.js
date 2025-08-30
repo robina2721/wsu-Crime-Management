@@ -1,4 +1,8 @@
-import { getHandler, updateHandler, deleteHandler } from "../../../../backend/controllers/assetsController.js";
+import {
+  getHandler,
+  updateHandler,
+  deleteHandler,
+} from "../../../../backend/controllers/assetsController.js";
 
 export async function GET(req, { params }) {
   return getHandler(req, params);

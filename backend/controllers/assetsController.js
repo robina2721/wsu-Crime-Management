@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { listAssets, getAsset, createAsset, updateAsset, deleteAsset } from "../../backend/models/assetModel.js";
+import {
+  listAssets,
+  getAsset,
+  createAsset,
+  updateAsset,
+  deleteAsset,
+} from "../../backend/models/assetModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
 
 function getAuthUserId(req) {
@@ -22,7 +28,10 @@ export async function listHandler(req) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
     const assets = await listAssets(limit, offset);
-    return NextResponse.json({ success: true, data: { assets, total: assets.length, limit, offset } });
+    return NextResponse.json({
+      success: true,
+      data: { assets, total: assets.length, limit, offset },
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
@@ -33,7 +42,11 @@ export async function listHandler(req) {
 export async function getHandler(_req, params) {
   try {
     const asset = await getAsset(params.id);
-    if (!asset) return NextResponse.json({ success: false, error: "Asset not found" }, { status: 404 });
+    if (!asset)
+      return NextResponse.json(
+        { success: false, error: "Asset not found" },
+        { status: 404 },
+      );
     return NextResponse.json({ success: true, data: asset });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -45,13 +58,24 @@ export async function getHandler(_req, params) {
 export async function createHandler(req) {
   try {
     const user = await getAuthUser(req);
-    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (!user)
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
     const allowed = new Set(["police_head", "super_admin"]);
-    if (!allowed.has(user.role)) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    if (!allowed.has(user.role))
+      return NextResponse.json(
+        { success: false, error: "Forbidden" },
+        { status: 403 },
+      );
 
     const body = await req.json();
     if (!body.name || !body.category || !body.type) {
-      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Missing required fields" },
+        { status: 400 },
+      );
     }
     const payload = {
       name: body.name,
@@ -69,7 +93,10 @@ export async function createHandler(req) {
       nextMaintenance: body.nextMaintenance,
     };
     const created = await createAsset(payload);
-    return NextResponse.json({ success: true, data: created, message: "Asset created" }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: created, message: "Asset created" },
+      { status: 201 },
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
@@ -80,10 +107,18 @@ export async function createHandler(req) {
 export async function updateHandler(req, params) {
   try {
     const user = await getAuthUser(req);
-    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (!user)
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
     const body = await req.json();
     const updated = await updateAsset(params.id, body);
-    return NextResponse.json({ success: true, data: updated, message: "Asset updated" });
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: "Asset updated",
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;

@@ -11,7 +11,12 @@ function toRecord(row) {
       address: row.address,
       phone: row.phone,
       photo: row.photo_path,
-      aliases: row.aliases ? row.aliases.split(",").map(s => s.trim()).filter(Boolean) : [],
+      aliases: row.aliases
+        ? row.aliases
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
     },
     physicalDescription: {
       height: row.height_cm,
@@ -39,7 +44,7 @@ export async function listCriminals(limit = 50, offset = 0) {
      FROM criminals
      ORDER BY updated_at DESC
      OFFSET @p1 ROWS FETCH NEXT @p2 ROWS ONLY`,
-    [offset, limit]
+    [offset, limit],
   );
   return rows.map(toRecord);
 }
@@ -50,7 +55,7 @@ export async function getCriminal(id) {
             aliases, height_cm, weight_kg, eye_color, hair_color, risk_level, is_active,
             created_at, updated_at
      FROM criminals WHERE id = @p1`,
-    [id]
+    [id],
   );
   return row ? toRecord(row) : null;
 }
@@ -80,7 +85,7 @@ export async function createCriminal(data) {
       data.isActive ? 1 : 0,
       now,
       now,
-    ]
+    ],
   );
   return await getCriminal(id);
 }

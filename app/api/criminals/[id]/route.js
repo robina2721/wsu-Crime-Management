@@ -1,4 +1,8 @@
-import { getHandler, updateHandler, deleteHandler } from "../../../../backend/controllers/criminalsController.js";
+import {
+  getHandler,
+  updateHandler,
+  deleteHandler,
+} from "../../../../backend/controllers/criminalsController.js";
 
 export async function GET(req, { params }) {
   return getHandler(req, params);

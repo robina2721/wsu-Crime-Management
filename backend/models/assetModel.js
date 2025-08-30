@@ -9,7 +9,7 @@ export async function listAssets(limit = 50, offset = 0) {
      FROM assets
      ORDER BY created_at DESC
      OFFSET @p1 ROWS FETCH NEXT @p2 ROWS ONLY`,
-    [offset, limit]
+    [offset, limit],
   );
   return rows;
 }
@@ -21,7 +21,7 @@ export async function getAsset(id) {
             location, assigned_to AS assignedTo, assigned_to_name AS assignedToName,
             next_maintenance AS nextMaintenance, created_at AS createdAt, updated_at AS updatedAt
      FROM assets WHERE id = @p1`,
-    [id]
+    [id],
   );
 }
 
@@ -51,7 +51,7 @@ export async function createAsset(data) {
       data.nextMaintenance ? new Date(data.nextMaintenance) : null,
       now,
       now,
-    ]
+    ],
   );
   return await getAsset(id);
 }
@@ -87,7 +87,8 @@ export async function updateAsset(id, updates) {
     const dbKey = mapping[key] ?? key;
     if (allowed.has(dbKey)) {
       let val = updates[key];
-      if (dbKey === "purchase_date" || dbKey === "next_maintenance") val = val ? new Date(val) : null;
+      if (dbKey === "purchase_date" || dbKey === "next_maintenance")
+        val = val ? new Date(val) : null;
       set.push(`${dbKey} = @p${params.length + 1}`);
       params.push(val);
     }
