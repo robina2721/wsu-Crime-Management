@@ -96,107 +96,57 @@ export default function AssetManagement() {
     filterAssets();
   }, [assets, searchTerm, categoryFilter, statusFilter, conditionFilter]);
 
-  const fetchAssets = async () => {
-    // Mock data - In production, fetch from API
-    const mockAssets: Asset[] = [
-      {
-        id: '1',
-        name: 'Police Patrol Vehicle #001',
-        category: AssetCategory.VEHICLES,
-        type: 'Patrol Car',
-        serialNumber: 'PV-2023-001',
-        purchaseDate: new Date('2023-01-15'),
-        purchasePrice: 35000,
-        currentValue: 28000,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.GOOD,
-        location: 'North District Station',
-        assignedTo: '4',
-        assignedToName: 'Officer Mulugeta Kebede',
-        lastMaintenance: new Date('2024-01-01'),
-        nextMaintenance: new Date('2024-04-01'),
-        warrantyExpiry: new Date('2026-01-15'),
-        description: 'Standard patrol vehicle equipped with radio and emergency equipment'
-      },
-      {
-        id: '2',
-        name: 'Service Pistol #SP-101',
-        category: AssetCategory.WEAPONS,
-        type: 'Handgun',
-        serialNumber: 'SP-2023-101',
-        purchaseDate: new Date('2023-03-20'),
-        purchasePrice: 800,
-        currentValue: 700,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.EXCELLENT,
-        location: 'Armory',
-        assignedTo: '3',
-        assignedToName: 'Detective Sara Alemayehu',
-        lastMaintenance: new Date('2024-01-10'),
-        nextMaintenance: new Date('2024-07-10'),
-        description: 'Standard issue service weapon'
-      },
-      {
-        id: '3',
-        name: 'Radio Communication Set #RC-05',
-        category: AssetCategory.COMMUNICATION,
-        type: 'Two-Way Radio',
-        serialNumber: 'RC-2023-005',
-        purchaseDate: new Date('2023-02-10'),
-        purchasePrice: 450,
-        currentValue: 350,
-        status: AssetStatus.AVAILABLE,
-        condition: AssetCondition.GOOD,
-        location: 'Communications Room',
-        description: 'Digital two-way radio with encryption capabilities'
-      },
-      {
-        id: '4',
-        name: 'Surveillance Camera System',
-        category: AssetCategory.TECHNOLOGY,
-        type: 'CCTV System',
-        serialNumber: 'CCTV-2023-001',
-        purchaseDate: new Date('2023-06-01'),
-        purchasePrice: 12000,
-        currentValue: 10000,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.EXCELLENT,
-        location: 'Station Building',
-        description: '16-channel surveillance system with night vision'
-      },
-      {
-        id: '5',
-        name: 'Body Armor Vest #BA-25',
-        category: AssetCategory.EQUIPMENT,
-        type: 'Protective Equipment',
-        serialNumber: 'BA-2023-025',
-        purchaseDate: new Date('2023-04-15'),
-        purchasePrice: 600,
-        currentValue: 480,
-        status: AssetStatus.MAINTENANCE,
-        condition: AssetCondition.FAIR,
-        location: 'Equipment Storage',
-        lastMaintenance: new Date('2024-01-15'),
-        description: 'Level IIIA body armor vest'
-      },
-      {
-        id: '6',
-        name: 'Main Station Building',
-        category: AssetCategory.INFRASTRUCTURE,
-        type: 'Building',
-        serialNumber: 'BLDG-001',
-        purchaseDate: new Date('2020-01-01'),
-        purchasePrice: 500000,
-        currentValue: 480000,
-        status: AssetStatus.IN_USE,
-        condition: AssetCondition.GOOD,
-        location: 'City Center',
-        description: 'Main police station headquarters'
-      }
-    ];
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newAsset, setNewAsset] = useState<Partial<Asset>>({
+    name: '',
+    category: AssetCategory.EQUIPMENT,
+    type: '',
+    serialNumber: '',
+    currentValue: 0,
+    status: AssetStatus.AVAILABLE,
+    condition: AssetCondition.GOOD,
+    location: '',
+    description: ''
+  });
 
-    setAssets(mockAssets);
-    setIsLoading(false);
+  const fetchAssets = async () => {
+    try {
+      const res = await api.get('/assets');
+      const data = await res.json();
+      if (data.success) {
+        setAssets(data.data.assets || []);
+      }
+    } catch (e) {
+      console.error('Failed to load assets', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddAsset = async () => {
+    try {
+      const res = await api.post('/assets', {
+        name: newAsset.name,
+        category: newAsset.category,
+        type: newAsset.type,
+        serialNumber: newAsset.serialNumber,
+        currentValue: newAsset.currentValue,
+        status: newAsset.status,
+        condition: newAsset.condition,
+        location: newAsset.location,
+        description: newAsset.description,
+      });
+      if (res.ok) {
+        setIsAddOpen(false);
+        setNewAsset({
+          name: '', category: AssetCategory.EQUIPMENT, type: '', serialNumber: '', currentValue: 0,
+          status: AssetStatus.AVAILABLE, condition: AssetCondition.GOOD, location: '', description: ''
+        });
+        await fetchAssets();
+      }
+    } catch (e) {
+      console.error('Failed to add asset', e);
+    }
   };
 
   const filterAssets = () => {
