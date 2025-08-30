@@ -5,6 +5,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { UserRole } from "@shared/types";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import CaseManagement from "./pages/CaseManagement";
 import StaffManagement from "./pages/StaffManagement";
