@@ -168,6 +168,9 @@ export default function Index() {
 
             <div className="flex items-center space-x-3">
               <LanguageToggle />
+              <Link to="/signup">
+                <Button variant="outline" className="border-white/40 text-white hover:bg-white hover:text-crime-black">Sign Up</Button>
+              </Link>
               <Link to="/login">
                 <Button className="bg-crime-red hover:bg-crime-red-dark text-white transition-all hover:scale-[1.02]">
                   {t('login.accessSystem')}
