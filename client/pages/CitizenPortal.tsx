@@ -70,125 +70,16 @@ import {
   CitizenReportStatus,
   StatusUpdate,
 } from "../../shared/types";
+import { api } from "@/lib/api";
 
-// Mock data for demonstration
-const mockReports: CrimeReport[] = [
-  {
-    id: "1",
-    title: "Bicycle Theft",
-    description:
-      "My bicycle was stolen from outside the grocery store while I was shopping",
-    category: CrimeCategory.THEFT,
-    status: CrimeStatus.UNDER_INVESTIGATION,
-    priority: Priority.MEDIUM,
-    location: "123 Main Street, Downtown",
-    dateReported: new Date("2024-01-10"),
-    dateIncident: new Date("2024-01-10"),
-    reportedBy: "citizen1",
-    assignedTo: "officer123",
-    evidence: ["photo1.jpg", "receipt.pdf"],
-    witnesses: [],
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-12"),
-  },
-  {
-    id: "2",
-    title: "Suspicious Activity",
-    description:
-      "Noticed unfamiliar people looking into car windows in the parking lot",
-    category: CrimeCategory.OTHER,
-    status: CrimeStatus.RESOLVED,
-    priority: Priority.LOW,
-    location: "City Mall Parking Lot",
-    dateReported: new Date("2024-01-05"),
-    dateIncident: new Date("2024-01-05"),
-    reportedBy: "citizen1",
-    assignedTo: "officer456",
-    evidence: [],
-    witnesses: [],
-    createdAt: new Date("2024-01-05"),
-    updatedAt: new Date("2024-01-08"),
-  },
-];
-
-const mockReportStatuses: CitizenReportStatus[] = [
-  {
-    reportId: "1",
-    currentStatus: CrimeStatus.UNDER_INVESTIGATION,
-    statusHistory: [
-      {
-        status: CrimeStatus.REPORTED,
-        timestamp: new Date("2024-01-10T10:00:00"),
-        updatedBy: "System",
-        notes: "Report submitted successfully",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.ASSIGNED,
-        timestamp: new Date("2024-01-10T14:30:00"),
-        updatedBy: "Sergeant Johnson",
-        notes: "Case assigned to Officer Smith for investigation",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.UNDER_INVESTIGATION,
-        timestamp: new Date("2024-01-11T09:15:00"),
-        updatedBy: "Officer Smith",
-        notes: "Investigation commenced. CCTV footage being reviewed.",
-        isVisibleToCitizen: true,
-      },
-    ],
-    assignedOfficer: {
-      id: "officer123",
-      name: "Officer John Smith",
-      badgeNumber: "BADGE123",
-      contactInfo: "For urgent matters, call (555) 123-4567",
-    },
-    lastUpdate: new Date("2024-01-11T09:15:00"),
-    estimatedResolution: new Date("2024-01-20"),
-    canProvideUpdates: true,
-  },
-  {
-    reportId: "2",
-    currentStatus: CrimeStatus.RESOLVED,
-    statusHistory: [
-      {
-        status: CrimeStatus.REPORTED,
-        timestamp: new Date("2024-01-05T16:00:00"),
-        updatedBy: "System",
-        notes: "Report submitted successfully",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.ASSIGNED,
-        timestamp: new Date("2024-01-05T18:00:00"),
-        updatedBy: "Dispatcher",
-        notes: "Patrol unit dispatched to location",
-        isVisibleToCitizen: true,
-      },
-      {
-        status: CrimeStatus.RESOLVED,
-        timestamp: new Date("2024-01-08T10:00:00"),
-        updatedBy: "Officer Davis",
-        notes: "Increased patrol in the area. No further incidents reported.",
-        isVisibleToCitizen: true,
-      },
-    ],
-    assignedOfficer: {
-      id: "officer456",
-      name: "Officer Sarah Davis",
-      badgeNumber: "BADGE456",
-    },
-    lastUpdate: new Date("2024-01-08T10:00:00"),
-    canProvideUpdates: false,
-  },
-];
+const mockReportStatuses: CitizenReportStatus[] = [];
 
 export default function CitizenPortal() {
   const { user } = useAuth();
-  const [reports, setReports] = useState<CrimeReport[]>(mockReports);
-  const [reportStatuses, setReportStatuses] =
-    useState<CitizenReportStatus[]>(mockReportStatuses);
+  const [reports, setReports] = useState<CrimeReport[]>([]);
+  const [reportStatuses, setReportStatuses] = useState<CitizenReportStatus[]>(
+    [],
+  );
   const [showNewReportForm, setShowNewReportForm] = useState(false);
   const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(
     null,
@@ -200,6 +91,67 @@ export default function CitizenPortal() {
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    const loadReports = async () => {
+      try {
+        const res = await api.get("/crimes?reportedBy=me");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const list = data.data.reports.map((r: any) => ({
+            ...r,
+            dateReported: new Date(r.dateReported),
+            dateIncident: new Date(r.dateIncident),
+            createdAt: new Date(r.createdAt),
+            updatedAt: new Date(r.updatedAt),
+          }));
+          setReports(list);
+        }
+      } catch (e) {
+        console.error("Failed to load reports", e);
+      }
+    };
+    loadReports();
+  }, []);
+
+  useEffect(() => {
+    // Subscribe to real-time crime updates for this user
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    if (!token) return;
+    const url = `/api/realtime/crimes?token=${encodeURIComponent(token)}`;
+    const es = new EventSource(url);
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload?.type === "crime_update" && payload.data) {
+          const r = payload.data;
+          setReports((prev) => {
+            const idx = prev.findIndex((x) => x.id === r.id);
+            const normalized = {
+              ...r,
+              dateReported: new Date(r.dateReported),
+              dateIncident: new Date(r.dateIncident),
+              createdAt: new Date(r.createdAt),
+              updatedAt: new Date(r.updatedAt),
+            } as any;
+            if (idx >= 0) {
+              const copy = [...prev];
+              copy[idx] = { ...copy[idx], ...normalized };
+              return copy;
+            }
+            return [normalized, ...prev];
+          });
+        }
+      } catch {}
+    };
+    es.onerror = () => {
+      /* auto-reconnect by browser */
+    };
+    return () => {
+      es.close();
+    };
+  }, []);
 
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
@@ -272,45 +224,37 @@ export default function CitizenPortal() {
     return icons[category] || "📋";
   };
 
-  const handleSubmitReport = (data: Partial<CrimeReport>) => {
-    const newReport: CrimeReport = {
-      id: Date.now().toString(),
-      title: data.title || "",
-      description: data.description || "",
-      category: data.category || CrimeCategory.OTHER,
-      status: CrimeStatus.REPORTED,
-      priority: data.priority || Priority.MEDIUM,
-      location: data.location || "",
-      dateReported: new Date(),
-      dateIncident: data.dateIncident || new Date(),
-      reportedBy: user?.id || "citizen1",
-      evidence: data.evidence || [],
-      witnesses: witnesses,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const newStatus: CitizenReportStatus = {
-      reportId: newReport.id,
-      currentStatus: CrimeStatus.REPORTED,
-      statusHistory: [
-        {
-          status: CrimeStatus.REPORTED,
-          timestamp: new Date(),
-          updatedBy: "System",
-          notes: "Report submitted successfully",
-          isVisibleToCitizen: true,
-        },
-      ],
-      lastUpdate: new Date(),
-      canProvideUpdates: true,
-    };
-
-    setReports((prev) => [newReport, ...prev]);
-    setReportStatuses((prev) => [newStatus, ...prev]);
-    setFormData({});
-    setWitnesses([]);
-    setShowNewReportForm(false);
+  const handleSubmitReport = async (data: Partial<CrimeReport>) => {
+    try {
+      const payload = {
+        title: data.title || "",
+        description: data.description || "",
+        category: data.category || CrimeCategory.OTHER,
+        location: data.location || "",
+        dateIncident: (data.dateIncident || new Date()).toString(),
+        reportedBy: user?.id || "citizen",
+      };
+      const res = await api.post("/crimes", payload);
+      if (res.ok) {
+        const created = await res.json();
+        const r = created.data;
+        const normalized: CrimeReport = {
+          ...r,
+          dateReported: new Date(r.dateReported),
+          dateIncident: new Date(r.dateIncident),
+          createdAt: new Date(r.createdAt),
+          updatedAt: new Date(r.updatedAt),
+          evidence: [],
+          witnesses: [],
+        };
+        setReports((prev) => [normalized, ...prev]);
+        setFormData({});
+        setWitnesses([]);
+        setShowNewReportForm(false);
+      }
+    } catch (e) {
+      console.error("Failed to submit report", e);
+    }
   };
 
   const handleFileUpload = async (files: FileList) => {

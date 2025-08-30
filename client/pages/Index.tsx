@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import LanguageToggle from "@/components/LanguageToggle";
 import {
   Shield,
   AlertTriangle,
@@ -29,8 +30,11 @@ import {
   Activity,
 } from "lucide-react";
 
+import { useI18n } from "@/contexts/I18nContext";
+
 export default function Index() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const { t } = useI18n();
 
   const features = [
     {
@@ -158,16 +162,22 @@ export default function Index() {
               <Shield className="w-8 h-8 text-crime-red" />
               <div>
                 <h1 className="text-xl font-bold text-white">
-                  Crime Management System
+                  {t("app.title")}
                 </h1>
-                <p className="text-gray-300 text-sm">Wolaita Sodo City</p>
+                <p className="text-gray-300 text-sm">{t("city.name")}</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <LanguageToggle />
+              <Link to="/signup">
+                <Button className="bg-crime-yellow text-crime-black hover:bg-yellow-500 font-semibold">
+                  Sign Up
+                </Button>
+              </Link>
               <Link to="/login">
-                <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
-                  Login / Access System
+                <Button className="bg-crime-red hover:bg-crime-red-dark text-white transition-all hover:scale-[1.02]">
+                  {t("login.accessSystem")}
                 </Button>
               </Link>
             </div>
@@ -190,16 +200,14 @@ export default function Index() {
             <div className="mb-6">
               <Badge className="bg-crime-yellow text-crime-black px-4 py-2 text-sm font-medium mb-4">
                 <Award className="w-4 h-4 mr-2" />
-                Ethiopia's Leading Crime Management Platform
+                {t("hero.leadingBadge")}
               </Badge>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-              Welcome to
-              <span className="text-crime-yellow block">Wolaita Sodo City</span>
-              <span className="text-crime-red block">
-                Crime Management System
-              </span>
+              {t("hero.welcome")}
+              <span className="text-crime-yellow block">{t("city.name")}</span>
+              <span className="text-crime-red block">{t("app.title")}</span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -216,33 +224,34 @@ export default function Index() {
                   className="bg-crime-red hover:bg-crime-red-dark text-white px-8 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
                   <Shield className="mr-2 w-5 h-5" />
-                  Access Secure Portal
+                  {t("hero.securePortal")}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-crime-black px-8 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
-              >
-                <Phone className="mr-2 w-5 h-5" />
-                Emergency: 911
-              </Button>
+              <a href="tel:911">
+                <Button
+                  size="lg"
+                  className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                >
+                  <Phone className="mr-2 w-5 h-5" />
+                  {t("hero.emergency")}
+                </Button>
+              </a>
             </div>
 
             {/* Trust indicators */}
             <div className="flex flex-wrap justify-center items-center gap-8 text-gray-400">
               <div className="flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-                <span>ISO Certified</span>
+                <span>{t("trust.iso")}</span>
               </div>
               <div className="flex items-center">
                 <Lock className="w-5 h-5 mr-2 text-blue-400" />
-                <span>256-bit Encryption</span>
+                <span>{t("trust.encryption")}</span>
               </div>
               <div className="flex items-center">
                 <Globe className="w-5 h-5 mr-2 text-purple-400" />
-                <span>24/7 Support</span>
+                <span>{t("trust.support")}</span>
               </div>
             </div>
           </div>
@@ -279,12 +288,10 @@ export default function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Comprehensive Crime Management Platform
+              {t("features.platformTitle")}
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Cutting-edge technology meets law enforcement expertise. Our
-              platform provides all the tools necessary for effective crime
-              prevention, investigation, and community safety.
+              {t("features.platformDesc")}
             </p>
           </div>
 
@@ -339,11 +346,10 @@ export default function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Designed for Every User
+              {t("roles.designedFor")}
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Role-based access ensures each user gets the tools they need while
-              maintaining security.
+              {t("roles.designedForDesc")}
             </p>
           </div>
 
@@ -386,10 +392,10 @@ export default function Index() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Trusted by Law Enforcement
+              {t("testimonials.heading")}
             </h2>
             <p className="text-xl text-gray-300">
-              See what our users say about the system
+              {t("testimonials.subheading")}
             </p>
           </div>
 
@@ -443,17 +449,15 @@ export default function Index() {
           <div className="mb-8">
             <Badge className="bg-crime-yellow text-crime-black px-4 py-2 text-sm font-medium mb-4">
               <Zap className="w-4 h-4 mr-2" />
-              Secure Access Portal
+              {t("cta.badge")}
             </Badge>
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Make Wolaita Sodo Safer?
+            {t("cta.heading")}
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join our mission for community safety. Access our secure system to
-            manage cases, file reports, monitor activities, and contribute to a
-            safer city.
+            {t("cta.subheading")}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -463,7 +467,7 @@ export default function Index() {
                 className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-medium shadow-lg transform hover:scale-105 transition-all duration-200"
               >
                 <Shield className="mr-2 w-5 h-5" />
-                Enter Secure Portal
+                {t("cta.enterPortal")}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
@@ -473,7 +477,7 @@ export default function Index() {
               className="border-2 border-white text-white hover:bg-white hover:text-crime-black px-8 py-4 text-lg shadow-lg"
             >
               <Eye className="mr-2 w-5 h-5" />
-              Learn More
+              {t("cta.learnMore")}
             </Button>
           </div>
 
@@ -489,28 +493,32 @@ export default function Index() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <Shield className="w-6 h-6 text-crime-red" />
-              <span className="text-white font-medium">
-                Wolaita Sodo City Police Department
-              </span>
+              <span className="text-white font-medium">{t("footer.dept")}</span>
             </div>
 
             <div className="flex items-center space-x-6 text-gray-300">
               <div className="flex items-center">
                 <Phone className="w-4 h-4 mr-2" />
-                <span>Emergency: 911</span>
+                <span>{t("footer.emergency")}</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="w-4 h-4 mr-2" />
-                <span>Wolaita Sodo, Ethiopia</span>
+                <span>{t("footer.location")}</span>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
-            <p>
-              &copy; 2024 Wolaita Sodo City Crime Management System. All rights
-              reserved.
-            </p>
+          <div className="border-t border-gray-700 mt-6 pt-6 grid gap-4 md:grid-cols-2 items-start">
+            <div className="text-center md:text-left text-gray-400">
+              <p>{t("footer.copyright")}</p>
+            </div>
+            <div className="flex justify-center md:justify-end gap-4 text-sm text-gray-300">
+              <Link to="/">Home</Link>
+              <Link to="/login">Login</Link>
+              <Link to="/signup">Sign Up</Link>
+              <Link to="/citizen-portal">Citizen Portal</Link>
+              <Link to="/incident-reports">Incidents</Link>
+            </div>
           </div>
         </div>
       </footer>
