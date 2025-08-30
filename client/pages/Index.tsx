@@ -500,8 +500,17 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
-            <p>{t('footer.copyright')}</p>
+          <div className="border-t border-gray-700 mt-6 pt-6 grid gap-4 md:grid-cols-2 items-start">
+            <div className="text-center md:text-left text-gray-400">
+              <p>{t('footer.copyright')}</p>
+            </div>
+            <div className="flex justify-center md:justify-end gap-4 text-sm text-gray-300">
+              <Link to="/">Home</Link>
+              <Link to="/login">Login</Link>
+              <Link to="/signup">Sign Up</Link>
+              <Link to="/citizen-portal">Citizen Portal</Link>
+              <Link to="/incident-reports">Incidents</Link>
+            </div>
           </div>
         </div>
       </footer>
