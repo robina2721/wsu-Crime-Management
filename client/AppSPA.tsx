@@ -7,6 +7,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { I18nProvider } from "./contexts/I18nContext";
 import AppRoutes from "./AppRoutes";
+import Navbar from "./components/Navbar";
 import React from "react";
 
 const queryClient = new QueryClient();
