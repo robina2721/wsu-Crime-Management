@@ -1,5 +1,20 @@
 import { listCrimes, getCrime, createCrime, updateCrime, deleteCrime } from "../../backend/models/crimeModel.js";
+import { findUserById } from "../../backend/models/userModel.js";
 import { NextResponse } from "next/server";
+
+function getAuthUserId(req) {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) return null;
+  const token = authHeader.replace("Bearer ", "");
+  const parts = token.split("_");
+  return parts.length >= 2 ? parts[1] : null;
+}
+
+async function getAuthUser(req) {
+  const id = getAuthUserId(req);
+  if (!id) return null;
+  return await findUserById(id);
+}
 
 export async function listHandler(req) {
   try {
@@ -32,10 +47,25 @@ export async function getHandler(_req, params) {
 
 export async function createHandler(req) {
   try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const allowed = new Set(["citizen","preventive_officer","detective_officer","police_head","super_admin"]);
+    if (!allowed.has(user.role)) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+
     const body = await req.json();
-    const required = ["title", "description", "category", "location", "dateIncident", "reportedBy"];
-    for (const k of required) if (!body[k]) return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
-    const created = await createCrime(body);
+    const required = ["title", "description", "category", "location", "dateIncident"];
+    for (const k of required) if (!body[k]) return NextResponse.json({ success: false, error: `Missing required field: ${k}` }, { status: 400 });
+
+    const payload = {
+      title: body.title,
+      description: body.description,
+      category: body.category,
+      priority: body.priority || "medium",
+      location: body.location,
+      dateIncident: body.dateIncident,
+      reportedBy: user.id,
+    };
+    const created = await createCrime(payload);
     return NextResponse.json({ success: true, data: created, message: "Crime report created successfully" }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -46,6 +76,11 @@ export async function createHandler(req) {
 
 export async function updateHandler(req, params) {
   try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const allowed = new Set(["detective_officer","police_head","super_admin"]);
+    if (!allowed.has(user.role)) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+
     const updates = await req.json();
     const updated = await updateCrime(params.id, updates);
     if (!updated) return NextResponse.json({ success: false, error: "Crime report not found" }, { status: 404 });
