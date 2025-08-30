@@ -585,6 +585,11 @@ export default function CriminalDatabase() {
                         <CardTitle className="text-lg">Personal Information</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
+                        {selectedCriminal.personalInfo.photo && (
+                          <div className="mb-3">
+                            <img src={selectedCriminal.personalInfo.photo} alt="Criminal" className="w-40 h-40 object-cover rounded" />
+                          </div>
+                        )}
                         <div>
                           <span className="font-medium">Full Name:</span>
                           <div>{selectedCriminal.personalInfo.fullName}</div>
