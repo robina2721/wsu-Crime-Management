@@ -87,6 +87,7 @@ export default function CitizenFeedback() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [formData, setFormData] = useState<Partial<CitizenFeedback>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [responseById, setResponseById] = useState<Record<string, string>>({});
 
   const filteredFeedback = feedback.filter((item) => {
     const matchesSearch =
