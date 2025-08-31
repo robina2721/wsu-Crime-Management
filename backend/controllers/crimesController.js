@@ -270,3 +270,126 @@ export async function deleteHandler(_req, params) {
     return NextResponse.json({ success: false, error: msg }, { status });
   }
 }
+
+// Status tracking handlers
+export async function getStatusHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    const report = await getCrime(params.id);
+    if (!report)
+      return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+    let updates = await getStatusUpdatesByCrime(report.id);
+    // Filter visibility for citizens
+    if (user?.role === "citizen") {
+      updates = updates.filter((u) => u.isVisibleToCitizen === 1 || u.isVisibleToCitizen === true);
+    }
+    const assignedOfficer = report.assignedTo ? await findUserById(report.assignedTo) : null;
+    const payload = {
+      reportId: report.id,
+      currentStatus: report.status,
+      statusHistory: updates.map((u) => ({
+        status: u.status,
+        timestamp: u.createdAt,
+        updatedBy: u.updatedBy,
+        notes: u.notes ?? undefined,
+        isVisibleToCitizen: !!u.isVisibleToCitizen,
+      })),
+      assignedOfficer: assignedOfficer
+        ? {
+            id: assignedOfficer.id,
+            name: assignedOfficer.fullName || assignedOfficer.username,
+            badgeNumber: assignedOfficer.username,
+            contactInfo: assignedOfficer.email || assignedOfficer.phone || undefined,
+          }
+        : undefined,
+      lastUpdate: (updates[0]?.createdAt) || report.updatedAt,
+      estimatedResolution: undefined,
+      canProvideUpdates: !!user && (user.role === "citizen" ? report.reportedBy === user.id : true),
+    };
+    return NextResponse.json({ success: true, data: payload });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+export async function postStatusHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const report = await getCrime(params.id);
+    if (!report) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+
+    const body = await req.json();
+    const isSupervisor = new Set(["detective_officer","police_head","super_admin"]).has(user.role);
+    if (user.role === "preventive_officer") {
+      if (report.assignedTo !== user.id) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    } else if (!isSupervisor) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+
+    const upd = await addStatusUpdate(report.id, {
+      status: body.status || report.status,
+      notes: body.notes,
+      updatedBy: user.id,
+      isVisibleToCitizen: body.isVisibleToCitizen !== false,
+    });
+    // also update main crime status if changed
+    if (body.status && body.status !== report.status) {
+      await updateCrime(report.id, { status: body.status });
+    }
+    return NextResponse.json({ success: true, data: upd, message: "Status updated" });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+// Messaging handlers
+export async function listMessagesHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const report = await getCrime(params.id);
+    if (!report) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+    // Basic access control: reporter, assigned officer, or supervisors
+    const isReporter = report.reportedBy === user.id;
+    const isAssigned = report.assignedTo === user.id;
+    const isSupervisor = new Set(["detective_officer","police_head","super_admin"]).has(user.role);
+    if (!(isReporter || isAssigned || isSupervisor)) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+
+    const limit = 100, offset = 0;
+    const messages = await getCrimeMessages(report.id, limit, offset);
+    return NextResponse.json({ success: true, data: { messages, total: messages.length, limit, offset } });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+export async function createMessageHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const report = await getCrime(params.id);
+    if (!report) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+
+    // Basic access control
+    const isReporter = report.reportedBy === user.id;
+    const isAssigned = report.assignedTo === user.id;
+    const isSupervisor = new Set(["detective_officer","police_head","super_admin"]).has(user.role);
+    if (!(isReporter || isAssigned || isSupervisor)) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+
+    const body = await req.json();
+    if (!body.message || typeof body.message !== 'string') return NextResponse.json({ success: false, error: 'Message required' }, { status: 400 });
+    const msg = await addCrimeMessage(report.id, { senderId: user.id, senderRole: user.role, message: body.message });
+    return NextResponse.json({ success: true, data: msg, message: 'Message sent' }, { status: 201 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
