@@ -190,14 +190,11 @@ export default function UserManagement() {
 
   const handleApproveAccount = async (accountId: string) => {
     try {
-      // In production, call API to approve account
-      setPendingAccounts((prev) =>
-        prev.map((account) =>
-          account.id === accountId
-            ? { ...account, status: "approved" }
-            : account,
-        ),
-      );
+      const res = await api.post(`/pending-accounts/${accountId}/approve`, {});
+      if (res.ok) {
+        await fetchPendingAccounts();
+        await fetchUsers();
+      }
     } catch (error) {
       console.error("Error approving account:", error);
     }
@@ -205,14 +202,10 @@ export default function UserManagement() {
 
   const handleRejectAccount = async (accountId: string) => {
     try {
-      // In production, call API to reject account
-      setPendingAccounts((prev) =>
-        prev.map((account) =>
-          account.id === accountId
-            ? { ...account, status: "rejected" }
-            : account,
-        ),
-      );
+      const res = await api.post(`/pending-accounts/${accountId}/reject`, {});
+      if (res.ok) {
+        await fetchPendingAccounts();
+      }
     } catch (error) {
       console.error("Error rejecting account:", error);
     }
