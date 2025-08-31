@@ -394,19 +394,19 @@ export default function CaseManagement() {
                       
                       {canManageAllCases && (
                         <>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => openStatusDialog(case_.id, case_.status)}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
-                          
-                          {!case_.assignedTo && canAssignCases && (
-                            <Button 
-                              size="sm" 
+
+                          {canAssignCases && (
+                            <Button
+                              size="sm"
                               className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
-                              onClick={() => handleAssignCase(case_.id, user?.id || '')}
+                              onClick={() => openAssignDialog(case_.id)}
                             >
                               <UserCheck className="w-4 h-4 mr-1" />
-                              Assign
+                              {case_.assignedTo ? 'Reassign' : 'Assign'}
                             </Button>
                           )}
                         </>
