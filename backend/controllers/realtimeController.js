@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { findUserById } from "../../backend/models/userModel.js";
+import { NextResponse } from "next/server";
 
 const subscribersByUser = new Map(); // userId => Set<Response>
 
@@ -89,6 +90,43 @@ export function notifyCrimeUpdate(crime) {
       for (const sub of subs) {
         try {
           sub.send({ type: "crime_update", data: crime });
+        } catch {}
+      }
+    }
+  } catch {}
+}
+
+export function notifyCrimeMessage(crimeId, message) {
+  try {
+    const recipients = new Set();
+    if (message?.senderId) recipients.add(message.senderId);
+    if (message?.recipientId) recipients.add(message.recipientId);
+    // also notify reporter and assigned (if provided on message)
+    if (message?.reportedBy) recipients.add(message.reportedBy);
+    if (message?.assignedTo) recipients.add(message.assignedTo);
+    for (const userId of recipients) {
+      const subs = subscribersByUser.get(userId);
+      if (!subs || subs.size === 0) continue;
+      for (const sub of subs) {
+        try {
+          sub.send({ type: "crime_message", data: { crimeId, message } });
+        } catch {}
+      }
+    }
+  } catch {}
+}
+
+export function notifyStatusUpdate(crimeId, update, audience) {
+  try {
+    const recipients = new Set();
+    if (audience?.reportedBy) recipients.add(audience.reportedBy);
+    if (audience?.assignedTo) recipients.add(audience.assignedTo);
+    for (const userId of recipients) {
+      const subs = subscribersByUser.get(userId);
+      if (!subs || subs.size === 0) continue;
+      for (const sub of subs) {
+        try {
+          sub.send({ type: "status_update", data: { crimeId, update } });
         } catch {}
       }
     }

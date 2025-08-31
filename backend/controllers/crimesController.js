@@ -5,6 +5,16 @@ import {
   updateCrime,
   deleteCrime,
 } from "../../backend/models/crimeModel.js";
+import {
+  createEvidenceForCrime,
+  createWitnessesForCrime,
+  getEvidenceByCrime,
+  getWitnessesByCrime,
+  addStatusUpdate,
+  getStatusUpdatesByCrime,
+  addCrimeMessage,
+  getCrimeMessages,
+} from "../../backend/models/crimeModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
 import { notifyCrimeUpdate } from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
@@ -64,7 +74,18 @@ export async function getHandler(_req, params) {
         { success: false, error: "Crime report not found" },
         { status: 404 },
       );
-    return NextResponse.json({ success: true, data: report });
+    let evidence = report.evidence,
+      witnesses = report.witnesses;
+    try {
+      if (!Array.isArray(evidence))
+        evidence = await getEvidenceByCrime(report.id);
+      if (!Array.isArray(witnesses))
+        witnesses = await getWitnessesByCrime(report.id);
+    } catch {}
+    return NextResponse.json({
+      success: true,
+      data: { ...report, evidence, witnesses },
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
@@ -118,11 +139,33 @@ export async function createHandler(req) {
       reportedBy: user.id,
     };
     const created = await createCrime(payload);
-    notifyCrimeUpdate(created);
+    // Optional: persist evidence and witnesses if provided
+    if (Array.isArray(body.evidence) && body.evidence.length) {
+      try {
+        await createEvidenceForCrime(created.id, body.evidence, {
+          uploadedBy: user.id,
+        });
+      } catch {}
+    }
+    if (Array.isArray(body.witnesses) && body.witnesses.length) {
+      try {
+        await createWitnessesForCrime(created.id, body.witnesses);
+      } catch {}
+    }
+    let evidence = [],
+      witnesses = [];
+    try {
+      [evidence, witnesses] = await Promise.all([
+        getEvidenceByCrime(created.id),
+        getWitnessesByCrime(created.id),
+      ]);
+    } catch {}
+    const createdWithExtras = { ...created, evidence, witnesses };
+    notifyCrimeUpdate(createdWithExtras);
     return NextResponse.json(
       {
         success: true,
-        data: created,
+        data: createdWithExtras,
         message: "Crime report created successfully",
       },
       { status: 201 },
@@ -191,6 +234,16 @@ export async function updateHandler(req, params) {
         );
       }
       const updated = await updateCrime(params.id, allowedUpdates);
+      try {
+        if (Object.prototype.hasOwnProperty.call(body, "status")) {
+          await addStatusUpdate(params.id, {
+            status: body.status,
+            notes: body.notes,
+            updatedBy: user.id,
+            isVisibleToCitizen: body.isVisibleToCitizen !== false,
+          });
+        }
+      } catch {}
       notifyCrimeUpdate(updated);
       return NextResponse.json({
         success: true,
@@ -233,6 +286,226 @@ export async function deleteHandler(_req, params) {
       success: true,
       message: "Crime report deleted successfully",
     });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+// Status tracking handlers
+export async function getStatusHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    const report = await getCrime(params.id);
+    if (!report)
+      return NextResponse.json(
+        { success: false, error: "Not found" },
+        { status: 404 },
+      );
+    let updates = await getStatusUpdatesByCrime(report.id);
+    // Filter visibility for citizens
+    if (user?.role === "citizen") {
+      updates = updates.filter(
+        (u) => u.isVisibleToCitizen === 1 || u.isVisibleToCitizen === true,
+      );
+    }
+    const assignedOfficer = report.assignedTo
+      ? await findUserById(report.assignedTo)
+      : null;
+    const payload = {
+      reportId: report.id,
+      currentStatus: report.status,
+      statusHistory: updates.map((u) => ({
+        status: u.status,
+        timestamp: u.createdAt,
+        updatedBy: u.updatedBy,
+        notes: u.notes ?? undefined,
+        isVisibleToCitizen: !!u.isVisibleToCitizen,
+      })),
+      assignedOfficer: assignedOfficer
+        ? {
+            id: assignedOfficer.id,
+            name: assignedOfficer.fullName || assignedOfficer.username,
+            badgeNumber: assignedOfficer.username,
+            contactInfo:
+              assignedOfficer.email || assignedOfficer.phone || undefined,
+          }
+        : undefined,
+      lastUpdate: updates[0]?.createdAt || report.updatedAt,
+      estimatedResolution: undefined,
+      canProvideUpdates:
+        !!user &&
+        (user.role === "citizen" ? report.reportedBy === user.id : true),
+    };
+    return NextResponse.json({ success: true, data: payload });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+export async function postStatusHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user)
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    const report = await getCrime(params.id);
+    if (!report)
+      return NextResponse.json(
+        { success: false, error: "Not found" },
+        { status: 404 },
+      );
+
+    const body = await req.json();
+    const isSupervisor = new Set([
+      "detective_officer",
+      "police_head",
+      "super_admin",
+    ]).has(user.role);
+    if (user.role === "preventive_officer") {
+      if (report.assignedTo !== user.id)
+        return NextResponse.json(
+          { success: false, error: "Forbidden" },
+          { status: 403 },
+        );
+    } else if (!isSupervisor) {
+      return NextResponse.json(
+        { success: false, error: "Forbidden" },
+        { status: 403 },
+      );
+    }
+
+    const upd = await addStatusUpdate(report.id, {
+      status: body.status || report.status,
+      notes: body.notes,
+      updatedBy: user.id,
+      isVisibleToCitizen: body.isVisibleToCitizen !== false,
+    });
+    // also update main crime status if changed
+    let updatedCrime = report;
+    if (body.status && body.status !== report.status) {
+      updatedCrime = await updateCrime(report.id, { status: body.status });
+    }
+    try {
+      // notify reporter and assigned officer
+      notifyStatusUpdate(report.id, upd, {
+        reportedBy: updatedCrime.reportedBy,
+        assignedTo: updatedCrime.assignedTo,
+      });
+    } catch {}
+    return NextResponse.json({
+      success: true,
+      data: upd,
+      message: "Status updated",
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+// Messaging handlers
+export async function listMessagesHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user)
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    const report = await getCrime(params.id);
+    if (!report)
+      return NextResponse.json(
+        { success: false, error: "Not found" },
+        { status: 404 },
+      );
+    // Basic access control: reporter, assigned officer, or supervisors
+    const isReporter = report.reportedBy === user.id;
+    const isAssigned = report.assignedTo === user.id;
+    const isSupervisor = new Set([
+      "detective_officer",
+      "police_head",
+      "super_admin",
+    ]).has(user.role);
+    if (!(isReporter || isAssigned || isSupervisor))
+      return NextResponse.json(
+        { success: false, error: "Forbidden" },
+        { status: 403 },
+      );
+
+    const limit = 100,
+      offset = 0;
+    const messages = await getCrimeMessages(report.id, limit, offset);
+    return NextResponse.json({
+      success: true,
+      data: { messages, total: messages.length, limit, offset },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+export async function createMessageHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user)
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    const report = await getCrime(params.id);
+    if (!report)
+      return NextResponse.json(
+        { success: false, error: "Not found" },
+        { status: 404 },
+      );
+
+    // Basic access control
+    const isReporter = report.reportedBy === user.id;
+    const isAssigned = report.assignedTo === user.id;
+    const isSupervisor = new Set([
+      "detective_officer",
+      "police_head",
+      "super_admin",
+    ]).has(user.role);
+    if (!(isReporter || isAssigned || isSupervisor))
+      return NextResponse.json(
+        { success: false, error: "Forbidden" },
+        { status: 403 },
+      );
+
+    const body = await req.json();
+    if (!body.message || typeof body.message !== "string")
+      return NextResponse.json(
+        { success: false, error: "Message required" },
+        { status: 400 },
+      );
+    const msg = await addCrimeMessage(report.id, {
+      senderId: user.id,
+      senderRole: user.role,
+      message: body.message,
+    });
+    try {
+      notifyCrimeMessage(report.id, {
+        ...msg,
+        reportedBy: report.reportedBy,
+        assignedTo: report.assignedTo,
+        recipientId:
+          user.id === report.reportedBy ? report.assignedTo : report.reportedBy,
+      });
+    } catch {}
+    return NextResponse.json(
+      { success: true, data: msg, message: "Message sent" },
+      { status: 201 },
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;

@@ -94,6 +94,7 @@ export default function UserManagement() {
     phone: "",
     password: "",
   });
+  const [newUserPhoto, setNewUserPhoto] = useState<File | null>(null);
 
   const canManageUsers = hasRole(UserRole.SUPER_ADMIN);
   const canApproveAccounts = hasAnyRole([
@@ -115,13 +116,23 @@ export default function UserManagement() {
       const res = await api.get("/users");
       const data = await res.json();
       if (res.ok && data.success) {
-        setUsers(
-          data.data.users.map((u: any) => ({
-            ...u,
-            createdAt: new Date(u.createdAt),
-            updatedAt: new Date(u.updatedAt),
-          })),
+        const list: any[] = data.data.users.map((u: any) => ({
+          ...u,
+          createdAt: new Date(u.createdAt),
+          updatedAt: new Date(u.updatedAt),
+        }));
+        await Promise.all(
+          list.map(async (u) => {
+            try {
+              const p = await api.get(`/users/${u.id}/photo`);
+              if (p.ok) {
+                const d = await p.json();
+                u.photoUrl = d?.data?.photoUrl || null;
+              }
+            } catch {}
+          }),
         );
+        setUsers(list as User[]);
       }
     } catch (e) {
       console.error("Failed to load users", e);
@@ -131,45 +142,23 @@ export default function UserManagement() {
   };
 
   const fetchPendingAccounts = async () => {
-    // Mock pending accounts data
-    const mockPending: PendingAccount[] = [
-      {
-        id: "P1",
-        fullName: "Officer Candidate Bereket Haile",
-        username: "bereket_h",
-        email: "bereket.haile@example.com",
-        phone: "+251-911-000-100",
-        requestedRole: UserRole.PREVENTIVE_OFFICER,
-        submittedDate: new Date("2024-01-14"),
-        status: "pending",
-        documents: ["police_certificate.pdf", "training_completion.pdf"],
-        notes: "Recent police academy graduate with high scores",
-      },
-      {
-        id: "P2",
-        fullName: "Detective Trainee Meron Gebre",
-        username: "meron_g",
-        email: "meron.gebre@example.com",
-        phone: "+251-911-000-101",
-        requestedRole: UserRole.DETECTIVE_OFFICER,
-        submittedDate: new Date("2024-01-12"),
-        status: "pending",
-        documents: ["detective_certification.pdf", "background_check.pdf"],
-        notes: "Specialized in cybercrime investigation",
-      },
-      {
-        id: "P3",
-        fullName: "Citizen Registration - Kebede Alemu",
-        username: "kebede_a",
-        email: "kebede.alemu@example.com",
-        requestedRole: UserRole.CITIZEN,
-        submittedDate: new Date("2024-01-16"),
-        status: "pending",
-        notes: "Standard citizen registration for crime reporting access",
-      },
-    ];
-
-    setPendingAccounts(mockPending);
+    try {
+      const res = await api.get("/pending-accounts");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          const list: PendingAccount[] = (data.data.pending || []).map(
+            (p: any) => ({
+              ...p,
+              submittedDate: new Date(p.submittedDate),
+            }),
+          );
+          setPendingAccounts(list);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load pending accounts", e);
+    }
   };
 
   const filterUsers = () => {
@@ -214,14 +203,11 @@ export default function UserManagement() {
 
   const handleApproveAccount = async (accountId: string) => {
     try {
-      // In production, call API to approve account
-      setPendingAccounts((prev) =>
-        prev.map((account) =>
-          account.id === accountId
-            ? { ...account, status: "approved" }
-            : account,
-        ),
-      );
+      const res = await api.post(`/pending-accounts/${accountId}/approve`, {});
+      if (res.ok) {
+        await fetchPendingAccounts();
+        await fetchUsers();
+      }
     } catch (error) {
       console.error("Error approving account:", error);
     }
@@ -229,14 +215,10 @@ export default function UserManagement() {
 
   const handleRejectAccount = async (accountId: string) => {
     try {
-      // In production, call API to reject account
-      setPendingAccounts((prev) =>
-        prev.map((account) =>
-          account.id === accountId
-            ? { ...account, status: "rejected" }
-            : account,
-        ),
-      );
+      const res = await api.post(`/pending-accounts/${accountId}/reject`, {});
+      if (res.ok) {
+        await fetchPendingAccounts();
+      }
     } catch (error) {
       console.error("Error rejecting account:", error);
     }
@@ -535,6 +517,16 @@ export default function UserManagement() {
                           </div>
                         </div>
                         <div className="space-y-2">
+                          <Label>Profile Photo</Label>
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              setNewUserPhoto(e.target.files?.[0] || null)
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
                           <Label>Role</Label>
                           <Select
                             value={newUser.role}
@@ -589,11 +581,24 @@ export default function UserManagement() {
                                 if (res.ok) {
                                   const data = await res.json();
                                   const u = data.data;
-                                  const normalized: User = {
+                                  const normalized: any = {
                                     ...u,
                                     createdAt: new Date(u.createdAt),
                                     updatedAt: new Date(u.updatedAt),
                                   };
+                                  if (newUserPhoto) {
+                                    const fd = new FormData();
+                                    fd.append("file", newUserPhoto);
+                                    const upRes = await api.post(
+                                      `/users/${u.id}/photo`,
+                                      fd,
+                                    );
+                                    if (upRes.ok) {
+                                      const pr = await upRes.json();
+                                      normalized.photoUrl =
+                                        pr?.data?.photoUrl || null;
+                                    }
+                                  }
                                   setUsers((prev) => [normalized, ...prev]);
                                   setIsAddDialogOpen(false);
                                   setNewUser({
@@ -604,6 +609,7 @@ export default function UserManagement() {
                                     phone: "",
                                     password: "",
                                   });
+                                  setNewUserPhoto(null);
                                 }
                               } catch (e) {
                                 console.error("Failed to create user", e);
@@ -644,9 +650,17 @@ export default function UserManagement() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-12 h-12 bg-crime-red rounded-full flex items-center justify-center">
-                              <Shield className="w-6 h-6 text-white" />
-                            </div>
+                            {(user_ as any).photoUrl ? (
+                              <img
+                                src={(user_ as any).photoUrl}
+                                alt={user_.fullName}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-crime-red rounded-full flex items-center justify-center">
+                                <Shield className="w-6 h-6 text-white" />
+                              </div>
+                            )}
                             <div>
                               <h3 className="text-lg font-semibold text-crime-black">
                                 {user_.fullName}

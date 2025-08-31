@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { api } from "@/lib/api";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -72,73 +73,11 @@ import {
   Priority,
 } from "../../shared/types";
 
-// Mock data for demonstration
-const mockFeedback: CitizenFeedback[] = [
-  {
-    id: "1",
-    citizenId: "citizen1",
-    citizenName: "John Doe",
-    email: "john.doe@email.com",
-    phone: "+1-234-567-8901",
-    feedbackType: FeedbackType.COMPLIMENT,
-    category: FeedbackCategory.OFFICER_CONDUCT,
-    subject: "Excellent Service by Officer Smith",
-    message:
-      "I wanted to express my gratitude for the professional and courteous service provided by Officer Smith during my recent interaction. He was very helpful and understanding.",
-    relatedCaseId: "CASE-001",
-    priority: Priority.LOW,
-    status: FeedbackStatus.RESOLVED,
-    response:
-      "Thank you for your positive feedback. We have forwarded your compliments to Officer Smith and his supervisor.",
-    respondedBy: "Supervisor Johnson",
-    respondedAt: new Date("2024-01-15T10:30:00"),
-    attachments: [],
-    isAnonymous: false,
-    submittedAt: new Date("2024-01-10T14:20:00"),
-    updatedAt: new Date("2024-01-15T10:30:00"),
-  },
-  {
-    id: "2",
-    citizenId: "citizen1",
-    citizenName: "Anonymous",
-    feedbackType: FeedbackType.COMPLAINT,
-    category: FeedbackCategory.RESPONSE_TIME,
-    subject: "Slow Response to Emergency Call",
-    message:
-      "I called for emergency assistance and it took over 45 minutes for officers to arrive. This seems excessive for an emergency situation.",
-    priority: Priority.HIGH,
-    status: FeedbackStatus.UNDER_REVIEW,
-    attachments: [],
-    isAnonymous: true,
-    submittedAt: new Date("2024-01-12T20:15:00"),
-    updatedAt: new Date("2024-01-13T09:00:00"),
-  },
-  {
-    id: "3",
-    citizenId: "citizen1",
-    citizenName: "John Doe",
-    email: "john.doe@email.com",
-    feedbackType: FeedbackType.SUGGESTION,
-    category: FeedbackCategory.SERVICE_QUALITY,
-    subject: "Suggestion for Online Reporting System",
-    message:
-      "It would be great if we could submit non-emergency reports online. This would save time for both citizens and officers.",
-    priority: Priority.MEDIUM,
-    status: FeedbackStatus.INVESTIGATING,
-    response:
-      "Thank you for your suggestion. We are currently evaluating options for an online reporting system.",
-    respondedBy: "IT Department",
-    respondedAt: new Date("2024-01-14T11:00:00"),
-    attachments: [],
-    isAnonymous: false,
-    submittedAt: new Date("2024-01-08T16:45:00"),
-    updatedAt: new Date("2024-01-14T11:00:00"),
-  },
-];
+// Using real data via API
 
 export default function CitizenFeedback() {
   const { user } = useAuth();
-  const [feedback, setFeedback] = useState<CitizenFeedback[]>(mockFeedback);
+  const [feedback, setFeedback] = useState<CitizenFeedback[]>([]);
   const [showNewFeedbackForm, setShowNewFeedbackForm] = useState(false);
   const [selectedFeedback, setSelectedFeedback] =
     useState<CitizenFeedback | null>(null);
@@ -148,6 +87,32 @@ export default function CitizenFeedback() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [formData, setFormData] = useState<Partial<CitizenFeedback>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [responseById, setResponseById] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get("/feedback");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            const list: CitizenFeedback[] = (data.data.feedback || []).map(
+              (f: any) => ({
+                ...f,
+                respondedAt: f.respondedAt
+                  ? new Date(f.respondedAt)
+                  : undefined,
+                submittedAt: new Date(f.submittedAt),
+                updatedAt: new Date(f.updatedAt),
+              }),
+            );
+            setFeedback(list);
+          }
+        }
+      } catch {}
+    };
+    load();
+  }, []);
 
   const filteredFeedback = feedback.filter((item) => {
     const matchesSearch =
@@ -233,33 +198,37 @@ export default function CitizenFeedback() {
 
   const handleSubmitFeedback = async (data: Partial<CitizenFeedback>) => {
     setIsSubmitting(true);
-
-    // Simulate submission delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    const newFeedback: CitizenFeedback = {
-      id: Date.now().toString(),
-      citizenId: user?.id || "citizen1",
-      citizenName: data.isAnonymous ? "Anonymous" : user?.fullName || "Unknown",
-      email: data.isAnonymous ? undefined : data.email,
-      phone: data.isAnonymous ? undefined : data.phone,
-      feedbackType: data.feedbackType || FeedbackType.INQUIRY,
-      category: data.category || FeedbackCategory.GENERAL,
-      subject: data.subject || "",
-      message: data.message || "",
-      relatedCaseId: data.relatedCaseId,
-      priority: data.priority || Priority.MEDIUM,
-      status: FeedbackStatus.SUBMITTED,
-      attachments: data.attachments || [],
-      isAnonymous: data.isAnonymous || false,
-      submittedAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    setFeedback((prev) => [newFeedback, ...prev]);
-    setFormData({});
-    setShowNewFeedbackForm(false);
-    setIsSubmitting(false);
+    try {
+      const payload = {
+        subject: data.subject || "",
+        message: data.message || "",
+        feedbackType: data.feedbackType || FeedbackType.INQUIRY,
+        category: data.category || FeedbackCategory.GENERAL,
+        relatedCaseId: data.relatedCaseId,
+        priority: data.priority || Priority.MEDIUM,
+        isAnonymous: data.isAnonymous || false,
+        email: data.email,
+        phone: data.phone,
+      };
+      const res = await api.post("/feedback", payload);
+      if (res.ok) {
+        const created = await res.json();
+        if (created.success) {
+          const f = created.data;
+          const normalized: CitizenFeedback = {
+            ...f,
+            respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
+            submittedAt: new Date(f.submittedAt),
+            updatedAt: new Date(f.updatedAt),
+          };
+          setFeedback((prev) => [normalized, ...prev]);
+          setFormData({});
+          setShowNewFeedbackForm(false);
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const feedbackTypeOptions = [
@@ -294,6 +263,35 @@ export default function CitizenFeedback() {
       icon: <Settings className="h-5 w-5 text-purple-500" />,
     },
   ];
+
+  const canRespond =
+    user &&
+    ["super_admin", "police_head", "hr_manager"].includes(user.role as any);
+
+  const respondToFeedback = async (item: CitizenFeedback) => {
+    const text = (responseById[item.id] || "").trim();
+    if (!text) return;
+    const res = await api.post(`/feedback/${item.id}/respond`, {
+      response: text,
+      status: FeedbackStatus.UNDER_REVIEW,
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        const f = data.data;
+        const normalized: CitizenFeedback = {
+          ...f,
+          respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
+          submittedAt: new Date(f.submittedAt),
+          updatedAt: new Date(f.updatedAt),
+        };
+        setFeedback((prev) =>
+          prev.map((fb) => (fb.id === item.id ? normalized : fb)),
+        );
+        setResponseById((prev) => ({ ...prev, [item.id]: "" }));
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -522,6 +520,30 @@ export default function CitizenFeedback() {
                           </div>
                         </div>
                       )}
+                      {canRespond && (
+                        <div className="mt-3 space-y-2">
+                          <Label>Respond</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Type response..."
+                              value={responseById[item.id] || ""}
+                              onChange={(e) =>
+                                setResponseById((prev) => ({
+                                  ...prev,
+                                  [item.id]: e.target.value,
+                                }))
+                              }
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => respondToFeedback(item)}
+                            >
+                              <Send className="h-4 w-4 mr-1" />
+                              Send
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -561,7 +583,10 @@ export default function CitizenFeedback() {
                                 </div>
                               )}
                             </div>
-                            {getStatusBadge(item.status)}
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(item.status)}
+                              {getPriorityBadge(item.priority)}
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">

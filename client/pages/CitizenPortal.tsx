@@ -91,6 +91,23 @@ export default function CitizenPortal() {
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [contactTextById, setContactTextById] = useState<
+    Record<string, string>
+  >({});
+  const [messagesById, setMessagesById] = useState<
+    Record<
+      string,
+      {
+        id: string;
+        senderId: string;
+        senderRole: string;
+        message: string;
+        createdAt: string | Date;
+      }[]
+    >
+  >({});
+  const [currentTab, setCurrentTab] = useState("incident");
+  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
 
   useEffect(() => {
     const loadReports = async () => {
@@ -143,6 +160,41 @@ export default function CitizenPortal() {
             return [normalized, ...prev];
           });
         }
+        if (payload?.type === "crime_message" && payload.data) {
+          const { crimeId, message } = payload.data;
+          setMessagesById((prev) => ({
+            ...prev,
+            [crimeId]: [message, ...(prev[crimeId] || [])],
+          }));
+        }
+        if (payload?.type === "status_update" && payload.data) {
+          const { crimeId, update } = payload.data;
+          setReportStatuses((prev) => {
+            const copy = [...prev];
+            const idx = copy.findIndex((s) => s.reportId === crimeId);
+            const upd = { ...update, timestamp: new Date(update.createdAt) };
+            if (idx >= 0) {
+              const cur = copy[idx];
+              const hist = [
+                {
+                  status: upd.status,
+                  timestamp: upd.timestamp,
+                  updatedBy: upd.updatedBy,
+                  notes: upd.notes,
+                  isVisibleToCitizen: !!upd.isVisibleToCitizen,
+                },
+                ...(cur.statusHistory || []),
+              ];
+              copy[idx] = {
+                ...cur,
+                currentStatus: upd.status || cur.currentStatus,
+                statusHistory: hist,
+                lastUpdate: upd.timestamp,
+              };
+            }
+            return copy;
+          });
+        }
       } catch {}
     };
     es.onerror = () => {
@@ -152,6 +204,46 @@ export default function CitizenPortal() {
       es.close();
     };
   }, []);
+
+  useEffect(() => {
+    const loadStatusesAndMessages = async () => {
+      try {
+        const statusList: CitizenReportStatus[] = [] as any;
+        const msgsMap: Record<string, any[]> = {};
+        await Promise.all(
+          reports.map(async (r) => {
+            try {
+              const sRes = await api.get(`/crimes/${r.id}/status`);
+              if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData.success)
+                  statusList.push({
+                    ...sData.data,
+                    lastUpdate: new Date(sData.data.lastUpdate),
+                    estimatedResolution: sData.data.estimatedResolution
+                      ? new Date(sData.data.estimatedResolution)
+                      : undefined,
+                    statusHistory: (sData.data.statusHistory || []).map(
+                      (u: any) => ({ ...u, timestamp: new Date(u.timestamp) }),
+                    ),
+                  } as CitizenReportStatus);
+              }
+            } catch {}
+            try {
+              const mRes = await api.get(`/crimes/${r.id}/messages`);
+              if (mRes.ok) {
+                const mData = await mRes.json();
+                if (mData.success) msgsMap[r.id] = mData.data.messages || [];
+              }
+            } catch {}
+          }),
+        );
+        setReportStatuses(statusList);
+        setMessagesById(msgsMap);
+      } catch {}
+    };
+    if (reports.length) loadStatusesAndMessages();
+  }, [reports]);
 
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
@@ -233,6 +325,8 @@ export default function CitizenPortal() {
         location: data.location || "",
         dateIncident: (data.dateIncident || new Date()).toString(),
         reportedBy: user?.id || "citizen",
+        evidence: (data.evidence as string[]) || [],
+        witnesses: witnesses,
       };
       const res = await api.post("/crimes", payload);
       if (res.ok) {
@@ -250,6 +344,7 @@ export default function CitizenPortal() {
         setReports((prev) => [normalized, ...prev]);
         setFormData({});
         setWitnesses([]);
+        setEvidenceFiles([]);
         setShowNewReportForm(false);
       }
     } catch (e) {
@@ -277,7 +372,9 @@ export default function CitizenPortal() {
       setUploadProgress(100);
       setIsUploading(false);
 
-      const fileNames = Array.from(files).map((file) => file.name);
+      const selected = Array.from(files);
+      setEvidenceFiles((prev) => [...prev, ...selected]);
+      const fileNames = selected.map((file) => file.name);
       setFormData((prev) => ({
         ...prev,
         evidence: [...(prev.evidence || []), ...fileNames],
@@ -761,16 +858,82 @@ export default function CitizenPortal() {
                                   {status.canProvideUpdates && (
                                     <div className="space-y-4">
                                       <div>
-                                        <Label htmlFor="additionalInfo">
+                                        <Label
+                                          htmlFor={`additionalInfo-${report.id}`}
+                                        >
                                           Provide Additional Information
                                         </Label>
                                         <Textarea
-                                          id="additionalInfo"
+                                          id={`additionalInfo-${report.id}`}
                                           placeholder="Any additional information or updates regarding this incident..."
                                           className="mt-1"
+                                          value={
+                                            contactTextById[report.id] || ""
+                                          }
+                                          onChange={(e) =>
+                                            setContactTextById((prev) => ({
+                                              ...prev,
+                                              [report.id]: e.target.value,
+                                            }))
+                                          }
                                         />
                                       </div>
-                                      <Button className="bg-red-600 hover:bg-red-700">
+                                      <div className="space-y-2">
+                                        <Label>Conversation</Label>
+                                        <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white">
+                                          {(messagesById[report.id] || [])
+                                            .slice()
+                                            .reverse()
+                                            .map((m, idx) => (
+                                              <div
+                                                key={m.id || idx}
+                                                className="text-sm mb-2"
+                                              >
+                                                <span className="font-medium">
+                                                  {m.senderRole}:
+                                                </span>{" "}
+                                                {m.message}
+                                                <span className="text-xs text-gray-500 ml-2">
+                                                  {new Date(
+                                                    m.createdAt,
+                                                  ).toLocaleString()}
+                                                </span>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      </div>
+                                      <Button
+                                        className="bg-red-600 hover:bg-red-700"
+                                        type="button"
+                                        onClick={async () => {
+                                          const msg = (
+                                            contactTextById[report.id] || ""
+                                          ).trim();
+                                          if (!msg) return;
+                                          try {
+                                            const res = await api.post(
+                                              `/crimes/${report.id}/messages`,
+                                              { message: msg },
+                                            );
+                                            if (res.ok) {
+                                              const data = await res.json();
+                                              if (data.success) {
+                                                setMessagesById((prev) => ({
+                                                  ...prev,
+                                                  [report.id]: [
+                                                    data.data,
+                                                    ...(prev[report.id] || []),
+                                                  ],
+                                                }));
+                                                setContactTextById((prev) => ({
+                                                  ...prev,
+                                                  [report.id]: "",
+                                                }));
+                                              }
+                                            }
+                                          } catch {}
+                                        }}
+                                      >
                                         <MessageSquare className="h-4 w-4 mr-2" />
                                         Submit Update
                                       </Button>
@@ -813,10 +976,18 @@ export default function CitizenPortal() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+                if (currentTab !== "review") {
+                  setCurrentTab("review");
+                  return;
+                }
                 handleSubmitReport(formData);
               }}
             >
-              <Tabs defaultValue="incident" className="w-full">
+              <Tabs
+                value={currentTab}
+                onValueChange={setCurrentTab}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="incident">Incident Details</TabsTrigger>
                   <TabsTrigger value="evidence">
@@ -962,7 +1133,7 @@ export default function CitizenPortal() {
                           type="file"
                           className="hidden"
                           multiple
-                          accept="image/*,video/*,.pdf,.doc,.docx"
+                          accept="image/*,video/*"
                           onChange={(e) => {
                             if (e.target.files) {
                               handleFileUpload(e.target.files);
@@ -982,17 +1153,28 @@ export default function CitizenPortal() {
                       </div>
                     )}
 
-                    {formData.evidence && formData.evidence.length > 0 && (
+                    {evidenceFiles.length > 0 && (
                       <div className="mt-4">
                         <Label>Uploaded Files</Label>
                         <div className="grid grid-cols-2 gap-2 mt-2">
-                          {formData.evidence.map((file, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 p-2 border rounded"
-                            >
-                              <Camera className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm truncate">{file}</span>
+                          {evidenceFiles.map((file, index) => (
+                            <div key={index} className="p-2 border rounded">
+                              {file.type.startsWith("image/") ? (
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="h-24 w-full object-cover rounded"
+                                />
+                              ) : (
+                                <video
+                                  src={URL.createObjectURL(file)}
+                                  controls
+                                  className="h-24 w-full rounded"
+                                />
+                              )}
+                              <p className="text-xs mt-1 truncate">
+                                {file.name}
+                              </p>
                             </div>
                           ))}
                         </div>
@@ -1191,13 +1373,16 @@ export default function CitizenPortal() {
                     setShowNewReportForm(false);
                     setFormData({});
                     setWitnesses([]);
+                    setEvidenceFiles([]);
                   }}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-red-600 hover:bg-red-700">
-                  Submit Report
-                </Button>
+                {currentTab === "review" && (
+                  <Button type="submit" className="bg-red-600 hover:bg-red-700">
+                    Submit Report
+                  </Button>
+                )}
               </div>
             </form>
           </DialogContent>

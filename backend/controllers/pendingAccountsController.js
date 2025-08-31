@@ -7,6 +7,7 @@ import {
   findPendingById,
 } from "../../backend/models/pendingAccountModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
+import { NextResponse } from "next/server";
 
 function getAuthUserId(req) {
   const authHeader = req.headers.get("authorization");
