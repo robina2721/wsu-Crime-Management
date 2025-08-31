@@ -63,71 +63,28 @@ export default function StaffManagement() {
   }, [staff, searchTerm, roleFilter, statusFilter]);
 
   const fetchStaff = async () => {
-    // Mock data - In production, fetch from API
-    const mockStaff: User[] = [
-      {
-        id: '2',
-        username: 'police_head',
-        password: '',
-        role: UserRole.POLICE_HEAD,
-        fullName: 'Chief Inspector Dawit Tadesse',
-        email: 'chief@wolaita-sodo.gov.et',
-        phone: '+251-911-000-002',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '3',
-        username: 'detective',
-        password: '',
-        role: UserRole.DETECTIVE_OFFICER,
-        fullName: 'Detective Sara Alemayehu',
-        email: 'detective@wolaita-sodo.gov.et',
-        phone: '+251-911-000-003',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '4',
-        username: 'officer',
-        password: '',
-        role: UserRole.PREVENTIVE_OFFICER,
-        fullName: 'Officer Mulugeta Kebede',
-        email: 'officer@wolaita-sodo.gov.et',
-        phone: '+251-911-000-004',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date()
-      },
-      {
-        id: '7',
-        username: 'officer2',
-        password: '',
-        role: UserRole.PREVENTIVE_OFFICER,
-        fullName: 'Officer Almaz Worku',
-        email: 'officer2@wolaita-sodo.gov.et',
-        phone: '+251-911-000-007',
-        isActive: true,
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date()
-      },
-      {
-        id: '8',
-        username: 'detective2',
-        password: '',
-        role: UserRole.DETECTIVE_OFFICER,
-        fullName: 'Detective Habtamu Desta',
-        email: 'detective2@wolaita-sodo.gov.et',
-        phone: '+251-911-000-008',
-        isActive: false,
-        createdAt: new Date('2024-01-10'),
-        updatedAt: new Date()
+    try {
+      const res = await api.get('/users');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          const list: any[] = data.data.users.map((u: any) => ({ ...u, createdAt: new Date(u.createdAt), updatedAt: new Date(u.updatedAt) }));
+          // Optionally fetch photos
+          await Promise.all(list.map(async (u) => {
+            try {
+              const p = await api.get(`/users/${u.id}/photo`);
+              if (p.ok) {
+                const d = await p.json();
+                u.photoUrl = d?.data?.photoUrl || null;
+              }
+            } catch {}
+          }));
+          setStaff(list as User[]);
+        }
       }
-    ];
-    setStaff(mockStaff);
-    setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const fetchAssignments = async () => {
