@@ -33,15 +33,26 @@ function requireRoles(user, roles) {
 export async function listUsersHandler(req) {
   try {
     const user = await getAuthUser(req);
-    if (!requireRoles(user, ["super_admin", "hr_manager", "police_head"])) {
+    const { searchParams } = new URL(req.url);
+    const withCaseCounts = searchParams.get("withCaseCounts") === "true";
+    const allowed = withCaseCounts
+      ? ["super_admin", "police_head", "detective_officer"]
+      : ["super_admin", "hr_manager", "police_head"];
+    if (!requireRoles(user, allowed)) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
         { status: 403 },
       );
     }
-    const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "100");
     const offset = parseInt(searchParams.get("offset") || "0");
+    if (withCaseCounts) {
+      const officers = await (await import("../../backend/models/userModel.js")).listActiveOfficersWithCaseCounts(limit, offset);
+      return NextResponse.json({
+        success: true,
+        data: { users: officers, total: officers.length, limit, offset },
+      });
+    }
     const role = searchParams.get("role") || undefined;
     const isActiveParam = searchParams.get("isActive");
     const isActive =
