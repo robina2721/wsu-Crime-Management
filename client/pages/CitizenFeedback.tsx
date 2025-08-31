@@ -194,33 +194,37 @@ export default function CitizenFeedback() {
 
   const handleSubmitFeedback = async (data: Partial<CitizenFeedback>) => {
     setIsSubmitting(true);
-
-    // Simulate submission delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    const newFeedback: CitizenFeedback = {
-      id: Date.now().toString(),
-      citizenId: user?.id || "citizen1",
-      citizenName: data.isAnonymous ? "Anonymous" : user?.fullName || "Unknown",
-      email: data.isAnonymous ? undefined : data.email,
-      phone: data.isAnonymous ? undefined : data.phone,
-      feedbackType: data.feedbackType || FeedbackType.INQUIRY,
-      category: data.category || FeedbackCategory.GENERAL,
-      subject: data.subject || "",
-      message: data.message || "",
-      relatedCaseId: data.relatedCaseId,
-      priority: data.priority || Priority.MEDIUM,
-      status: FeedbackStatus.SUBMITTED,
-      attachments: data.attachments || [],
-      isAnonymous: data.isAnonymous || false,
-      submittedAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    setFeedback((prev) => [newFeedback, ...prev]);
-    setFormData({});
-    setShowNewFeedbackForm(false);
-    setIsSubmitting(false);
+    try {
+      const payload = {
+        subject: data.subject || "",
+        message: data.message || "",
+        feedbackType: data.feedbackType || FeedbackType.INQUIRY,
+        category: data.category || FeedbackCategory.GENERAL,
+        relatedCaseId: data.relatedCaseId,
+        priority: data.priority || Priority.MEDIUM,
+        isAnonymous: data.isAnonymous || false,
+        email: data.email,
+        phone: data.phone,
+      };
+      const res = await api.post("/feedback", payload);
+      if (res.ok) {
+        const created = await res.json();
+        if (created.success) {
+          const f = created.data;
+          const normalized: CitizenFeedback = {
+            ...f,
+            respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
+            submittedAt: new Date(f.submittedAt),
+            updatedAt: new Date(f.updatedAt),
+          };
+          setFeedback((prev) => [normalized, ...prev]);
+          setFormData({});
+          setShowNewFeedbackForm(false);
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const feedbackTypeOptions = [
