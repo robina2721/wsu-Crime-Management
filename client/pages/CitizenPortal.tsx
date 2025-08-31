@@ -257,7 +257,7 @@ export default function CitizenPortal() {
       [CrimeCategory.THEFT]: "🔒",
       [CrimeCategory.ASSAULT]: "⚠️",
       [CrimeCategory.BURGLARY]: "🏠",
-      [CrimeCategory.FRAUD]: "��",
+      [CrimeCategory.FRAUD]: "💳",
       [CrimeCategory.VANDALISM]: "🔨",
       [CrimeCategory.DRUG_OFFENSE]: "💊",
       [CrimeCategory.DOMESTIC_VIOLENCE]: "🏠",
@@ -810,16 +810,57 @@ export default function CitizenPortal() {
                                   {status.canProvideUpdates && (
                                     <div className="space-y-4">
                                       <div>
-                                        <Label htmlFor="additionalInfo">
+                                        <Label htmlFor={`additionalInfo-${report.id}`}>
                                           Provide Additional Information
                                         </Label>
                                         <Textarea
-                                          id="additionalInfo"
+                                          id={`additionalInfo-${report.id}`}
                                           placeholder="Any additional information or updates regarding this incident..."
                                           className="mt-1"
+                                          value={contactTextById[report.id] || ""}
+                                          onChange={(e) =>
+                                            setContactTextById((prev) => ({
+                                              ...prev,
+                                              [report.id]: e.target.value,
+                                            }))
+                                          }
                                         />
                                       </div>
-                                      <Button className="bg-red-600 hover:bg-red-700">
+                                      <div className="space-y-2">
+                                        <Label>Conversation</Label>
+                                        <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white">
+                                          {(messagesById[report.id] || [])
+                                            .slice()
+                                            .reverse()
+                                            .map((m, idx) => (
+                                              <div key={m.id || idx} className="text-sm mb-2">
+                                                <span className="font-medium">{m.senderRole}:</span> {m.message}
+                                                <span className="text-xs text-gray-500 ml-2">{new Date(m.createdAt).toLocaleString()}</span>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      </div>
+                                      <Button
+                                        className="bg-red-600 hover:bg-red-700"
+                                        type="button"
+                                        onClick={async () => {
+                                          const msg = (contactTextById[report.id] || "").trim();
+                                          if (!msg) return;
+                                          try {
+                                            const res = await api.post(`/crimes/${report.id}/messages`, { message: msg });
+                                            if (res.ok) {
+                                              const data = await res.json();
+                                              if (data.success) {
+                                                setMessagesById((prev) => ({
+                                                  ...prev,
+                                                  [report.id]: [data.data, ...(prev[report.id] || [])],
+                                                }));
+                                                setContactTextById((prev) => ({ ...prev, [report.id]: "" }));
+                                              }
+                                            }
+                                          } catch {}
+                                        }}
+                                      >
                                         <MessageSquare className="h-4 w-4 mr-2" />
                                         Submit Update
                                       </Button>
