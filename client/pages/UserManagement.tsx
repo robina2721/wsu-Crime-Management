@@ -131,45 +131,21 @@ export default function UserManagement() {
   };
 
   const fetchPendingAccounts = async () => {
-    // Mock pending accounts data
-    const mockPending: PendingAccount[] = [
-      {
-        id: "P1",
-        fullName: "Officer Candidate Bereket Haile",
-        username: "bereket_h",
-        email: "bereket.haile@example.com",
-        phone: "+251-911-000-100",
-        requestedRole: UserRole.PREVENTIVE_OFFICER,
-        submittedDate: new Date("2024-01-14"),
-        status: "pending",
-        documents: ["police_certificate.pdf", "training_completion.pdf"],
-        notes: "Recent police academy graduate with high scores",
-      },
-      {
-        id: "P2",
-        fullName: "Detective Trainee Meron Gebre",
-        username: "meron_g",
-        email: "meron.gebre@example.com",
-        phone: "+251-911-000-101",
-        requestedRole: UserRole.DETECTIVE_OFFICER,
-        submittedDate: new Date("2024-01-12"),
-        status: "pending",
-        documents: ["detective_certification.pdf", "background_check.pdf"],
-        notes: "Specialized in cybercrime investigation",
-      },
-      {
-        id: "P3",
-        fullName: "Citizen Registration - Kebede Alemu",
-        username: "kebede_a",
-        email: "kebede.alemu@example.com",
-        requestedRole: UserRole.CITIZEN,
-        submittedDate: new Date("2024-01-16"),
-        status: "pending",
-        notes: "Standard citizen registration for crime reporting access",
-      },
-    ];
-
-    setPendingAccounts(mockPending);
+    try {
+      const res = await api.get("/pending-accounts");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          const list: PendingAccount[] = (data.data.pending || []).map((p: any) => ({
+            ...p,
+            submittedDate: new Date(p.submittedDate),
+          }));
+          setPendingAccounts(list);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load pending accounts", e);
+    }
   };
 
   const filterUsers = () => {
