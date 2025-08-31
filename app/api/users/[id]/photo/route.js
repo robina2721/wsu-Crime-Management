@@ -1,4 +1,7 @@
-import { uploadUserPhotoHandler, getUserPhotoHandler } from "../../../../../backend/controllers/usersController.js";
+import {
+  uploadUserPhotoHandler,
+  getUserPhotoHandler,
+} from "../../../../../backend/controllers/usersController.js";
 
 export async function GET(req, { params }) {
   return getUserPhotoHandler(req, params);

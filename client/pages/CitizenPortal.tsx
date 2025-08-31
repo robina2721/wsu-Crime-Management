@@ -91,8 +91,21 @@ export default function CitizenPortal() {
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [contactTextById, setContactTextById] = useState<Record<string, string>>({});
-  const [messagesById, setMessagesById] = useState<Record<string, { id: string; senderId: string; senderRole: string; message: string; createdAt: string | Date }[]>>({});
+  const [contactTextById, setContactTextById] = useState<
+    Record<string, string>
+  >({});
+  const [messagesById, setMessagesById] = useState<
+    Record<
+      string,
+      {
+        id: string;
+        senderId: string;
+        senderRole: string;
+        message: string;
+        createdAt: string | Date;
+      }[]
+    >
+  >({});
   const [currentTab, setCurrentTab] = useState("incident");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
 
@@ -149,7 +162,10 @@ export default function CitizenPortal() {
         }
         if (payload?.type === "crime_message" && payload.data) {
           const { crimeId, message } = payload.data;
-          setMessagesById((prev) => ({ ...prev, [crimeId]: [message, ...(prev[crimeId] || [])] }));
+          setMessagesById((prev) => ({
+            ...prev,
+            [crimeId]: [message, ...(prev[crimeId] || [])],
+          }));
         }
         if (payload?.type === "status_update" && payload.data) {
           const { crimeId, update } = payload.data;
@@ -160,10 +176,21 @@ export default function CitizenPortal() {
             if (idx >= 0) {
               const cur = copy[idx];
               const hist = [
-                { status: upd.status, timestamp: upd.timestamp, updatedBy: upd.updatedBy, notes: upd.notes, isVisibleToCitizen: !!upd.isVisibleToCitizen },
+                {
+                  status: upd.status,
+                  timestamp: upd.timestamp,
+                  updatedBy: upd.updatedBy,
+                  notes: upd.notes,
+                  isVisibleToCitizen: !!upd.isVisibleToCitizen,
+                },
                 ...(cur.statusHistory || []),
               ];
-              copy[idx] = { ...cur, currentStatus: upd.status || cur.currentStatus, statusHistory: hist, lastUpdate: upd.timestamp };
+              copy[idx] = {
+                ...cur,
+                currentStatus: upd.status || cur.currentStatus,
+                statusHistory: hist,
+                lastUpdate: upd.timestamp,
+              };
             }
             return copy;
           });
@@ -831,14 +858,18 @@ export default function CitizenPortal() {
                                   {status.canProvideUpdates && (
                                     <div className="space-y-4">
                                       <div>
-                                        <Label htmlFor={`additionalInfo-${report.id}`}>
+                                        <Label
+                                          htmlFor={`additionalInfo-${report.id}`}
+                                        >
                                           Provide Additional Information
                                         </Label>
                                         <Textarea
                                           id={`additionalInfo-${report.id}`}
                                           placeholder="Any additional information or updates regarding this incident..."
                                           className="mt-1"
-                                          value={contactTextById[report.id] || ""}
+                                          value={
+                                            contactTextById[report.id] || ""
+                                          }
                                           onChange={(e) =>
                                             setContactTextById((prev) => ({
                                               ...prev,
@@ -854,9 +885,19 @@ export default function CitizenPortal() {
                                             .slice()
                                             .reverse()
                                             .map((m, idx) => (
-                                              <div key={m.id || idx} className="text-sm mb-2">
-                                                <span className="font-medium">{m.senderRole}:</span> {m.message}
-                                                <span className="text-xs text-gray-500 ml-2">{new Date(m.createdAt).toLocaleString()}</span>
+                                              <div
+                                                key={m.id || idx}
+                                                className="text-sm mb-2"
+                                              >
+                                                <span className="font-medium">
+                                                  {m.senderRole}:
+                                                </span>{" "}
+                                                {m.message}
+                                                <span className="text-xs text-gray-500 ml-2">
+                                                  {new Date(
+                                                    m.createdAt,
+                                                  ).toLocaleString()}
+                                                </span>
                                               </div>
                                             ))}
                                         </div>
@@ -865,18 +906,29 @@ export default function CitizenPortal() {
                                         className="bg-red-600 hover:bg-red-700"
                                         type="button"
                                         onClick={async () => {
-                                          const msg = (contactTextById[report.id] || "").trim();
+                                          const msg = (
+                                            contactTextById[report.id] || ""
+                                          ).trim();
                                           if (!msg) return;
                                           try {
-                                            const res = await api.post(`/crimes/${report.id}/messages`, { message: msg });
+                                            const res = await api.post(
+                                              `/crimes/${report.id}/messages`,
+                                              { message: msg },
+                                            );
                                             if (res.ok) {
                                               const data = await res.json();
                                               if (data.success) {
                                                 setMessagesById((prev) => ({
                                                   ...prev,
-                                                  [report.id]: [data.data, ...(prev[report.id] || [])],
+                                                  [report.id]: [
+                                                    data.data,
+                                                    ...(prev[report.id] || []),
+                                                  ],
                                                 }));
-                                                setContactTextById((prev) => ({ ...prev, [report.id]: "" }));
+                                                setContactTextById((prev) => ({
+                                                  ...prev,
+                                                  [report.id]: "",
+                                                }));
                                               }
                                             }
                                           } catch {}
@@ -931,7 +983,11 @@ export default function CitizenPortal() {
                 handleSubmitReport(formData);
               }}
             >
-              <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+              <Tabs
+                value={currentTab}
+                onValueChange={setCurrentTab}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="incident">Incident Details</TabsTrigger>
                   <TabsTrigger value="evidence">
@@ -1116,7 +1172,9 @@ export default function CitizenPortal() {
                                   className="h-24 w-full rounded"
                                 />
                               )}
-                              <p className="text-xs mt-1 truncate">{file.name}</p>
+                              <p className="text-xs mt-1 truncate">
+                                {file.name}
+                              </p>
                             </div>
                           ))}
                         </div>

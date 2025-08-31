@@ -121,15 +121,17 @@ export default function UserManagement() {
           createdAt: new Date(u.createdAt),
           updatedAt: new Date(u.updatedAt),
         }));
-        await Promise.all(list.map(async (u) => {
-          try {
-            const p = await api.get(`/users/${u.id}/photo`);
-            if (p.ok) {
-              const d = await p.json();
-              u.photoUrl = d?.data?.photoUrl || null;
-            }
-          } catch {}
-        }));
+        await Promise.all(
+          list.map(async (u) => {
+            try {
+              const p = await api.get(`/users/${u.id}/photo`);
+              if (p.ok) {
+                const d = await p.json();
+                u.photoUrl = d?.data?.photoUrl || null;
+              }
+            } catch {}
+          }),
+        );
         setUsers(list as User[]);
       }
     } catch (e) {
@@ -145,10 +147,12 @@ export default function UserManagement() {
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          const list: PendingAccount[] = (data.data.pending || []).map((p: any) => ({
-            ...p,
-            submittedDate: new Date(p.submittedDate),
-          }));
+          const list: PendingAccount[] = (data.data.pending || []).map(
+            (p: any) => ({
+              ...p,
+              submittedDate: new Date(p.submittedDate),
+            }),
+          );
           setPendingAccounts(list);
         }
       }
@@ -514,7 +518,13 @@ export default function UserManagement() {
                         </div>
                         <div className="space-y-2">
                           <Label>Profile Photo</Label>
-                          <Input type="file" accept="image/*" onChange={(e) => setNewUserPhoto(e.target.files?.[0] || null)} />
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              setNewUserPhoto(e.target.files?.[0] || null)
+                            }
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Role</Label>
@@ -578,11 +588,15 @@ export default function UserManagement() {
                                   };
                                   if (newUserPhoto) {
                                     const fd = new FormData();
-                                    fd.append('file', newUserPhoto);
-                                    const upRes = await api.post(`/users/${u.id}/photo`, fd);
+                                    fd.append("file", newUserPhoto);
+                                    const upRes = await api.post(
+                                      `/users/${u.id}/photo`,
+                                      fd,
+                                    );
                                     if (upRes.ok) {
                                       const pr = await upRes.json();
-                                      normalized.photoUrl = pr?.data?.photoUrl || null;
+                                      normalized.photoUrl =
+                                        pr?.data?.photoUrl || null;
                                     }
                                   }
                                   setUsers((prev) => [normalized, ...prev]);
@@ -636,13 +650,17 @@ export default function UserManagement() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            { (user_ as any).photoUrl ? (
-                              <img src={(user_ as any).photoUrl} alt={user_.fullName} className="w-12 h-12 rounded-full object-cover" />
+                            {(user_ as any).photoUrl ? (
+                              <img
+                                src={(user_ as any).photoUrl}
+                                alt={user_.fullName}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
                             ) : (
                               <div className="w-12 h-12 bg-crime-red rounded-full flex items-center justify-center">
                                 <Shield className="w-6 h-6 text-white" />
                               </div>
-                            ) }
+                            )}
                             <div>
                               <h3 className="text-lg font-semibold text-crime-black">
                                 {user_.fullName}

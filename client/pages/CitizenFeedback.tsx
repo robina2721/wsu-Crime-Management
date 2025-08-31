@@ -96,12 +96,16 @@ export default function CitizenFeedback() {
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
-            const list: CitizenFeedback[] = (data.data.feedback || []).map((f: any) => ({
-              ...f,
-              respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
-              submittedAt: new Date(f.submittedAt),
-              updatedAt: new Date(f.updatedAt),
-            }));
+            const list: CitizenFeedback[] = (data.data.feedback || []).map(
+              (f: any) => ({
+                ...f,
+                respondedAt: f.respondedAt
+                  ? new Date(f.respondedAt)
+                  : undefined,
+                submittedAt: new Date(f.submittedAt),
+                updatedAt: new Date(f.updatedAt),
+              }),
+            );
             setFeedback(list);
           }
         }
@@ -260,18 +264,30 @@ export default function CitizenFeedback() {
     },
   ];
 
-  const canRespond = user && ["super_admin","police_head","hr_manager"].includes(user.role as any);
+  const canRespond =
+    user &&
+    ["super_admin", "police_head", "hr_manager"].includes(user.role as any);
 
   const respondToFeedback = async (item: CitizenFeedback) => {
     const text = (responseById[item.id] || "").trim();
     if (!text) return;
-    const res = await api.post(`/feedback/${item.id}/respond`, { response: text, status: FeedbackStatus.UNDER_REVIEW });
+    const res = await api.post(`/feedback/${item.id}/respond`, {
+      response: text,
+      status: FeedbackStatus.UNDER_REVIEW,
+    });
     if (res.ok) {
       const data = await res.json();
       if (data.success) {
         const f = data.data;
-        const normalized: CitizenFeedback = { ...f, respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined, submittedAt: new Date(f.submittedAt), updatedAt: new Date(f.updatedAt) };
-        setFeedback((prev) => prev.map((fb) => (fb.id === item.id ? normalized : fb)));
+        const normalized: CitizenFeedback = {
+          ...f,
+          respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
+          submittedAt: new Date(f.submittedAt),
+          updatedAt: new Date(f.updatedAt),
+        };
+        setFeedback((prev) =>
+          prev.map((fb) => (fb.id === item.id ? normalized : fb)),
+        );
         setResponseById((prev) => ({ ...prev, [item.id]: "" }));
       }
     }
@@ -511,9 +527,17 @@ export default function CitizenFeedback() {
                             <Input
                               placeholder="Type response..."
                               value={responseById[item.id] || ""}
-                              onChange={(e) => setResponseById((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                              onChange={(e) =>
+                                setResponseById((prev) => ({
+                                  ...prev,
+                                  [item.id]: e.target.value,
+                                }))
+                              }
                             />
-                            <Button size="sm" onClick={() => respondToFeedback(item)}>
+                            <Button
+                              size="sm"
+                              onClick={() => respondToFeedback(item)}
+                            >
                               <Send className="h-4 w-4 mr-1" />
                               Send
                             </Button>

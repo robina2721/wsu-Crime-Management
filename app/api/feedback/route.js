@@ -1,4 +1,7 @@
-import { listHandler, createHandler } from "../../../backend/controllers/feedbackController.js";
+import {
+  listHandler,
+  createHandler,
+} from "../../../backend/controllers/feedbackController.js";
 
 export async function GET(req) {
   return listHandler(req);

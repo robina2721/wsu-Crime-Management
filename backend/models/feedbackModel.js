@@ -25,7 +25,7 @@ async function ensureFeedbackTable() {
          submitted_at DATETIME2 NOT NULL,
          updated_at DATETIME2 NOT NULL
        )
-     END`
+     END`,
   );
 }
 
@@ -33,11 +33,21 @@ export async function listFeedback(limit = 100, offset = 0, filters = {}) {
   await ensureFeedbackTable();
   const where = [];
   const params = [];
-  if (filters.type) { where.push(`feedback_type = @p${params.length + 1}`); params.push(filters.type); }
-  if (filters.status) { where.push(`status = @p${params.length + 1}`); params.push(filters.status); }
-  if (filters.category) { where.push(`category = @p${params.length + 1}`); params.push(filters.category); }
+  if (filters.type) {
+    where.push(`feedback_type = @p${params.length + 1}`);
+    params.push(filters.type);
+  }
+  if (filters.status) {
+    where.push(`status = @p${params.length + 1}`);
+    params.push(filters.status);
+  }
+  if (filters.category) {
+    where.push(`category = @p${params.length + 1}`);
+    params.push(filters.category);
+  }
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  params.push(offset); params.push(limit);
+  params.push(offset);
+  params.push(limit);
   const rows = await queryRows(
     `SELECT id, citizen_id as citizenId, citizen_name as citizenName, email, phone, 
             feedback_type as feedbackType, category, subject, message, related_case_id as relatedCaseId,
@@ -47,7 +57,7 @@ export async function listFeedback(limit = 100, offset = 0, filters = {}) {
      FROM citizen_feedback ${whereSql}
      ORDER BY submitted_at DESC
      OFFSET @p${params.length - 1} ROWS FETCH NEXT @p${params.length} ROWS ONLY`,
-    params
+    params,
   );
   return rows;
 }
@@ -61,33 +71,59 @@ export async function getFeedback(id) {
             responded_at as respondedAt, CAST(is_anonymous as INT) as isAnonymous,
             submitted_at as submittedAt, updated_at as updatedAt
      FROM citizen_feedback WHERE id = @p1`,
-    [id]
+    [id],
   );
 }
 
 export async function createFeedback(data) {
   await ensureFeedbackTable();
-  const id = (global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID());
+  const id =
+    global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
   const now = new Date();
   await queryRows(
     `INSERT INTO citizen_feedback (id, citizen_id, citizen_name, email, phone, feedback_type, category, subject, message,
                                    related_case_id, priority, status, response, responded_by_id, responded_by_name, responded_at,
                                    is_anonymous, submitted_at, updated_at)
      VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,'submitted',NULL,NULL,NULL,NULL,@p12,@p13,@p14)`,
-    [id, data.citizenId, data.citizenName ?? null, data.email ?? null, data.phone ?? null, data.feedbackType, data.category,
-     data.subject, data.message, data.relatedCaseId ?? null, data.priority ?? 'medium', data.isAnonymous ? 1 : 0, now, now]
+    [
+      id,
+      data.citizenId,
+      data.citizenName ?? null,
+      data.email ?? null,
+      data.phone ?? null,
+      data.feedbackType,
+      data.category,
+      data.subject,
+      data.message,
+      data.relatedCaseId ?? null,
+      data.priority ?? "medium",
+      data.isAnonymous ? 1 : 0,
+      now,
+      now,
+    ],
   );
   return await getFeedback(id);
 }
 
-export async function respondFeedback(id, { response, status, respondedById, respondedByName }) {
+export async function respondFeedback(
+  id,
+  { response, status, respondedById, respondedByName },
+) {
   await ensureFeedbackTable();
   const now = new Date();
-  const s = status || 'under_review';
+  const s = status || "under_review";
   await queryRows(
     `UPDATE citizen_feedback SET response = @p1, status = @p2, responded_by_id = @p3, responded_by_name = @p4,
       responded_at = @p5, updated_at = @p6 WHERE id = @p7`,
-    [response ?? null, s, respondedById ?? null, respondedByName ?? null, now, now, id]
+    [
+      response ?? null,
+      s,
+      respondedById ?? null,
+      respondedByName ?? null,
+      now,
+      now,
+      id,
+    ],
   );
   return await getFeedback(id);
 }

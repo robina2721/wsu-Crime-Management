@@ -11,17 +11,18 @@ async function ensureUserPhotosTable() {
          data_base64 NVARCHAR(MAX) NOT NULL,
          created_at DATETIME2 NOT NULL
        )
-     END`
+     END`,
   );
 }
 
 export async function saveUserPhoto(userId, mime, dataBase64) {
   await ensureUserPhotosTable();
-  const id = (global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID());
+  const id =
+    global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
   const now = new Date();
   await queryRows(
     `INSERT INTO user_photos (id, user_id, mime, data_base64, created_at) VALUES (@p1, @p2, @p3, @p4, @p5)`,
-    [id, userId, mime, dataBase64, now]
+    [id, userId, mime, dataBase64, now],
   );
   return { id, userId, mime, createdAt: now };
 }
@@ -30,6 +31,6 @@ export async function getLatestUserPhoto(userId) {
   await ensureUserPhotosTable();
   return await queryRow(
     `SELECT TOP 1 id, user_id as userId, mime, data_base64 as dataBase64, created_at as createdAt FROM user_photos WHERE user_id = @p1 ORDER BY created_at DESC`,
-    [userId]
+    [userId],
   );
 }

@@ -138,7 +138,7 @@ async function ensureEvidenceTable() {
          uploaded_by NVARCHAR(64) NULL,
          created_at DATETIME2 NOT NULL
        )
-     END`
+     END`,
   );
 }
 
@@ -155,7 +155,7 @@ async function ensureWitnessTable() {
          statement NVARCHAR(MAX) NULL,
          created_at DATETIME2 NOT NULL
        )
-     END`
+     END`,
   );
 }
 
@@ -165,13 +165,31 @@ export async function createEvidenceForCrime(crimeId, files = [], opts = {}) {
   const now = new Date();
   const created = [];
   for (const f of files) {
-    const id = global.crypto?.randomUUID?.() || (await import('node:crypto')).randomUUID();
+    const id =
+      global.crypto?.randomUUID?.() ||
+      (await import("node:crypto")).randomUUID();
     await queryRows(
       `INSERT INTO crime_evidence (id, crime_id, file_name, file_type, description, uploaded_by, created_at)
        VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`,
-      [id, crimeId, f.fileName || String(f), f.fileType || null, f.description || null, opts.uploadedBy || null, now]
+      [
+        id,
+        crimeId,
+        f.fileName || String(f),
+        f.fileType || null,
+        f.description || null,
+        opts.uploadedBy || null,
+        now,
+      ],
     );
-    created.push({ id, crimeId, fileName: f.fileName || String(f), fileType: f.fileType || null, description: f.description || null, uploadedBy: opts.uploadedBy || null, createdAt: now });
+    created.push({
+      id,
+      crimeId,
+      fileName: f.fileName || String(f),
+      fileType: f.fileType || null,
+      description: f.description || null,
+      uploadedBy: opts.uploadedBy || null,
+      createdAt: now,
+    });
   }
   return created;
 }
@@ -182,13 +200,31 @@ export async function createWitnessesForCrime(crimeId, witnesses = []) {
   const now = new Date();
   const created = [];
   for (const w of witnesses) {
-    const id = global.crypto?.randomUUID?.() || (await import('node:crypto')).randomUUID();
+    const id =
+      global.crypto?.randomUUID?.() ||
+      (await import("node:crypto")).randomUUID();
     await queryRows(
       `INSERT INTO crime_witnesses (id, crime_id, name, phone, email, statement, created_at)
        VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`,
-      [id, crimeId, w.name || '', w.phone || null, w.email || null, w.statement || null, now]
+      [
+        id,
+        crimeId,
+        w.name || "",
+        w.phone || null,
+        w.email || null,
+        w.statement || null,
+        now,
+      ],
     );
-    created.push({ id, crimeId, name: w.name || '', phone: w.phone || null, email: w.email || null, statement: w.statement || null, createdAt: now });
+    created.push({
+      id,
+      crimeId,
+      name: w.name || "",
+      phone: w.phone || null,
+      email: w.email || null,
+      statement: w.statement || null,
+      createdAt: now,
+    });
   }
   return created;
 }
@@ -198,7 +234,7 @@ export async function getEvidenceByCrime(crimeId) {
   const rows = await queryRows(
     `SELECT id, crime_id as crimeId, file_name as fileName, file_type as fileType, description, uploaded_by as uploadedBy, created_at as createdAt
      FROM crime_evidence WHERE crime_id = @p1 ORDER BY created_at DESC`,
-    [crimeId]
+    [crimeId],
   );
   return rows;
 }
@@ -208,7 +244,7 @@ export async function getWitnessesByCrime(crimeId) {
   const rows = await queryRows(
     `SELECT id, crime_id as crimeId, name, phone, email, statement, created_at as createdAt
      FROM crime_witnesses WHERE crime_id = @p1 ORDER BY created_at DESC`,
-    [crimeId]
+    [crimeId],
   );
   return rows;
 }
@@ -227,20 +263,40 @@ async function ensureStatusTable() {
          is_visible_to_citizen BIT NOT NULL DEFAULT 1,
          created_at DATETIME2 NOT NULL
        )
-     END`
+     END`,
   );
 }
 
-export async function addStatusUpdate(crimeId, { status, notes, updatedBy, isVisibleToCitizen = true }) {
+export async function addStatusUpdate(
+  crimeId,
+  { status, notes, updatedBy, isVisibleToCitizen = true },
+) {
   await ensureStatusTable();
-  const id = global.crypto?.randomUUID?.() || (await import('node:crypto')).randomUUID();
+  const id =
+    global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
   const now = new Date();
   await queryRows(
     `INSERT INTO crime_status_updates (id, crime_id, status, notes, updated_by, is_visible_to_citizen, created_at)
      VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`,
-    [id, crimeId, status, notes ?? null, updatedBy, isVisibleToCitizen ? 1 : 0, now]
+    [
+      id,
+      crimeId,
+      status,
+      notes ?? null,
+      updatedBy,
+      isVisibleToCitizen ? 1 : 0,
+      now,
+    ],
   );
-  return { id, crimeId, status, notes: notes ?? null, updatedBy, isVisibleToCitizen: !!isVisibleToCitizen, createdAt: now };
+  return {
+    id,
+    crimeId,
+    status,
+    notes: notes ?? null,
+    updatedBy,
+    isVisibleToCitizen: !!isVisibleToCitizen,
+    createdAt: now,
+  };
 }
 
 export async function getStatusUpdatesByCrime(crimeId) {
@@ -248,7 +304,7 @@ export async function getStatusUpdatesByCrime(crimeId) {
   return await queryRows(
     `SELECT id, crime_id as crimeId, status, notes, updated_by as updatedBy, CAST(is_visible_to_citizen as INT) as isVisibleToCitizen, created_at as createdAt
      FROM crime_status_updates WHERE crime_id = @p1 ORDER BY created_at DESC`,
-    [crimeId]
+    [crimeId],
   );
 }
 
@@ -265,18 +321,22 @@ async function ensureMessagesTable() {
          message NVARCHAR(MAX) NOT NULL,
          created_at DATETIME2 NOT NULL
        )
-     END`
+     END`,
   );
 }
 
-export async function addCrimeMessage(crimeId, { senderId, senderRole, message }) {
+export async function addCrimeMessage(
+  crimeId,
+  { senderId, senderRole, message },
+) {
   await ensureMessagesTable();
-  const id = global.crypto?.randomUUID?.() || (await import('node:crypto')).randomUUID();
+  const id =
+    global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
   const now = new Date();
   await queryRows(
     `INSERT INTO crime_messages (id, crime_id, sender_id, sender_role, message, created_at)
      VALUES (@p1, @p2, @p3, @p4, @p5, @p6)`,
-    [id, crimeId, senderId, senderRole, message, now]
+    [id, crimeId, senderId, senderRole, message, now],
   );
   return { id, crimeId, senderId, senderRole, message, createdAt: now };
 }
@@ -288,6 +348,6 @@ export async function getCrimeMessages(crimeId, limit = 100, offset = 0) {
      FROM crime_messages WHERE crime_id = @p1
      ORDER BY created_at DESC
      OFFSET @p2 ROWS FETCH NEXT @p3 ROWS ONLY`,
-    [crimeId, offset, limit]
+    [crimeId, offset, limit],
   );
 }
