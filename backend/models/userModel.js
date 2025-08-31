@@ -32,6 +32,34 @@ export async function listUsers(limit = 100, offset = 0, filters = {}) {
   );
 }
 
+export async function listActiveOfficersWithCaseCounts(limit = 100, offset = 0) {
+  const activeStatuses = [
+    'reported',
+    'assigned',
+    'under_investigation'
+  ];
+  // Prepare parameters for IN clause
+  const params = [];
+  for (const s of activeStatuses) params.push(s);
+  params.push(offset); params.push(limit);
+  const sql = `
+    WITH active_cases AS (
+      SELECT assigned_to AS officer_id, COUNT(*) AS activeCount
+      FROM crimes
+      WHERE assigned_to IS NOT NULL AND status IN (${activeStatuses.map((_, i) => `@p${i + 1}`).join(', ')})
+      GROUP BY assigned_to
+    )
+    SELECT u.id, u.username, u.role, u.full_name AS fullName, u.email, u.phone,
+           CAST(u.is_active AS INT) AS isActive,
+           COALESCE(a.activeCount, 0) AS activeCaseCount
+    FROM users u
+    LEFT JOIN active_cases a ON a.officer_id = u.id
+    WHERE u.is_active = 1 AND u.role IN ('preventive_officer','detective_officer')
+    ORDER BY a.activeCount ASC, u.full_name ASC
+    OFFSET @p${params.length - 1} ROWS FETCH NEXT @p${params.length} ROWS ONLY`;
+  return await queryRows(sql, params);
+}
+
 export async function createUser(data) {
   const id = (global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID());
   const now = new Date();
