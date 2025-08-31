@@ -48,6 +48,15 @@ export default function CaseManagement() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [statusDialogCaseId, setStatusDialogCaseId] = useState<string | null>(null);
+  const [newStatus, setNewStatus] = useState<CrimeStatus | ''>('');
+  const [remark, setRemark] = useState('');
+
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [assignCaseId, setAssignCaseId] = useState<string | null>(null);
+  const [officers, setOfficers] = useState<OfficerWithCounts[]>([]);
+  const [selectedOfficerId, setSelectedOfficerId] = useState<string>('');
 
   const canManageAllCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
   const canAssignCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.DETECTIVE_OFFICER]);
