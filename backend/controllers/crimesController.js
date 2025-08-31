@@ -5,7 +5,7 @@ import {
   updateCrime,
   deleteCrime,
 } from "../../backend/models/crimeModel.js";
-import { createEvidenceForCrime, createWitnessesForCrime, getEvidenceByCrime, getWitnessesByCrime } from "../../backend/models/crimeModel.js";
+import { createEvidenceForCrime, createWitnessesForCrime, getEvidenceByCrime, getWitnessesByCrime, addStatusUpdate, getStatusUpdatesByCrime, addCrimeMessage, getCrimeMessages } from "../../backend/models/crimeModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
 import { notifyCrimeUpdate } from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
@@ -212,6 +212,16 @@ export async function updateHandler(req, params) {
         );
       }
       const updated = await updateCrime(params.id, allowedUpdates);
+      try {
+        if (Object.prototype.hasOwnProperty.call(body, "status")) {
+          await addStatusUpdate(params.id, {
+            status: body.status,
+            notes: body.notes,
+            updatedBy: user.id,
+            isVisibleToCitizen: body.isVisibleToCitizen !== false,
+          });
+        }
+      } catch {}
       notifyCrimeUpdate(updated);
       return NextResponse.json({
         success: true,

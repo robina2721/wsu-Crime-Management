@@ -212,3 +212,82 @@ export async function getWitnessesByCrime(crimeId) {
   );
   return rows;
 }
+
+// Status updates
+async function ensureStatusTable() {
+  await queryRows(
+    `IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[crime_status_updates]') AND type in (N'U'))
+     BEGIN
+       CREATE TABLE crime_status_updates (
+         id NVARCHAR(64) NOT NULL PRIMARY KEY,
+         crime_id NVARCHAR(64) NOT NULL,
+         status NVARCHAR(64) NOT NULL,
+         notes NVARCHAR(MAX) NULL,
+         updated_by NVARCHAR(64) NOT NULL,
+         is_visible_to_citizen BIT NOT NULL DEFAULT 1,
+         created_at DATETIME2 NOT NULL
+       )
+     END`
+  );
+}
+
+export async function addStatusUpdate(crimeId, { status, notes, updatedBy, isVisibleToCitizen = true }) {
+  await ensureStatusTable();
+  const id = global.crypto?.randomUUID?.() || (await import('node:crypto')).randomUUID();
+  const now = new Date();
+  await queryRows(
+    `INSERT INTO crime_status_updates (id, crime_id, status, notes, updated_by, is_visible_to_citizen, created_at)
+     VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`,
+    [id, crimeId, status, notes ?? null, updatedBy, isVisibleToCitizen ? 1 : 0, now]
+  );
+  return { id, crimeId, status, notes: notes ?? null, updatedBy, isVisibleToCitizen: !!isVisibleToCitizen, createdAt: now };
+}
+
+export async function getStatusUpdatesByCrime(crimeId) {
+  await ensureStatusTable();
+  return await queryRows(
+    `SELECT id, crime_id as crimeId, status, notes, updated_by as updatedBy, CAST(is_visible_to_citizen as INT) as isVisibleToCitizen, created_at as createdAt
+     FROM crime_status_updates WHERE crime_id = @p1 ORDER BY created_at DESC`,
+    [crimeId]
+  );
+}
+
+// Messages
+async function ensureMessagesTable() {
+  await queryRows(
+    `IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[crime_messages]') AND type in (N'U'))
+     BEGIN
+       CREATE TABLE crime_messages (
+         id NVARCHAR(64) NOT NULL PRIMARY KEY,
+         crime_id NVARCHAR(64) NOT NULL,
+         sender_id NVARCHAR(64) NOT NULL,
+         sender_role NVARCHAR(64) NOT NULL,
+         message NVARCHAR(MAX) NOT NULL,
+         created_at DATETIME2 NOT NULL
+       )
+     END`
+  );
+}
+
+export async function addCrimeMessage(crimeId, { senderId, senderRole, message }) {
+  await ensureMessagesTable();
+  const id = global.crypto?.randomUUID?.() || (await import('node:crypto')).randomUUID();
+  const now = new Date();
+  await queryRows(
+    `INSERT INTO crime_messages (id, crime_id, sender_id, sender_role, message, created_at)
+     VALUES (@p1, @p2, @p3, @p4, @p5, @p6)`,
+    [id, crimeId, senderId, senderRole, message, now]
+  );
+  return { id, crimeId, senderId, senderRole, message, createdAt: now };
+}
+
+export async function getCrimeMessages(crimeId, limit = 100, offset = 0) {
+  await ensureMessagesTable();
+  return await queryRows(
+    `SELECT id, crime_id as crimeId, sender_id as senderId, sender_role as senderRole, message, created_at as createdAt
+     FROM crime_messages WHERE crime_id = @p1
+     ORDER BY created_at DESC
+     OFFSET @p2 ROWS FETCH NEXT @p3 ROWS ONLY`,
+    [crimeId, offset, limit]
+  );
+}
