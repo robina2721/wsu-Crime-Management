@@ -89,6 +89,27 @@ export default function CitizenFeedback() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseById, setResponseById] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get("/feedback");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            const list: CitizenFeedback[] = (data.data.feedback || []).map((f: any) => ({
+              ...f,
+              respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
+              submittedAt: new Date(f.submittedAt),
+              updatedAt: new Date(f.updatedAt),
+            }));
+            setFeedback(list);
+          }
+        }
+      } catch {}
+    };
+    load();
+  }, []);
+
   const filteredFeedback = feedback.filter((item) => {
     const matchesSearch =
       item.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
