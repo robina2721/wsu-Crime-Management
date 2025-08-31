@@ -91,6 +91,8 @@ export default function CitizenPortal() {
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [currentTab, setCurrentTab] = useState("incident");
+  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
 
   useEffect(() => {
     const loadReports = async () => {
@@ -250,6 +252,7 @@ export default function CitizenPortal() {
         setReports((prev) => [normalized, ...prev]);
         setFormData({});
         setWitnesses([]);
+        setEvidenceFiles([]);
         setShowNewReportForm(false);
       }
     } catch (e) {
@@ -277,7 +280,9 @@ export default function CitizenPortal() {
       setUploadProgress(100);
       setIsUploading(false);
 
-      const fileNames = Array.from(files).map((file) => file.name);
+      const selected = Array.from(files);
+      setEvidenceFiles((prev) => [...prev, ...selected]);
+      const fileNames = selected.map((file) => file.name);
       setFormData((prev) => ({
         ...prev,
         evidence: [...(prev.evidence || []), ...fileNames],
@@ -816,7 +821,7 @@ export default function CitizenPortal() {
                 handleSubmitReport(formData);
               }}
             >
-              <Tabs defaultValue="incident" className="w-full">
+              <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="incident">Incident Details</TabsTrigger>
                   <TabsTrigger value="evidence">
@@ -962,7 +967,7 @@ export default function CitizenPortal() {
                           type="file"
                           className="hidden"
                           multiple
-                          accept="image/*,video/*,.pdf,.doc,.docx"
+                          accept="image/*,video/*"
                           onChange={(e) => {
                             if (e.target.files) {
                               handleFileUpload(e.target.files);
@@ -982,17 +987,26 @@ export default function CitizenPortal() {
                       </div>
                     )}
 
-                    {formData.evidence && formData.evidence.length > 0 && (
+                    {evidenceFiles.length > 0 && (
                       <div className="mt-4">
                         <Label>Uploaded Files</Label>
                         <div className="grid grid-cols-2 gap-2 mt-2">
-                          {formData.evidence.map((file, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 p-2 border rounded"
-                            >
-                              <Camera className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm truncate">{file}</span>
+                          {evidenceFiles.map((file, index) => (
+                            <div key={index} className="p-2 border rounded">
+                              {file.type.startsWith("image/") ? (
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="h-24 w-full object-cover rounded"
+                                />
+                              ) : (
+                                <video
+                                  src={URL.createObjectURL(file)}
+                                  controls
+                                  className="h-24 w-full rounded"
+                                />
+                              )}
+                              <p className="text-xs mt-1 truncate">{file.name}</p>
                             </div>
                           ))}
                         </div>
@@ -1191,13 +1205,16 @@ export default function CitizenPortal() {
                     setShowNewReportForm(false);
                     setFormData({});
                     setWitnesses([]);
+                    setEvidenceFiles([]);
                   }}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-red-600 hover:bg-red-700">
-                  Submit Report
-                </Button>
+                {currentTab === "review" && (
+                  <Button type="submit" className="bg-red-600 hover:bg-red-700">
+                    Submit Report
+                  </Button>
+                )}
               </div>
             </form>
           </DialogContent>
