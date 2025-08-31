@@ -336,9 +336,14 @@ export async function postStatusHandler(req, params) {
       isVisibleToCitizen: body.isVisibleToCitizen !== false,
     });
     // also update main crime status if changed
+    let updatedCrime = report;
     if (body.status && body.status !== report.status) {
-      await updateCrime(report.id, { status: body.status });
+      updatedCrime = await updateCrime(report.id, { status: body.status });
     }
+    try {
+      // notify reporter and assigned officer
+      notifyStatusUpdate(report.id, upd, { reportedBy: updatedCrime.reportedBy, assignedTo: updatedCrime.assignedTo });
+    } catch {}
     return NextResponse.json({ success: true, data: upd, message: "Status updated" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
