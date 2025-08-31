@@ -115,13 +115,21 @@ export default function UserManagement() {
       const res = await api.get("/users");
       const data = await res.json();
       if (res.ok && data.success) {
-        setUsers(
-          data.data.users.map((u: any) => ({
-            ...u,
-            createdAt: new Date(u.createdAt),
-            updatedAt: new Date(u.updatedAt),
-          })),
-        );
+        const list: any[] = data.data.users.map((u: any) => ({
+          ...u,
+          createdAt: new Date(u.createdAt),
+          updatedAt: new Date(u.updatedAt),
+        }));
+        await Promise.all(list.map(async (u) => {
+          try {
+            const p = await api.get(`/users/${u.id}/photo`);
+            if (p.ok) {
+              const d = await p.json();
+              u.photoUrl = d?.data?.photoUrl || null;
+            }
+          } catch {}
+        }));
+        setUsers(list as User[]);
       }
     } catch (e) {
       console.error("Failed to load users", e);
