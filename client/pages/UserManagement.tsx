@@ -636,9 +636,13 @@ export default function UserManagement() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-12 h-12 bg-crime-red rounded-full flex items-center justify-center">
-                              <Shield className="w-6 h-6 text-white" />
-                            </div>
+                            { (user_ as any).photoUrl ? (
+                              <img src={(user_ as any).photoUrl} alt={user_.fullName} className="w-12 h-12 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-12 h-12 bg-crime-red rounded-full flex items-center justify-center">
+                                <Shield className="w-6 h-6 text-white" />
+                              </div>
+                            ) }
                             <div>
                               <h3 className="text-lg font-semibold text-crime-black">
                                 {user_.fullName}
