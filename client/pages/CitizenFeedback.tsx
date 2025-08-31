@@ -73,69 +73,7 @@ import {
   Priority,
 } from "../../shared/types";
 
-// Mock data for demonstration
-const mockFeedback: CitizenFeedback[] = [
-  {
-    id: "1",
-    citizenId: "citizen1",
-    citizenName: "John Doe",
-    email: "john.doe@email.com",
-    phone: "+1-234-567-8901",
-    feedbackType: FeedbackType.COMPLIMENT,
-    category: FeedbackCategory.OFFICER_CONDUCT,
-    subject: "Excellent Service by Officer Smith",
-    message:
-      "I wanted to express my gratitude for the professional and courteous service provided by Officer Smith during my recent interaction. He was very helpful and understanding.",
-    relatedCaseId: "CASE-001",
-    priority: Priority.LOW,
-    status: FeedbackStatus.RESOLVED,
-    response:
-      "Thank you for your positive feedback. We have forwarded your compliments to Officer Smith and his supervisor.",
-    respondedBy: "Supervisor Johnson",
-    respondedAt: new Date("2024-01-15T10:30:00"),
-    attachments: [],
-    isAnonymous: false,
-    submittedAt: new Date("2024-01-10T14:20:00"),
-    updatedAt: new Date("2024-01-15T10:30:00"),
-  },
-  {
-    id: "2",
-    citizenId: "citizen1",
-    citizenName: "Anonymous",
-    feedbackType: FeedbackType.COMPLAINT,
-    category: FeedbackCategory.RESPONSE_TIME,
-    subject: "Slow Response to Emergency Call",
-    message:
-      "I called for emergency assistance and it took over 45 minutes for officers to arrive. This seems excessive for an emergency situation.",
-    priority: Priority.HIGH,
-    status: FeedbackStatus.UNDER_REVIEW,
-    attachments: [],
-    isAnonymous: true,
-    submittedAt: new Date("2024-01-12T20:15:00"),
-    updatedAt: new Date("2024-01-13T09:00:00"),
-  },
-  {
-    id: "3",
-    citizenId: "citizen1",
-    citizenName: "John Doe",
-    email: "john.doe@email.com",
-    feedbackType: FeedbackType.SUGGESTION,
-    category: FeedbackCategory.SERVICE_QUALITY,
-    subject: "Suggestion for Online Reporting System",
-    message:
-      "It would be great if we could submit non-emergency reports online. This would save time for both citizens and officers.",
-    priority: Priority.MEDIUM,
-    status: FeedbackStatus.INVESTIGATING,
-    response:
-      "Thank you for your suggestion. We are currently evaluating options for an online reporting system.",
-    respondedBy: "IT Department",
-    respondedAt: new Date("2024-01-14T11:00:00"),
-    attachments: [],
-    isAnonymous: false,
-    submittedAt: new Date("2024-01-08T16:45:00"),
-    updatedAt: new Date("2024-01-14T11:00:00"),
-  },
-];
+// Using real data via API
 
 export default function CitizenFeedback() {
   const { user } = useAuth();
