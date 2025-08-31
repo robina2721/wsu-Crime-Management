@@ -420,28 +420,28 @@ export default function CaseManagement() {
                         <span className="text-sm text-gray-600">Quick Actions:</span>
                         <div className="flex gap-2">
                           {case_.status !== CrimeStatus.UNDER_INVESTIGATION && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
-                              onClick={() => handleStatusUpdate(case_.id, CrimeStatus.UNDER_INVESTIGATION)}
+                              onClick={() => openStatusDialog(case_.id, CrimeStatus.UNDER_INVESTIGATION)}
                             >
                               Start Investigation
                             </Button>
                           )}
                           {case_.status !== CrimeStatus.RESOLVED && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
-                              onClick={() => handleStatusUpdate(case_.id, CrimeStatus.RESOLVED)}
+                              onClick={() => openStatusDialog(case_.id, CrimeStatus.RESOLVED)}
                             >
                               Mark Resolved
                             </Button>
                           )}
                           {case_.status !== CrimeStatus.CLOSED && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
-                              onClick={() => handleStatusUpdate(case_.id, CrimeStatus.CLOSED)}
+                              onClick={() => openStatusDialog(case_.id, CrimeStatus.CLOSED)}
                             >
                               Close Case
                             </Button>
