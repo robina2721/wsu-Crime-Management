@@ -235,6 +235,8 @@ export default function CitizenPortal() {
         location: data.location || "",
         dateIncident: (data.dateIncident || new Date()).toString(),
         reportedBy: user?.id || "citizen",
+        evidence: (data.evidence as string[]) || [],
+        witnesses: witnesses,
       };
       const res = await api.post("/crimes", payload);
       if (res.ok) {
