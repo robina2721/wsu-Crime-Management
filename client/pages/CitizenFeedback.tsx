@@ -559,7 +559,10 @@ export default function CitizenFeedback() {
                                 </div>
                               )}
                             </div>
-                            {getStatusBadge(item.status)}
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(item.status)}
+                              {getPriorityBadge(item.priority)}
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
