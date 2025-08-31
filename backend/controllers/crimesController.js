@@ -5,6 +5,7 @@ import {
   updateCrime,
   deleteCrime,
 } from "../../backend/models/crimeModel.js";
+import { createEvidenceForCrime, createWitnessesForCrime, getEvidenceByCrime, getWitnessesByCrime } from "../../backend/models/crimeModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
 import { notifyCrimeUpdate } from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
