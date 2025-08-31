@@ -124,11 +124,26 @@ export async function createHandler(req) {
       reportedBy: user.id,
     };
     const created = await createCrime(payload);
-    notifyCrimeUpdate(created);
+    // Optional: persist evidence and witnesses if provided
+    if (Array.isArray(body.evidence) && body.evidence.length) {
+      try { await createEvidenceForCrime(created.id, body.evidence, { uploadedBy: user.id }); } catch {}
+    }
+    if (Array.isArray(body.witnesses) && body.witnesses.length) {
+      try { await createWitnessesForCrime(created.id, body.witnesses); } catch {}
+    }
+    let evidence = [], witnesses = [];
+    try {
+      [evidence, witnesses] = await Promise.all([
+        getEvidenceByCrime(created.id),
+        getWitnessesByCrime(created.id),
+      ]);
+    } catch {}
+    const createdWithExtras = { ...created, evidence, witnesses };
+    notifyCrimeUpdate(createdWithExtras);
     return NextResponse.json(
       {
         success: true,
-        data: created,
+        data: createdWithExtras,
         message: "Crime report created successfully",
       },
       { status: 201 },
