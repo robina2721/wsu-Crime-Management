@@ -391,6 +391,9 @@ export async function createMessageHandler(req, params) {
     const body = await req.json();
     if (!body.message || typeof body.message !== 'string') return NextResponse.json({ success: false, error: 'Message required' }, { status: 400 });
     const msg = await addCrimeMessage(report.id, { senderId: user.id, senderRole: user.role, message: body.message });
+    try {
+      notifyCrimeMessage(report.id, { ...msg, reportedBy: report.reportedBy, assignedTo: report.assignedTo, recipientId: user.id === report.reportedBy ? report.assignedTo : report.reportedBy });
+    } catch {}
     return NextResponse.json({ success: true, data: msg, message: 'Message sent' }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
