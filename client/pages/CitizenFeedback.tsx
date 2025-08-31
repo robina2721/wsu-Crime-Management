@@ -504,6 +504,22 @@ export default function CitizenFeedback() {
                           </div>
                         </div>
                       )}
+                      {canRespond && (
+                        <div className="mt-3 space-y-2">
+                          <Label>Respond</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Type response..."
+                              value={responseById[item.id] || ""}
+                              onChange={(e) => setResponseById((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                            />
+                            <Button size="sm" onClick={() => respondToFeedback(item)}>
+                              <Send className="h-4 w-4 mr-1" />
+                              Send
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
