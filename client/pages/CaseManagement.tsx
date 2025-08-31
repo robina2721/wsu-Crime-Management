@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Search,
@@ -24,6 +27,17 @@ import {
   Plus
 } from 'lucide-react';
 import { api } from '@/lib/api';
+
+type OfficerWithCounts = {
+  id: string;
+  username: string;
+  role: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  isActive: number | boolean;
+  activeCaseCount: number;
+};
 
 export default function CaseManagement() {
   const { user, hasRole, hasAnyRole } = useAuth();
