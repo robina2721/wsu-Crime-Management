@@ -157,6 +157,46 @@ export default function CitizenPortal() {
     };
   }, []);
 
+  useEffect(() => {
+    const loadStatusesAndMessages = async () => {
+      try {
+        const statusList: CitizenReportStatus[] = [] as any;
+        const msgsMap: Record<string, any[]> = {};
+        await Promise.all(
+          reports.map(async (r) => {
+            try {
+              const sRes = await api.get(`/crimes/${r.id}/status`);
+              if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData.success)
+                  statusList.push({
+                    ...sData.data,
+                    lastUpdate: new Date(sData.data.lastUpdate),
+                    estimatedResolution: sData.data.estimatedResolution
+                      ? new Date(sData.data.estimatedResolution)
+                      : undefined,
+                    statusHistory: (sData.data.statusHistory || []).map(
+                      (u: any) => ({ ...u, timestamp: new Date(u.timestamp) }),
+                    ),
+                  } as CitizenReportStatus);
+              }
+            } catch {}
+            try {
+              const mRes = await api.get(`/crimes/${r.id}/messages`);
+              if (mRes.ok) {
+                const mData = await mRes.json();
+                if (mData.success) msgsMap[r.id] = mData.data.messages || [];
+              }
+            } catch {}
+          }),
+        );
+        setReportStatuses(statusList);
+        setMessagesById(msgsMap);
+      } catch {}
+    };
+    if (reports.length) loadStatusesAndMessages();
+  }, [reports]);
+
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
       report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -217,7 +257,7 @@ export default function CitizenPortal() {
       [CrimeCategory.THEFT]: "🔒",
       [CrimeCategory.ASSAULT]: "⚠️",
       [CrimeCategory.BURGLARY]: "🏠",
-      [CrimeCategory.FRAUD]: "💳",
+      [CrimeCategory.FRAUD]: "��",
       [CrimeCategory.VANDALISM]: "🔨",
       [CrimeCategory.DRUG_OFFENSE]: "💊",
       [CrimeCategory.DOMESTIC_VIOLENCE]: "🏠",
