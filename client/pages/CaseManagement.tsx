@@ -1,15 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { CrimeReport, CrimeStatus, CrimeCategory, Priority, UserRole } from '@shared/types';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Input } from '../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  CrimeReport,
+  CrimeStatus,
+  CrimeCategory,
+  Priority,
+  UserRole,
+} from "@shared/types";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import {
   Search,
   Filter,
@@ -24,9 +54,9 @@ import {
   XCircle,
   Calendar,
   User,
-  Plus
-} from 'lucide-react';
-import { api } from '@/lib/api';
+  Plus,
+} from "lucide-react";
+import { api } from "@/lib/api";
 
 type OfficerWithCounts = {
   id: string;
@@ -43,23 +73,32 @@ export default function CaseManagement() {
   const { user, hasRole, hasAnyRole } = useAuth();
   const [cases, setCases] = useState<CrimeReport[]>([]);
   const [filteredCases, setFilteredCases] = useState<CrimeReport[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [statusDialogCaseId, setStatusDialogCaseId] = useState<string | null>(null);
-  const [newStatus, setNewStatus] = useState<CrimeStatus | ''>('');
-  const [remark, setRemark] = useState('');
+  const [statusDialogCaseId, setStatusDialogCaseId] = useState<string | null>(
+    null,
+  );
+  const [newStatus, setNewStatus] = useState<CrimeStatus | "">("");
+  const [remark, setRemark] = useState("");
 
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [assignCaseId, setAssignCaseId] = useState<string | null>(null);
   const [officers, setOfficers] = useState<OfficerWithCounts[]>([]);
-  const [selectedOfficerId, setSelectedOfficerId] = useState<string>('');
+  const [selectedOfficerId, setSelectedOfficerId] = useState<string>("");
 
-  const canManageAllCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
-  const canAssignCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.DETECTIVE_OFFICER]);
+  const canManageAllCases = hasAnyRole([
+    UserRole.SUPER_ADMIN,
+    UserRole.POLICE_HEAD,
+  ]);
+  const canAssignCases = hasAnyRole([
+    UserRole.SUPER_ADMIN,
+    UserRole.POLICE_HEAD,
+    UserRole.DETECTIVE_OFFICER,
+  ]);
 
   useEffect(() => {
     fetchCases();
@@ -71,13 +110,13 @@ export default function CaseManagement() {
 
   const fetchCases = async () => {
     try {
-      const response = await api.get('/crimes');
+      const response = await api.get("/crimes");
       const data = await response.json();
       if (data.success) {
         setCases(data.data.reports);
       }
     } catch (error) {
-      console.error('Error fetching cases:', error);
+      console.error("Error fetching cases:", error);
     } finally {
       setIsLoading(false);
     }
@@ -88,57 +127,68 @@ export default function CaseManagement() {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(case_ => 
-        case_.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        case_.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        case_.location.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (case_) =>
+          case_.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          case_.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          case_.location.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(case_ => case_.status === statusFilter);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((case_) => case_.status === statusFilter);
     }
 
     // Priority filter
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(case_ => case_.priority === priorityFilter);
+    if (priorityFilter !== "all") {
+      filtered = filtered.filter((case_) => case_.priority === priorityFilter);
     }
 
     // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(case_ => case_.category === categoryFilter);
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((case_) => case_.category === categoryFilter);
     }
 
     setFilteredCases(filtered);
   };
 
-  const handleStatusUpdate = async (caseId: string, statusValue: CrimeStatus, notes?: string) => {
+  const handleStatusUpdate = async (
+    caseId: string,
+    statusValue: CrimeStatus,
+    notes?: string,
+  ) => {
     try {
-      const response = await api.post(`/crimes/${caseId}/status`, { status: statusValue, notes: notes || '', isVisibleToCitizen: true });
+      const response = await api.post(`/crimes/${caseId}/status`, {
+        status: statusValue,
+        notes: notes || "",
+        isVisibleToCitizen: true,
+      });
       if (response.ok) {
         await fetchCases();
       }
     } catch (error) {
-      console.error('Error updating case status:', error);
+      console.error("Error updating case status:", error);
     }
   };
 
   const handleAssignCase = async (caseId: string, officerId: string) => {
     try {
-      const response = await api.put(`/crimes/${caseId}`, { assignedTo: officerId });
+      const response = await api.put(`/crimes/${caseId}`, {
+        assignedTo: officerId,
+      });
       if (response.ok) {
         await fetchCases();
       }
     } catch (error) {
-      console.error('Error assigning case:', error);
+      console.error("Error assigning case:", error);
     }
   };
 
   const openStatusDialog = (caseId: string, currentStatus: CrimeStatus) => {
     setStatusDialogCaseId(caseId);
     setNewStatus(currentStatus);
-    setRemark('');
+    setRemark("");
     setStatusDialogOpen(true);
   };
 
@@ -151,15 +201,17 @@ export default function CaseManagement() {
   const openAssignDialog = async (caseId: string) => {
     setAssignCaseId(caseId);
     setAssignDialogOpen(true);
-    setSelectedOfficerId('');
+    setSelectedOfficerId("");
     try {
-      const res = await api.get(`/users?withCaseCounts=true&limit=100&offset=0`);
+      const res = await api.get(
+        `/users?withCaseCounts=true&limit=100&offset=0`,
+      );
       if (res.ok) {
         const data = await res.json();
         setOfficers(data.data.users || []);
       }
     } catch (e) {
-      console.error('Failed to load officers', e);
+      console.error("Failed to load officers", e);
     }
   };
 
@@ -171,43 +223,70 @@ export default function CaseManagement() {
 
   const getStatusBadgeColor = (status: CrimeStatus) => {
     switch (status) {
-      case CrimeStatus.REPORTED: return 'bg-blue-100 text-blue-800';
-      case CrimeStatus.UNDER_INVESTIGATION: return 'bg-yellow-100 text-yellow-800';
-      case CrimeStatus.ASSIGNED: return 'bg-purple-100 text-purple-800';
-      case CrimeStatus.RESOLVED: return 'bg-green-100 text-green-800';
-      case CrimeStatus.CLOSED: return 'bg-gray-100 text-gray-800';
-      case CrimeStatus.REJECTED: return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case CrimeStatus.REPORTED:
+        return "bg-blue-100 text-blue-800";
+      case CrimeStatus.UNDER_INVESTIGATION:
+        return "bg-yellow-100 text-yellow-800";
+      case CrimeStatus.ASSIGNED:
+        return "bg-purple-100 text-purple-800";
+      case CrimeStatus.RESOLVED:
+        return "bg-green-100 text-green-800";
+      case CrimeStatus.CLOSED:
+        return "bg-gray-100 text-gray-800";
+      case CrimeStatus.REJECTED:
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityBadgeColor = (priority: Priority) => {
     switch (priority) {
-      case Priority.CRITICAL: return 'bg-red-500 text-white';
-      case Priority.HIGH: return 'bg-crime-red text-white';
-      case Priority.MEDIUM: return 'bg-crime-yellow text-crime-black';
-      case Priority.LOW: return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case Priority.CRITICAL:
+        return "bg-red-500 text-white";
+      case Priority.HIGH:
+        return "bg-crime-red text-white";
+      case Priority.MEDIUM:
+        return "bg-crime-yellow text-crime-black";
+      case Priority.LOW:
+        return "bg-green-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
     }
   };
 
   const getStatusIcon = (status: CrimeStatus) => {
     switch (status) {
-      case CrimeStatus.REPORTED: return <Clock className="w-4 h-4" />;
-      case CrimeStatus.UNDER_INVESTIGATION: return <Search className="w-4 h-4" />;
-      case CrimeStatus.ASSIGNED: return <UserCheck className="w-4 h-4" />;
-      case CrimeStatus.RESOLVED: return <CheckCircle className="w-4 h-4" />;
-      case CrimeStatus.CLOSED: return <XCircle className="w-4 h-4" />;
-      case CrimeStatus.REJECTED: return <XCircle className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+      case CrimeStatus.REPORTED:
+        return <Clock className="w-4 h-4" />;
+      case CrimeStatus.UNDER_INVESTIGATION:
+        return <Search className="w-4 h-4" />;
+      case CrimeStatus.ASSIGNED:
+        return <UserCheck className="w-4 h-4" />;
+      case CrimeStatus.RESOLVED:
+        return <CheckCircle className="w-4 h-4" />;
+      case CrimeStatus.CLOSED:
+        return <XCircle className="w-4 h-4" />;
+      case CrimeStatus.REJECTED:
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <FileText className="w-4 h-4" />;
     }
   };
 
   const caseStats = {
     total: filteredCases.length,
-    active: filteredCases.filter(c => [CrimeStatus.REPORTED, CrimeStatus.UNDER_INVESTIGATION, CrimeStatus.ASSIGNED].includes(c.status)).length,
-    resolved: filteredCases.filter(c => c.status === CrimeStatus.RESOLVED).length,
-    critical: filteredCases.filter(c => c.priority === Priority.CRITICAL).length
+    active: filteredCases.filter((c) =>
+      [
+        CrimeStatus.REPORTED,
+        CrimeStatus.UNDER_INVESTIGATION,
+        CrimeStatus.ASSIGNED,
+      ].includes(c.status),
+    ).length,
+    resolved: filteredCases.filter((c) => c.status === CrimeStatus.RESOLVED)
+      .length,
+    critical: filteredCases.filter((c) => c.priority === Priority.CRITICAL)
+      .length,
   };
 
   if (isLoading) {
@@ -224,7 +303,9 @@ export default function CaseManagement() {
       <div className="bg-crime-black text-white p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Case Management</h1>
-          <p className="text-gray-300">Comprehensive case tracking and management system</p>
+          <p className="text-gray-300">
+            Comprehensive case tracking and management system
+          </p>
         </div>
       </div>
 
@@ -234,28 +315,36 @@ export default function CaseManagement() {
           <Card>
             <CardContent className="p-6 text-center">
               <FileText className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{caseStats.total}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {caseStats.total}
+              </h3>
               <p className="text-gray-600">Total Cases</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-crime-yellow" />
-              <h3 className="text-2xl font-bold text-crime-black">{caseStats.active}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {caseStats.active}
+              </h3>
               <p className="text-gray-600">Active Cases</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{caseStats.resolved}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {caseStats.resolved}
+              </h3>
               <p className="text-gray-600">Resolved Cases</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-crime-red" />
-              <h3 className="text-2xl font-bold text-crime-black">{caseStats.critical}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {caseStats.critical}
+              </h3>
               <p className="text-gray-600">Critical Cases</p>
             </CardContent>
           </Card>
@@ -280,7 +369,7 @@ export default function CaseManagement() {
                   className="pl-10"
                 />
               </div>
-              
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
@@ -288,7 +377,9 @@ export default function CaseManagement() {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value={CrimeStatus.REPORTED}>Reported</SelectItem>
-                  <SelectItem value={CrimeStatus.UNDER_INVESTIGATION}>Under Investigation</SelectItem>
+                  <SelectItem value={CrimeStatus.UNDER_INVESTIGATION}>
+                    Under Investigation
+                  </SelectItem>
                   <SelectItem value={CrimeStatus.ASSIGNED}>Assigned</SelectItem>
                   <SelectItem value={CrimeStatus.RESOLVED}>Resolved</SelectItem>
                   <SelectItem value={CrimeStatus.CLOSED}>Closed</SelectItem>
@@ -317,12 +408,22 @@ export default function CaseManagement() {
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value={CrimeCategory.THEFT}>Theft</SelectItem>
                   <SelectItem value={CrimeCategory.ASSAULT}>Assault</SelectItem>
-                  <SelectItem value={CrimeCategory.BURGLARY}>Burglary</SelectItem>
+                  <SelectItem value={CrimeCategory.BURGLARY}>
+                    Burglary
+                  </SelectItem>
                   <SelectItem value={CrimeCategory.FRAUD}>Fraud</SelectItem>
-                  <SelectItem value={CrimeCategory.VANDALISM}>Vandalism</SelectItem>
-                  <SelectItem value={CrimeCategory.DRUG_OFFENSE}>Drug Offense</SelectItem>
-                  <SelectItem value={CrimeCategory.DOMESTIC_VIOLENCE}>Domestic Violence</SelectItem>
-                  <SelectItem value={CrimeCategory.TRAFFIC_VIOLATION}>Traffic Violation</SelectItem>
+                  <SelectItem value={CrimeCategory.VANDALISM}>
+                    Vandalism
+                  </SelectItem>
+                  <SelectItem value={CrimeCategory.DRUG_OFFENSE}>
+                    Drug Offense
+                  </SelectItem>
+                  <SelectItem value={CrimeCategory.DOMESTIC_VIOLENCE}>
+                    Domestic Violence
+                  </SelectItem>
+                  <SelectItem value={CrimeCategory.TRAFFIC_VIOLATION}>
+                    Traffic Violation
+                  </SelectItem>
                   <SelectItem value={CrimeCategory.OTHER}>Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -348,22 +449,31 @@ export default function CaseManagement() {
           <CardContent>
             <div className="space-y-4">
               {filteredCases.map((case_) => (
-                <div key={case_.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div
+                  key={case_.id}
+                  className="border rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-crime-black">{case_.title}</h3>
+                        <h3 className="text-lg font-semibold text-crime-black">
+                          {case_.title}
+                        </h3>
                         <Badge className={getStatusBadgeColor(case_.status)}>
                           {getStatusIcon(case_.status)}
-                          <span className="ml-1">{case_.status.replace('_', ' ').toUpperCase()}</span>
+                          <span className="ml-1">
+                            {case_.status.replace("_", " ").toUpperCase()}
+                          </span>
                         </Badge>
-                        <Badge className={getPriorityBadgeColor(case_.priority)}>
+                        <Badge
+                          className={getPriorityBadgeColor(case_.priority)}
+                        >
                           {case_.priority.toUpperCase()}
                         </Badge>
                       </div>
-                      
+
                       <p className="text-gray-600 mb-3">{case_.description}</p>
-                      
+
                       <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
@@ -381,7 +491,7 @@ export default function CaseManagement() {
                         )}
                         <div className="flex items-center">
                           <FileText className="w-4 h-4 mr-1" />
-                          {case_.category.replace('_', ' ')}
+                          {case_.category.replace("_", " ")}
                         </div>
                       </div>
                     </div>
@@ -391,10 +501,16 @@ export default function CaseManagement() {
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
-                      
+
                       {canManageAllCases && (
                         <>
-                          <Button variant="outline" size="sm" onClick={() => openStatusDialog(case_.id, case_.status)}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              openStatusDialog(case_.id, case_.status)
+                            }
+                          >
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
@@ -406,7 +522,7 @@ export default function CaseManagement() {
                               onClick={() => openAssignDialog(case_.id)}
                             >
                               <UserCheck className="w-4 h-4 mr-1" />
-                              {case_.assignedTo ? 'Reassign' : 'Assign'}
+                              {case_.assignedTo ? "Reassign" : "Assign"}
                             </Button>
                           )}
                         </>
@@ -417,13 +533,20 @@ export default function CaseManagement() {
                   {canManageAllCases && (
                     <div className="border-t pt-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Quick Actions:</span>
+                        <span className="text-sm text-gray-600">
+                          Quick Actions:
+                        </span>
                         <div className="flex gap-2">
                           {case_.status !== CrimeStatus.UNDER_INVESTIGATION && (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => openStatusDialog(case_.id, CrimeStatus.UNDER_INVESTIGATION)}
+                              onClick={() =>
+                                openStatusDialog(
+                                  case_.id,
+                                  CrimeStatus.UNDER_INVESTIGATION,
+                                )
+                              }
                             >
                               Start Investigation
                             </Button>
@@ -432,7 +555,9 @@ export default function CaseManagement() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => openStatusDialog(case_.id, CrimeStatus.RESOLVED)}
+                              onClick={() =>
+                                openStatusDialog(case_.id, CrimeStatus.RESOLVED)
+                              }
                             >
                               Mark Resolved
                             </Button>
@@ -441,7 +566,9 @@ export default function CaseManagement() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => openStatusDialog(case_.id, CrimeStatus.CLOSED)}
+                              onClick={() =>
+                                openStatusDialog(case_.id, CrimeStatus.CLOSED)
+                              }
                             >
                               Close Case
                             </Button>
@@ -456,8 +583,12 @@ export default function CaseManagement() {
               {filteredCases.length === 0 && (
                 <div className="text-center py-12">
                   <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No cases found</h3>
-                  <p className="text-gray-500">Try adjusting your search and filter criteria</p>
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    No cases found
+                  </h3>
+                  <p className="text-gray-500">
+                    Try adjusting your search and filter criteria
+                  </p>
                 </div>
               )}
             </div>
@@ -474,24 +605,36 @@ export default function CaseManagement() {
           <div className="space-y-4">
             <div>
               <Label>Status</Label>
-              <Select value={newStatus || ''} onValueChange={(v) => setNewStatus(v as CrimeStatus)}>
+              <Select
+                value={newStatus || ""}
+                onValueChange={(v) => setNewStatus(v as CrimeStatus)}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.values(CrimeStatus).map((s) => (
-                    <SelectItem key={s} value={s}>{s.replace('_',' ')}</SelectItem>
+                    <SelectItem key={s} value={s}>
+                      {s.replace("_", " ")}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Remark</Label>
-              <Textarea className="mt-1" placeholder="Add a remark for this status update" value={remark} onChange={(e) => setRemark(e.target.value)} />
+              <Textarea
+                className="mt-1"
+                placeholder="Add a remark for this status update"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={submitStatusDialog} disabled={!newStatus}>Save</Button>
+            <Button onClick={submitStatusDialog} disabled={!newStatus}>
+              Save
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -504,21 +647,27 @@ export default function CaseManagement() {
           </DialogHeader>
           <div className="space-y-2">
             <Label>Select an active officer</Label>
-            <Select value={selectedOfficerId} onValueChange={setSelectedOfficerId}>
+            <Select
+              value={selectedOfficerId}
+              onValueChange={setSelectedOfficerId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Choose officer" />
               </SelectTrigger>
               <SelectContent>
                 {officers.map((o) => (
                   <SelectItem key={o.id} value={o.id}>
-                    {o.fullName || o.username} ({o.activeCaseCount} active cases)
+                    {o.fullName || o.username} ({o.activeCaseCount} active
+                    cases)
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <DialogFooter>
-            <Button onClick={submitAssignDialog} disabled={!selectedOfficerId}>Assign</Button>
+            <Button onClick={submitAssignDialog} disabled={!selectedOfficerId}>
+              Assign
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

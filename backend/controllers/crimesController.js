@@ -16,7 +16,11 @@ import {
   getCrimeMessages,
 } from "../../backend/models/crimeModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
-import { notifyCrimeUpdate, notifyCrimeMessage, notifyStatusUpdate } from "../../backend/controllers/realtimeController.js";
+import {
+  notifyCrimeUpdate,
+  notifyCrimeMessage,
+  notifyStatusUpdate,
+} from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
 
 function getAuthUserId(req) {

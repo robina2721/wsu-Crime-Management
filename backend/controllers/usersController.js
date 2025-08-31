@@ -47,7 +47,9 @@ export async function listUsersHandler(req) {
     const limit = parseInt(searchParams.get("limit") || "100");
     const offset = parseInt(searchParams.get("offset") || "0");
     if (withCaseCounts) {
-      const officers = await (await import("../../backend/models/userModel.js")).listActiveOfficersWithCaseCounts(limit, offset);
+      const officers = await (
+        await import("../../backend/models/userModel.js")
+      ).listActiveOfficersWithCaseCounts(limit, offset);
       return NextResponse.json({
         success: true,
         data: { users: officers, total: officers.length, limit, offset },
