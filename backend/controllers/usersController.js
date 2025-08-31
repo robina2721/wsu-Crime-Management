@@ -6,6 +6,8 @@ import {
   deleteUser,
   findUserById,
 } from "../../backend/models/userModel.js";
+import { saveUserPhoto, getLatestUserPhoto } from "../../backend/models/userPhotoModel.js";
+import { NextResponse } from "next/server";
 
 function getAuthUserId(req) {
   const authHeader = req.headers.get("authorization");
