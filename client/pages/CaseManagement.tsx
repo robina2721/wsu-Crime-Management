@@ -127,13 +127,46 @@ export default function CaseManagement() {
   const handleAssignCase = async (caseId: string, officerId: string) => {
     try {
       const response = await api.put(`/crimes/${caseId}`, { assignedTo: officerId });
-
       if (response.ok) {
         await fetchCases();
       }
     } catch (error) {
       console.error('Error assigning case:', error);
     }
+  };
+
+  const openStatusDialog = (caseId: string, currentStatus: CrimeStatus) => {
+    setStatusDialogCaseId(caseId);
+    setNewStatus(currentStatus);
+    setRemark('');
+    setStatusDialogOpen(true);
+  };
+
+  const submitStatusDialog = async () => {
+    if (!statusDialogCaseId || !newStatus) return;
+    await handleStatusUpdate(statusDialogCaseId, newStatus, remark);
+    setStatusDialogOpen(false);
+  };
+
+  const openAssignDialog = async (caseId: string) => {
+    setAssignCaseId(caseId);
+    setAssignDialogOpen(true);
+    setSelectedOfficerId('');
+    try {
+      const res = await api.get(`/users?withCaseCounts=true&limit=100&offset=0`);
+      if (res.ok) {
+        const data = await res.json();
+        setOfficers(data.data.users || []);
+      }
+    } catch (e) {
+      console.error('Failed to load officers', e);
+    }
+  };
+
+  const submitAssignDialog = async () => {
+    if (!assignCaseId || !selectedOfficerId) return;
+    await handleAssignCase(assignCaseId, selectedOfficerId);
+    setAssignDialogOpen(false);
   };
 
   const getStatusBadgeColor = (status: CrimeStatus) => {
