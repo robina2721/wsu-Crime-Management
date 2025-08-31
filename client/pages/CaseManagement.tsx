@@ -464,6 +464,64 @@ export default function CaseManagement() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Status Edit Dialog */}
+      <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Case Status</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Status</Label>
+              <Select value={newStatus || ''} onValueChange={(v) => setNewStatus(v as CrimeStatus)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(CrimeStatus).map((s) => (
+                    <SelectItem key={s} value={s}>{s.replace('_',' ')}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Remark</Label>
+              <Textarea className="mt-1" placeholder="Add a remark for this status update" value={remark} onChange={(e) => setRemark(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={submitStatusDialog} disabled={!newStatus}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Officer Dialog */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Officer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Select an active officer</Label>
+            <Select value={selectedOfficerId} onValueChange={setSelectedOfficerId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose officer" />
+              </SelectTrigger>
+              <SelectContent>
+                {officers.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>
+                    {o.fullName || o.username} ({o.activeCaseCount} active cases)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button onClick={submitAssignDialog} disabled={!selectedOfficerId}>Assign</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
