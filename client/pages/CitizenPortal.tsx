@@ -91,6 +91,8 @@ export default function CitizenPortal() {
   const [witnesses, setWitnesses] = useState<Witness[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [contactTextById, setContactTextById] = useState<Record<string, string>>({});
+  const [messagesById, setMessagesById] = useState<Record<string, { id: string; senderId: string; senderRole: string; message: string; createdAt: string | Date }[]>>({});
   const [currentTab, setCurrentTab] = useState("incident");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
 
