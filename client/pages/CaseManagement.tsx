@@ -113,10 +113,9 @@ export default function CaseManagement() {
     setFilteredCases(filtered);
   };
 
-  const handleStatusUpdate = async (caseId: string, newStatus: CrimeStatus) => {
+  const handleStatusUpdate = async (caseId: string, statusValue: CrimeStatus, notes?: string) => {
     try {
-      const response = await api.put(`/crimes/${caseId}`, { status: newStatus });
-
+      const response = await api.post(`/crimes/${caseId}/status`, { status: statusValue, notes: notes || '', isVisibleToCitizen: true });
       if (response.ok) {
         await fetchCases();
       }
