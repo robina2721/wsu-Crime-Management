@@ -147,6 +147,27 @@ export default function CitizenPortal() {
             return [normalized, ...prev];
           });
         }
+        if (payload?.type === "crime_message" && payload.data) {
+          const { crimeId, message } = payload.data;
+          setMessagesById((prev) => ({ ...prev, [crimeId]: [message, ...(prev[crimeId] || [])] }));
+        }
+        if (payload?.type === "status_update" && payload.data) {
+          const { crimeId, update } = payload.data;
+          setReportStatuses((prev) => {
+            const copy = [...prev];
+            const idx = copy.findIndex((s) => s.reportId === crimeId);
+            const upd = { ...update, timestamp: new Date(update.createdAt) };
+            if (idx >= 0) {
+              const cur = copy[idx];
+              const hist = [
+                { status: upd.status, timestamp: upd.timestamp, updatedBy: upd.updatedBy, notes: upd.notes, isVisibleToCitizen: !!upd.isVisibleToCitizen },
+                ...(cur.statusHistory || []),
+              ];
+              copy[idx] = { ...cur, currentStatus: upd.status || cur.currentStatus, statusHistory: hist, lastUpdate: upd.timestamp };
+            }
+            return copy;
+          });
+        }
       } catch {}
     };
     es.onerror = () => {
