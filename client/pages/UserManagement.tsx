@@ -94,6 +94,7 @@ export default function UserManagement() {
     phone: "",
     password: "",
   });
+  const [newUserPhoto, setNewUserPhoto] = useState<File | null>(null);
 
   const canManageUsers = hasRole(UserRole.SUPER_ADMIN);
   const canApproveAccounts = hasAnyRole([
