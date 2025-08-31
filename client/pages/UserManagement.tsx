@@ -571,11 +571,20 @@ export default function UserManagement() {
                                 if (res.ok) {
                                   const data = await res.json();
                                   const u = data.data;
-                                  const normalized: User = {
+                                  const normalized: any = {
                                     ...u,
                                     createdAt: new Date(u.createdAt),
                                     updatedAt: new Date(u.updatedAt),
                                   };
+                                  if (newUserPhoto) {
+                                    const fd = new FormData();
+                                    fd.append('file', newUserPhoto);
+                                    const upRes = await api.post(`/users/${u.id}/photo`, fd);
+                                    if (upRes.ok) {
+                                      const pr = await upRes.json();
+                                      normalized.photoUrl = pr?.data?.photoUrl || null;
+                                    }
+                                  }
                                   setUsers((prev) => [normalized, ...prev]);
                                   setIsAddDialogOpen(false);
                                   setNewUser({
@@ -586,6 +595,7 @@ export default function UserManagement() {
                                     phone: "",
                                     password: "",
                                   });
+                                  setNewUserPhoto(null);
                                 }
                               } catch (e) {
                                 console.error("Failed to create user", e);
