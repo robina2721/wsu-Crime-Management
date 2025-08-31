@@ -65,7 +65,12 @@ export async function getHandler(_req, params) {
         { success: false, error: "Crime report not found" },
         { status: 404 },
       );
-    return NextResponse.json({ success: true, data: report });
+    let evidence = report.evidence, witnesses = report.witnesses;
+    try {
+      if (!Array.isArray(evidence)) evidence = await getEvidenceByCrime(report.id);
+      if (!Array.isArray(witnesses)) witnesses = await getWitnessesByCrime(report.id);
+    } catch {}
+    return NextResponse.json({ success: true, data: { ...report, evidence, witnesses } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
