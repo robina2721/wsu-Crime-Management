@@ -260,6 +260,23 @@ export default function CitizenFeedback() {
     },
   ];
 
+  const canRespond = user && ["super_admin","police_head","hr_manager"].includes(user.role as any);
+
+  const respondToFeedback = async (item: CitizenFeedback) => {
+    const text = (responseById[item.id] || "").trim();
+    if (!text) return;
+    const res = await api.post(`/feedback/${item.id}/respond`, { response: text, status: FeedbackStatus.UNDER_REVIEW });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        const f = data.data;
+        const normalized: CitizenFeedback = { ...f, respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined, submittedAt: new Date(f.submittedAt), updatedAt: new Date(f.updatedAt) };
+        setFeedback((prev) => prev.map((fb) => (fb.id === item.id ? normalized : fb)));
+        setResponseById((prev) => ({ ...prev, [item.id]: "" }));
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
