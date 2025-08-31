@@ -818,6 +818,10 @@ export default function CitizenPortal() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+                if (currentTab !== "review") {
+                  setCurrentTab("review");
+                  return;
+                }
                 handleSubmitReport(formData);
               }}
             >
