@@ -16,7 +16,11 @@ import {
   getCrimeMessages,
 } from "../../backend/models/crimeModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
-import { notifyCrimeUpdate } from "../../backend/controllers/realtimeController.js";
+import {
+  notifyCrimeUpdate,
+  notifyCrimeMessage,
+  notifyStatusUpdate,
+} from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
 
 function getAuthUserId(req) {
@@ -261,6 +265,20 @@ export async function updateHandler(req, params) {
       updates.status = "assigned";
     }
     const updated = await updateCrime(params.id, updates);
+    try {
+      if (Object.prototype.hasOwnProperty.call(body, "status")) {
+        const upd = await addStatusUpdate(params.id, {
+          status: updates.status,
+          notes: body.notes,
+          updatedBy: user.id,
+          isVisibleToCitizen: body.isVisibleToCitizen !== false,
+        });
+        notifyStatusUpdate(params.id, upd, {
+          reportedBy: updated.reportedBy,
+          assignedTo: updated.assignedTo,
+        });
+      }
+    } catch {}
     notifyCrimeUpdate(updated);
     return NextResponse.json({
       success: true,
