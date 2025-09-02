@@ -280,6 +280,7 @@ export default function HRManagement() {
       [EmploymentStatus.ON_LEAVE]: "outline",
     };
 
+    
     return (
       <Badge variant={variants[status] as any}>
         {status.replace("_", " ")}
@@ -468,11 +469,12 @@ export default function HRManagement() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2 text-sm">
                     <Shield className="h-4 w-4 text-gray-400" />
-                    <span>
-                      {officer.professionalInfo.rank
-                        .replace("_", " ")
-                        .toUpperCase()}
-                    </span>
+                   <span>
+  {(officer.professionalInfo?.rank ?? "")
+    .replace("_", " ")
+    .toUpperCase()}
+</span>
+
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="h-4 w-4 text-gray-400" />
@@ -621,10 +623,10 @@ export default function HRManagement() {
                             <div>
                               <Label>Rank</Label>
                               <Input
-                                value={officer.professionalInfo.rank
-                                  .replace("_", " ")
-                                  .toUpperCase()}
-                                readOnly
+                                value={(officer.professionalInfo?.department ?? "UNASSIGNED")
+                                         .replace("_", " ")
+                                          .toUpperCase()}
+
                               />
                             </div>
                             <div>
