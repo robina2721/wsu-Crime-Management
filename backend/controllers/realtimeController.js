@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { findUserById } from "../../backend/models/userModel.js";
-import { NextResponse } from "next/server";
 
 const subscribersByUser = new Map(); // userId => Set<Response>
 
