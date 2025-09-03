@@ -846,25 +846,25 @@ export default function UserManagement() {
                             </div>
                           )}
 
-                          {account.documents &&
-                            account.documents.length > 0 && (
-                              <div className="mb-3">
-                                <p className="text-sm font-medium text-gray-700 mb-2">
-                                  Submitted Documents:
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                  {account.documents.map((doc, index) => (
-                                    <Badge
-                                      key={index}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {doc}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                         {Array.isArray(account.documents) && account.documents.length > 0 && (
+  <div className="mb-3">
+    <p className="text-sm font-medium text-gray-700 mb-2">
+      Submitted Documents:
+    </p>
+    <div className="flex flex-wrap gap-2">
+      {account.documents.map((doc, index) => (
+        <Badge
+          key={index}
+          variant="outline"
+          className="text-xs"
+        >
+          {doc}
+        </Badge>
+      ))}
+    </div>
+  </div>
+)}
+
                         </div>
 
                         {canApproveAccounts && account.status === "pending" && (
