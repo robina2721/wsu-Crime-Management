@@ -48,7 +48,7 @@ export async function loginHandler(req) {
 
 export async function signupCitizenHandler(req) {
   try {
-    const { username, password, fullName, email, phone, requestedRole } =
+    const { username, password, fullName, email, phone, requestedRole, photo, photoMime, photoBase64, details } =
       await req.json();
     if (!username || !password || !fullName) {
       return NextResponse.json(
@@ -93,6 +93,35 @@ export async function signupCitizenHandler(req) {
       );
     }
 
+    // For non-citizen roles, require photo and additional details and store password hash + photo in pending documents
+    let mime = photoMime || null;
+    let base64 = photoBase64 || null;
+    if (!mime || !base64) {
+      if (typeof photo === "string" && photo.startsWith("data:")) {
+        const [meta, data] = photo.split(",");
+        const m = /data:([^;]+);base64/.exec(meta || "");
+        if (m) mime = m[1];
+        base64 = data || null;
+      }
+    }
+
+    if (!mime || !base64) {
+      return NextResponse.json(
+        { success: false, message: "Employee signup requires a photo" },
+        { status: 400 },
+      );
+    }
+
+    const passwordHash = password.startsWith("$2")
+      ? password
+      : await bcrypt.hash(password, 10);
+
+    const documents = {
+      passwordHash,
+      photo: { mime, dataBase64: base64 },
+      details: details && typeof details === "object" ? details : {},
+    };
+
     const pending = await createPendingAccount({
       fullName,
       username,
@@ -100,6 +129,7 @@ export async function signupCitizenHandler(req) {
       phone,
       requestedRole: role,
       status: "pending",
+      documents: JSON.stringify(documents),
       notes: "Self registration via signup",
     });
     return NextResponse.json(
