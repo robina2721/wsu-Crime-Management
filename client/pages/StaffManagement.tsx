@@ -24,6 +24,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import { api } from "@/lib/api";
 import {
   Users,
   Search,
