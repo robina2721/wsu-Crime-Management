@@ -77,12 +77,20 @@ export default function CriminalDatabase() {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editRecord, setEditRecord] = useState<any | null>(null);
   const [newRecord, setNewRecord] = useState({
     fullName: "",
     dateOfBirth: "",
     nationalId: "",
     address: "",
     phone: "",
+    aliases: "",
+    heightCm: "",
+    weightKg: "",
+    eyeColor: "",
+    hairColor: "",
     riskLevel: RiskLevel.LOW,
     isActive: true,
     photo: null as File | null,
@@ -664,9 +672,25 @@ export default function CriminalDatabase() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          setSelectedCriminal(criminal);
-                          setIsDetailsDialogOpen(true);
+                        onClick={async () => {
+                          try {
+                            const res = await api.get(`/criminals/${criminal.id}`);
+                            const data = await res.json();
+                            if (data.success) {
+                              setSelectedCriminal({
+                                ...data.data,
+                                personalInfo: {
+                                  ...data.data.personalInfo,
+                                  dateOfBirth: data.data.personalInfo?.dateOfBirth
+                                    ? new Date(data.data.personalInfo.dateOfBirth)
+                                    : null,
+                                },
+                              });
+                              setIsDetailsDialogOpen(true);
+                            }
+                          } catch (e) {
+                            console.error(e);
+                          }
                         }}
                       >
                         <Eye className="w-4 h-4 mr-1" />
@@ -674,7 +698,24 @@ export default function CriminalDatabase() {
                       </Button>
 
                       {canModifyRecords && (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setEditingId(criminal.id);
+                          setEditRecord({
+                            fullName: criminal.personalInfo.fullName || "",
+                            dateOfBirth: criminal.personalInfo.dateOfBirth ? new Date(criminal.personalInfo.dateOfBirth).toISOString().slice(0,10) : "",
+                            nationalId: criminal.personalInfo.nationalId || "",
+                            address: criminal.personalInfo.address || "",
+                            phone: criminal.personalInfo.phone || "",
+                            aliases: (criminal.personalInfo.aliases || []).join(", "),
+                            heightCm: criminal.physicalDescription.height || "",
+                            weightKg: criminal.physicalDescription.weight || "",
+                            eyeColor: criminal.physicalDescription.eyeColor || "",
+                            hairColor: criminal.physicalDescription.hairColor || "",
+                            riskLevel: criminal.riskLevel,
+                            isActive: criminal.isActive,
+                          });
+                          setIsEditOpen(true);
+                        }}>
                           <Fingerprint className="w-4 h-4 mr-1" />
                           Update
                         </Button>
@@ -1115,6 +1156,43 @@ export default function CriminalDatabase() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <label className="text-sm">Aliases (comma separated)</label>
+                <Input
+                  value={newRecord.aliases}
+                  onChange={(e) => setNewRecord((r) => ({ ...r, aliases: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">Height (cm)</label>
+                <Input
+                  type="number"
+                  value={newRecord.heightCm}
+                  onChange={(e) => setNewRecord((r) => ({ ...r, heightCm: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">Weight (kg)</label>
+                <Input
+                  type="number"
+                  value={newRecord.weightKg}
+                  onChange={(e) => setNewRecord((r) => ({ ...r, weightKg: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">Eye Color</label>
+                <Input
+                  value={newRecord.eyeColor}
+                  onChange={(e) => setNewRecord((r) => ({ ...r, eyeColor: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">Hair Color</label>
+                <Input
+                  value={newRecord.hairColor}
+                  onChange={(e) => setNewRecord((r) => ({ ...r, hairColor: e.target.value }))}
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="text-sm">Photo</label>
                 <input
@@ -1145,6 +1223,11 @@ export default function CriminalDatabase() {
                     if (newRecord.address)
                       fd.append("address", newRecord.address);
                     if (newRecord.phone) fd.append("phone", newRecord.phone);
+                    if (newRecord.aliases) fd.append("aliases", newRecord.aliases);
+                    if (newRecord.heightCm) fd.append("heightCm", String(newRecord.heightCm));
+                    if (newRecord.weightKg) fd.append("weightKg", String(newRecord.weightKg));
+                    if (newRecord.eyeColor) fd.append("eyeColor", newRecord.eyeColor);
+                    if (newRecord.hairColor) fd.append("hairColor", newRecord.hairColor);
                     fd.append("riskLevel", newRecord.riskLevel as any);
                     fd.append("isActive", String(newRecord.isActive));
                     if (newRecord.photo) fd.append("photo", newRecord.photo);
