@@ -1016,6 +1016,37 @@ export default function CriminalDatabase() {
                         No arrest records found
                       </div>
                     )}
+
+                    {canModifyRecords && (
+                      <div className="border-t pt-4 space-y-2">
+                        <div className="font-semibold">Add Arrest</div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <Input placeholder="Date" type="date" onChange={(e:any) => (window as any)._arDate = e.target.value} />
+                          <Input placeholder="Disposition" onChange={(e:any) => (window as any)._arDisp = e.target.value} />
+                          <Input placeholder="Arresting Officer" onChange={(e:any) => (window as any)._arOfficer = e.target.value} />
+                          <Input placeholder="Location" onChange={(e:any) => (window as any)._arLoc = e.target.value} />
+                          <Input placeholder="Charges (comma separated)" onChange={(e:any) => (window as any)._arCharges = e.target.value} className="md:col-span-2" />
+                        </div>
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={async () => {
+                            if (!selectedCriminal) return;
+                            const charges = ((window as any)._arCharges || "").split(",").map((s:string)=>s.trim()).filter(Boolean);
+                            const payload:any = {
+                              date: (window as any)._arDate || undefined,
+                              disposition: (window as any)._arDisp || undefined,
+                              arrestingOfficer: (window as any)._arOfficer || undefined,
+                              location: (window as any)._arLoc || undefined,
+                              charges,
+                            };
+                            const res = await api.post(`/criminals/${selectedCriminal.id}/arrests`, payload);
+                            if (res.ok) {
+                              const d = await (await api.get(`/criminals/${selectedCriminal.id}`)).json();
+                              if (d.success) setSelectedCriminal(d.data);
+                            }
+                          }}>Add</Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
