@@ -214,17 +214,18 @@ export default function Dashboard() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {quickStats.map((stat, index) => (
+          {[
+            { title: 'Active Cases', value: String(stats.activeCases), icon: FileText, color: 'text-crime-red', bgColor: 'bg-red-50' },
+            { title: 'Critical Alerts', value: String(stats.criticalAlerts), icon: AlertTriangle, color: 'text-crime-yellow', bgColor: 'bg-yellow-50' },
+            { title: 'Officers on Duty', value: String(stats.officersOnDuty), icon: Shield, color: 'text-green-600', bgColor: 'bg-green-50' },
+            { title: 'Reports Today', value: String(stats.reportsToday), icon: TrendingUp, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+          ].map((stat, index) => (
             <Card key={index} className="border-l-4 border-l-crime-red">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold text-crime-black">
-                      {stat.value}
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                    <p className="text-3xl font-bold text-crime-black">{stat.value}</p>
                   </div>
                   <div className={`p-3 rounded-full ${stat.bgColor}`}>
                     <stat.icon className={`w-6 h-6 ${stat.color}`} />
