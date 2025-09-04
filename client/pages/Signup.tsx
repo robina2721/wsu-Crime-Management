@@ -200,6 +200,78 @@ export default function Signup() {
               </Select>
             </div>
 
+            {isEmployee && (
+              <div className="space-y-4 border rounded-md p-4">
+                <div className="space-y-2">
+                  <Label htmlFor="photo">Upload Photo</Label>
+                  <Input
+                    id="photo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] || null;
+                      setPhotoFile(f || null);
+                      setPhotoPreview(f ? URL.createObjectURL(f) : "");
+                    }}
+                    required={isEmployee}
+                  />
+                  {photoPreview && (
+                    <img
+                      src={photoPreview}
+                      alt="Preview"
+                      className="h-24 w-24 rounded object-cover border"
+                    />
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="employeeId">Employee ID</Label>
+                    <Input
+                      id="employeeId"
+                      value={employeeDetails.employeeId}
+                      onChange={(e) =>
+                        setEmployeeDetails({ ...employeeDetails, employeeId: e.target.value })
+                      }
+                      required={isEmployee}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Input
+                      id="department"
+                      value={employeeDetails.department}
+                      onChange={(e) =>
+                        setEmployeeDetails({ ...employeeDetails, department: e.target.value })
+                      }
+                      required={isEmployee}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="badgeNumber">Badge Number</Label>
+                    <Input
+                      id="badgeNumber"
+                      value={employeeDetails.badgeNumber}
+                      onChange={(e) =>
+                        setEmployeeDetails({ ...employeeDetails, badgeNumber: e.target.value })
+                      }
+                      required={isEmployee}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rank">Rank</Label>
+                    <Input
+                      id="rank"
+                      value={employeeDetails.rank}
+                      onChange={(e) =>
+                        setEmployeeDetails({ ...employeeDetails, rank: e.target.value })
+                      }
+                      required={isEmployee}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="flex items-center space-x-2 text-crime-red bg-red-50 p-3 rounded-md">
                 <AlertTriangle className="w-4 h-4" />
