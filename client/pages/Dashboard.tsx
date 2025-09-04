@@ -10,6 +10,12 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { api } from "@/lib/api";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+import { Label } from "../components/ui/label";
 import {
   Shield,
   AlertTriangle,
@@ -38,6 +44,117 @@ export default function Dashboard() {
   const { user, logout, hasRole, hasAnyRole } = useAuth();
   const navigate = useNavigate();
 
+  const [stats, setStats] = React.useState({
+    activeCases: 0,
+    criticalAlerts: 0,
+    officersOnDuty: "—",
+    reportsToday: 0,
+  });
+  const [activity, setActivity] = React.useState<any[]>([]);
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [newCase, setNewCase] = React.useState({
+    title: "",
+    category: "other",
+    priority: "medium",
+    location: "",
+    dateIncident: new Date().toISOString().slice(0, 16),
+    description: "",
+  });
+
+  React.useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      try {
+        const res = await api.get("/crimes?limit=100");
+        if (res.ok) {
+          const data = await res.json();
+          const reports = data.data?.reports || [];
+          const today = new Date();
+          const isSameDay = (d: string) => new Date(d).toDateString() === today.toDateString();
+          setStats((prev) => ({
+            ...prev,
+            activeCases: reports.filter((r: any) => ["reported", "under_investigation", "assigned"].includes(r.status)).length,
+            criticalAlerts: reports.filter((r: any) => r.priority === "critical").length,
+            reportsToday: reports.filter((r: any) => isSameDay(r.dateReported || r.createdAt)).length,
+          }));
+        }
+      } catch {}
+      try {
+        const uRes = await api.get("/users?isActive=true");
+        if (uRes.ok) {
+          const uData = await uRes.json();
+          setStats((prev) => ({ ...prev, officersOnDuty: String(uData.data?.users?.length ?? "—") }));
+        }
+      } catch {
+        setStats((prev) => ({ ...prev, officersOnDuty: "—" }));
+      }
+    };
+    load();
+  }, [user]);
+
+  React.useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    if (!token) return;
+    const c = new EventSource(`/api/realtime/crimes?token=${encodeURIComponent(token)}`);
+    const i = new EventSource(`/api/realtime/incidents?token=${encodeURIComponent(token)}`);
+    const handleCrime = (payload: any) => {
+      if (payload?.type === "crime_update" && payload.data) {
+        const r = payload.data;
+        setActivity((prev) => [
+          {
+            time: new Date().toLocaleTimeString(),
+            action: `Case updated: ${r.title}`,
+            location: r.location || "",
+            type: r.priority === "critical" ? "high" : r.priority === "high" ? "medium" : "low",
+          },
+          ...prev,
+        ].slice(0, 20));
+      }
+      if (payload?.type === "status_update" && payload.data) {
+        setActivity((prev) => [
+          { time: new Date().toLocaleTimeString(), action: `Status update: ${payload.data.update.status}`, location: "", type: "low" },
+          ...prev,
+        ].slice(0, 20));
+      }
+      if (payload?.type === "crime_message") {
+        setActivity((prev) => [
+          { time: new Date().toLocaleTimeString(), action: `New message on a case`, location: "", type: "low" },
+          ...prev,
+        ].slice(0, 20));
+      }
+    };
+    const handleIncident = (payload: any) => {
+      if (payload?.type === "incident_update") {
+        const ev = payload.data;
+        const inc = ev.incident || ev;
+        const kind = ev.type || "updated";
+        setActivity((prev) => [
+          {
+            time: new Date().toLocaleTimeString(),
+            action: `Incident ${kind}: ${inc.title}`,
+            location: inc.location || "",
+            type: inc.severity === "critical" ? "high" : inc.severity === "high" ? "medium" : "low",
+          },
+          ...prev,
+        ].slice(0, 20));
+      }
+    };
+    c.onmessage = (e) => {
+      try {
+        handleCrime(JSON.parse(e.data));
+      } catch {}
+    };
+    i.onmessage = (e) => {
+      try {
+        handleIncident(JSON.parse(e.data));
+      } catch {}
+    };
+    return () => {
+      c.close();
+      i.close();
+    };
+  }, []);
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -50,64 +167,6 @@ export default function Dashboard() {
   ]);
   const isHR = hasRole(UserRole.HR_MANAGER);
   const isCitizen = hasRole(UserRole.CITIZEN);
-
-  const quickStats = [
-    {
-      title: "Active Cases",
-      value: "24",
-      icon: FileText,
-      color: "text-crime-red",
-      bgColor: "bg-red-50",
-    },
-    {
-      title: "Critical Alerts",
-      value: "3",
-      icon: AlertTriangle,
-      color: "text-crime-yellow",
-      bgColor: "bg-yellow-50",
-    },
-    {
-      title: "Officers on Duty",
-      value: "18",
-      icon: Shield,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-    },
-    {
-      title: "Reports Today",
-      value: "7",
-      icon: TrendingUp,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-  ];
-
-  const recentActivity = [
-    {
-      time: "10 min ago",
-      action: "New theft report filed",
-      location: "Downtown Area",
-      type: "high",
-    },
-    {
-      time: "25 min ago",
-      action: "Case #2024-001 updated",
-      location: "North District",
-      type: "medium",
-    },
-    {
-      time: "1 hour ago",
-      action: "Officer patrol assigned",
-      location: "Market Street",
-      type: "low",
-    },
-    {
-      time: "2 hours ago",
-      action: "Evidence logged",
-      location: "Station #1",
-      type: "medium",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,17 +214,18 @@ export default function Dashboard() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {quickStats.map((stat, index) => (
+          {[
+            { title: 'Active Cases', value: String(stats.activeCases), icon: FileText, color: 'text-crime-red', bgColor: 'bg-red-50' },
+            { title: 'Critical Alerts', value: String(stats.criticalAlerts), icon: AlertTriangle, color: 'text-crime-yellow', bgColor: 'bg-yellow-50' },
+            { title: 'Officers on Duty', value: String(stats.officersOnDuty), icon: Shield, color: 'text-green-600', bgColor: 'bg-green-50' },
+            { title: 'Reports Today', value: String(stats.reportsToday), icon: TrendingUp, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+          ].map((stat, index) => (
             <Card key={index} className="border-l-4 border-l-crime-red">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold text-crime-black">
-                      {stat.value}
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                    <p className="text-3xl font-bold text-crime-black">{stat.value}</p>
                   </div>
                   <div className={`p-3 rounded-full ${stat.bgColor}`}>
                     <stat.icon className={`w-6 h-6 ${stat.color}`} />
@@ -211,6 +271,81 @@ export default function Dashboard() {
                       <UserCheck className="w-4 h-4 mr-2" />
                       Staff Management
                     </Button>
+                    <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Case
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Create New Case</DialogTitle>
+                          <DialogDescription>Open a new case record</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Title</Label>
+                              <Input value={newCase.title} onChange={(e) => setNewCase(prev => ({...prev, title: e.target.value}))} placeholder="Case title" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Category</Label>
+                              <Select value={newCase.category} onValueChange={(v) => setNewCase(prev => ({...prev, category: v}))}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {['theft','assault','burglary','fraud','vandalism','drug_offense','domestic_violence','traffic_violation','other'].map(c => (
+                                    <SelectItem key={c} value={c}>{c.replace('_',' ')}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Priority</Label>
+                              <Select value={newCase.priority} onValueChange={(v) => setNewCase(prev => ({...prev, priority: v}))}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {['low','medium','high','critical'].map(p => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Date of Incident</Label>
+                              <Input type="datetime-local" value={newCase.dateIncident} onChange={(e) => setNewCase(prev => ({...prev, dateIncident: e.target.value}))} />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Location</Label>
+                            <Input value={newCase.location} onChange={(e) => setNewCase(prev => ({...prev, location: e.target.value}))} placeholder="Location" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Description</Label>
+                            <Textarea value={newCase.description} onChange={(e) => setNewCase(prev => ({...prev, description: e.target.value}))} placeholder="Case description" rows={4} />
+                          </div>
+                          <div className="flex gap-2 justify-end pt-2">
+                            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                            <Button onClick={async () => {
+                              try {
+                                const payload = {
+                                  title: newCase.title,
+                                  description: newCase.description,
+                                  category: newCase.category,
+                                  priority: newCase.priority,
+                                  location: newCase.location,
+                                  dateIncident: newCase.dateIncident,
+                                };
+                                const res = await api.post('/crimes', payload);
+                                if (res.ok) { setCreateOpen(false); setNewCase({ title:'', category:'other', priority:'medium', location:'', dateIncident: new Date().toISOString().slice(0,16), description:''}); }
+                              } catch (e) { console.error(e); }
+                            }}>Create</Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       onClick={() => navigate("/reports")}
                       className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start"
@@ -440,30 +575,15 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg"
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full mt-2 ${
-                          activity.type === "high"
-                            ? "bg-crime-red"
-                            : activity.type === "medium"
-                              ? "bg-crime-yellow"
-                              : "bg-green-500"
-                        }`}
-                      ></div>
+                  {activity.map((a, index) => (
+                    <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${a.type === 'high' ? 'bg-crime-red' : a.type === 'medium' ? 'bg-crime-yellow' : 'bg-green-500'}`}></div>
                       <div className="flex-1">
-                        <p className="font-medium text-crime-black">
-                          {activity.action}
-                        </p>
+                        <p className="font-medium text-crime-black">{a.action}</p>
                         <div className="flex items-center text-sm text-gray-600 mt-1">
                           <Clock className="w-4 h-4 mr-1" />
-                          <span>{activity.time}</span>
-                          <span className="mx-2">•</span>
-                          <MapPin className="w-4 h-4 mr-1" />
-                          <span>{activity.location}</span>
+                          <span>{a.time}</span>
+                          {a.location ? (<><span className="mx-2">•</span><MapPin className="w-4 h-4 mr-1" /><span>{a.location}</span></>) : null}
                         </div>
                       </div>
                     </div>

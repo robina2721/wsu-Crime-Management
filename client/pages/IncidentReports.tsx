@@ -90,6 +90,30 @@ export default function IncidentReports() {
   }, []);
 
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) return;
+    const es = new EventSource(`/api/realtime/incidents?token=${encodeURIComponent(token)}`);
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload?.type === 'incident_update') {
+          const ev = payload.data;
+          const inc = ev.incident || ev;
+          setIncidents(prev => {
+            const idx = prev.findIndex(x => x.id === inc.id);
+            const normalized: IncidentReport = { ...inc, dateOccurred: new Date(inc.dateOccurred), createdAt: new Date(inc.createdAt), updatedAt: new Date(inc.updatedAt) };
+            if (ev.type === 'deleted') return prev.filter(x => x.id !== inc.id);
+            if (idx >= 0) { const copy = [...prev]; copy[idx] = { ...copy[idx], ...normalized }; return copy; }
+            return [normalized, ...prev];
+          });
+        }
+      } catch {}
+    };
+    es.onerror = () => {};
+    return () => { es.close(); };
+  }, []);
+
+  useEffect(() => {
     filterIncidents();
   }, [incidents, searchTerm, typeFilter, statusFilter]);
 

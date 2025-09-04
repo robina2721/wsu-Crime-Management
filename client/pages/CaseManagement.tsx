@@ -3,6 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { CrimeReport, CrimeStatus, CrimeCategory, Priority, UserRole } from '@shared/types';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -34,6 +37,14 @@ export default function CaseManagement() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [activeCase, setActiveCase] = useState<any | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [messageFiles, setMessageFiles] = useState<File[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [officers, setOfficers] = useState<any[]>([]);
+  const [selectedOfficer, setSelectedOfficer] = useState<string>("");
 
   const canManageAllCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
   const canAssignCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.DETECTIVE_OFFICER]);
@@ -332,10 +343,122 @@ export default function CaseManagement() {
                     </div>
 
                     <div className="flex gap-2 ml-4">
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
+                      <Dialog open={isViewOpen && activeCase?.id === case_.id} onOpenChange={(o) => { if (!o) { setIsViewOpen(false); setActiveCase(null); } }}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            try {
+                              const res = await api.get(`/crimes/${case_.id}`);
+                              if (res.ok) {
+                                const d = await res.json();
+                                if (d.success) {
+                                  setActiveCase(d.data);
+                                  setIsViewOpen(true);
+                                  const mRes = await api.get(`/crimes/${case_.id}/messages`);
+                                  if (mRes.ok) {
+                                    const mData = await mRes.json();
+                                    if (mData.success) setMessages(mData.data.messages);
+                                  }
+                                }
+                              }
+                            } catch (e) { console.error(e); }
+                          }}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Case Details - {activeCase?.title}</DialogTitle>
+                          </DialogHeader>
+                          <Tabs defaultValue="details">
+                            <TabsList>
+                              <TabsTrigger value="details">Details</TabsTrigger>
+                              <TabsTrigger value="evidence">Evidence</TabsTrigger>
+                              <TabsTrigger value="contact">Contact Citizen</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="details">
+                              <div className="space-y-2">
+                                <div className="text-sm text-gray-600">Category: {activeCase?.category}</div>
+                                <div className="text-sm text-gray-600">Location: {activeCase?.location}</div>
+                                <div className="text-sm text-gray-600">Reported: {activeCase ? new Date(activeCase.dateReported).toLocaleString() : ""}</div>
+                                <div className="text-sm text-gray-600">Description:</div>
+                                <div className="whitespace-pre-wrap">{activeCase?.description}</div>
+                              </div>
+                            </TabsContent>
+                            <TabsContent value="evidence">
+                              <div className="grid grid-cols-2 gap-3">
+                                {(activeCase?.evidence || []).map((ev: any, i: number) => {
+                                  const name = typeof ev === 'string' ? ev : ev.fileName;
+                                  const type = typeof ev === 'string' ? '' : ev.fileType || '';
+                                  const isImg = type.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp)$/i.test(name);
+                                  const isVideo = type.startsWith('video/') || /\.(mp4|webm|ogg)$/i.test(name);
+                                  return (
+                                    <div key={i} className="p-2 border rounded">
+                                      {isImg ? (
+                                        <img src={name} alt={`ev-${i}`} className="h-28 w-full object-cover rounded" />
+                                      ) : isVideo ? (
+                                        <video src={name} controls className="h-28 w-full rounded" />
+                                      ) : (
+                                        <div className="text-sm truncate">{name}</div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </TabsContent>
+                            <TabsContent value="contact">
+                              <div className="space-y-3">
+                                <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white">
+                                  {messages.slice().reverse().map((m, idx) => (
+                                    <div key={m.id || idx} className="text-sm mb-2">
+                                      <span className="font-medium">{m.senderRole}:</span> {m.message}
+                                      <span className="text-xs text-gray-500 ml-2">{new Date(m.createdAt).toLocaleString()}</span>
+                                      {(m.attachments || []).map((att: any, aidx: number) => (
+                                        <div key={aidx} className="mt-1">
+                                          {att.fileType?.startsWith('image/') ? (
+                                            <img src={att.fileName} className="h-24 rounded" />
+                                          ) : att.fileType?.startsWith('video/') ? (
+                                            <video src={att.fileName} controls className="h-24 rounded" />
+                                          ) : (
+                                            <a href={att.fileName} target="_blank" className="text-blue-600 underline">Attachment</a>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Message</Label>
+                                  <Textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Write a message to the citizen..." />
+                                  <Input type="file" multiple accept="image/*,video/*" onChange={(e) => setMessageFiles(Array.from(e.target.files || []))} />
+                                  <div className="flex gap-2">
+                                    <Button onClick={async () => {
+                                      try {
+                                        if (!activeCase) return;
+                                        if (!newMessage && messageFiles.length === 0) return;
+                                        const form = new FormData();
+                                        if (newMessage) form.append('message', newMessage);
+                                        messageFiles.forEach(f => form.append('files', f));
+                                        const res = await api.post(`/crimes/${activeCase.id}/messages`, form);
+                                        if (res.ok) {
+                                          const d = await res.json();
+                                          if (d.success) {
+                                            setMessages(prev => [d.data, ...prev]);
+                                            setNewMessage('');
+                                            setMessageFiles([]);
+                                          }
+                                        }
+                                      } catch (e) { console.error(e); }
+                                    }}>
+                                      Send
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+                          </Tabs>
+                        </DialogContent>
+                      </Dialog>
                       
                       {canManageAllCases && (
                         <>
@@ -345,14 +468,55 @@ export default function CaseManagement() {
                           </Button>
                           
                           {!case_.assignedTo && canAssignCases && (
-                            <Button 
-                              size="sm" 
-                              className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
-                              onClick={() => handleAssignCase(case_.id, user?.id || '')}
-                            >
-                              <UserCheck className="w-4 h-4 mr-1" />
-                              Assign
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
+                                onClick={async () => {
+                                  try {
+                                    const res = await api.get('/crimes/active-officers');
+                                    if (res.ok) {
+                                      const d = await res.json();
+                                      if (d.success) setOfficers(d.data.officers);
+                                    }
+                                    setSelectedOfficer('');
+                                    setAssignOpen(true);
+                                    setActiveCase(case_);
+                                  } catch (e) { console.error(e); }
+                                }}
+                              >
+                                <UserCheck className="w-4 h-4 mr-1" />
+                                Assign
+                              </Button>
+                              <Dialog open={assignOpen && activeCase?.id === case_.id} onOpenChange={(o) => { if (!o) setAssignOpen(false); }}>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Assign Officer</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-3">
+                                    <Label>Select active officer</Label>
+                                    <Select value={selectedOfficer} onValueChange={setSelectedOfficer}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Choose officer" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {officers.map((o) => (
+                                          <SelectItem key={o.id} value={o.id}>{o.name} ({o.role.replace('_',' ')}) - Active cases: {o.activeCaseCount}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <div className="flex justify-end gap-2">
+                                      <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
+                                      <Button disabled={!selectedOfficer} onClick={async () => {
+                                        if (!activeCase || !selectedOfficer) return;
+                                        const res = await api.put(`/crimes/${activeCase.id}`, { assignedTo: selectedOfficer });
+                                        if (res.ok) { setAssignOpen(false); fetchCases(); }
+                                      }}>Assign</Button>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </>
                           )}
                         </>
                       )}

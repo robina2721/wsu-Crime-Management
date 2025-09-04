@@ -131,3 +131,67 @@ export function notifyStatusUpdate(crimeId, update, audience) {
     }
   } catch {}
 }
+
+export async function incidentsStreamHandler(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const tokenParam = searchParams.get("token");
+    const headerToken = req.headers.get("authorization")?.replace("Bearer ", "");
+    const token = tokenParam || headerToken || "";
+    const userId = getAuthUserIdFromToken(token);
+    if (!userId)
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const user = await findUserById(userId);
+    if (!user)
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+
+    const stream = new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder();
+        function sendEvent(data) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        }
+        const subs = subscribersByUser.get(userId) || new Set();
+        const subscriber = { send: sendEvent };
+        subs.add(subscriber);
+        subscribersByUser.set(userId, subs);
+        sendEvent({ type: "connected", time: Date.now() });
+        const keepalive = setInterval(() => sendEvent({ type: "ping", time: Date.now() }), 25000);
+        controller._cleanup = () => {
+          clearInterval(keepalive);
+          const s = subscribersByUser.get(userId);
+          if (s) {
+            s.delete(subscriber);
+            if (s.size === 0) subscribersByUser.delete(userId);
+          }
+        };
+      },
+      cancel() {},
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  }
+}
+
+export function notifyIncidentUpdate(incident) {
+  try {
+    for (const subs of subscribersByUser.values()) {
+      if (!subs || subs.size === 0) continue;
+      for (const sub of subs) {
+        try {
+          sub.send({ type: "incident_update", data: incident });
+        } catch {}
+      }
+    }
+  } catch {}
+}

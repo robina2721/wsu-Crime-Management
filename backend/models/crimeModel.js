@@ -351,3 +351,86 @@ export async function getCrimeMessages(crimeId, limit = 100, offset = 0) {
     [crimeId, offset, limit],
   );
 }
+
+// Message attachments
+async function ensureMessageAttachmentsTable() {
+  await queryRows(
+    `IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[crime_message_attachments]') AND type in (N'U'))
+     BEGIN
+       CREATE TABLE crime_message_attachments (
+         id NVARCHAR(64) NOT NULL PRIMARY KEY,
+         message_id NVARCHAR(64) NOT NULL,
+         crime_id NVARCHAR(64) NOT NULL,
+         file_name NVARCHAR(512) NOT NULL,
+         file_type NVARCHAR(128) NULL,
+         created_at DATETIME2 NOT NULL
+       )
+     END`,
+  );
+}
+
+export async function addCrimeMessageAttachment(messageId, crimeId, { fileName, fileType }) {
+  await ensureMessageAttachmentsTable();
+  const id = global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
+  const now = new Date();
+  await queryRows(
+    `INSERT INTO crime_message_attachments (id, message_id, crime_id, file_name, file_type, created_at)
+     VALUES (@p1, @p2, @p3, @p4, @p5, @p6)`,
+    [id, messageId, crimeId, fileName, fileType || null, now]
+  );
+  return { id, messageId, crimeId, fileName, fileType: fileType || null, createdAt: now };
+}
+
+export async function getCrimeMessageAttachments(messageIds = []) {
+  if (!messageIds.length) return {};
+  await ensureMessageAttachmentsTable();
+  // Build dynamic IN clause
+  const params = [];
+  const placeholders = messageIds.map((id, idx) => {
+    params.push(id);
+    return `@p${idx + 1}`;
+  });
+  const rows = await queryRows(
+    `SELECT id, message_id as messageId, crime_id as crimeId, file_name as fileName, file_type as fileType, created_at as createdAt
+     FROM crime_message_attachments WHERE message_id IN (${placeholders.join(', ')})
+     ORDER BY created_at DESC`,
+    params
+  );
+  const map = {};
+  for (const r of rows) {
+    if (!map[r.messageId]) map[r.messageId] = [];
+    map[r.messageId].push(r);
+  }
+  return map;
+}
+
+export async function getCrimeMessagesWithAttachments(crimeId, limit = 100, offset = 0) {
+  const messages = await getCrimeMessages(crimeId, limit, offset);
+  const ids = messages.map(m => m.id);
+  const attMap = await getCrimeMessageAttachments(ids);
+  return messages.map(m => ({ ...m, attachments: attMap[m.id] || [] }));
+}
+
+// Officer active case counts
+export async function getActiveCaseCountsForOfficers(officerIds = []) {
+  if (!officerIds.length) return {};
+  const params = [];
+  const placeholders = officerIds.map((id, idx) => {
+    params.push(id);
+    return `@p${idx + 1}`;
+  });
+  // active statuses
+  const activeStatuses = ['reported','under_investigation','assigned'];
+  activeStatuses.forEach((s, i) => params.push(s));
+  const where = `assigned_to IN (${placeholders.join(', ')}) AND status IN (@p${officerIds.length + 1}, @p${officerIds.length + 2}, @p${officerIds.length + 3})`;
+  const rows = await queryRows(
+    `SELECT assigned_to as officerId, COUNT(*) as activeCount
+     FROM crimes
+     WHERE ${where}
+     GROUP BY assigned_to`,
+    params
+  );
+  const map = {};
+  for (const r of rows) map[r.officerId] = Number(r.activeCount) || 0;
+  return map;
+}

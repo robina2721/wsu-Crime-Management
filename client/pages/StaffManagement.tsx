@@ -24,6 +24,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import { api } from "@/lib/api";
 import {
   Users,
   Search,
@@ -43,6 +44,7 @@ import {
   XCircle,
   AlertTriangle,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 
 interface StaffAssignment {
   id: string;
@@ -457,6 +459,19 @@ export default function StaffManagement() {
                               <Button
                                 size="sm"
                                 className="flex-1 bg-crime-yellow hover:bg-yellow-600 text-crime-black"
+                                onClick={() => {
+                                  setNewAssignment({
+                                    officerId: member.id,
+                                    officerName: member.fullName,
+                                    assignment: "",
+                                    location: "",
+                                    startTime: new Date(),
+                                    endTime: new Date(),
+                                    status: "active",
+                                    priority: "medium",
+                                  });
+                                  setIsAssignOpen(true);
+                                }}
                               >
                                 <UserCheck className="w-4 h-4 mr-1" />
                                 Assign
@@ -495,7 +510,7 @@ export default function StaffManagement() {
                     </CardDescription>
                   </div>
                   {canAssignStaff && (
-                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
+                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAssignOpen(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       New Assignment
                     </Button>
@@ -595,6 +610,114 @@ export default function StaffManagement() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {canAssignStaff && (
+        <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New Assignment</DialogTitle>
+              <DialogDescription>Create or update a staff assignment</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="text-sm">Officer</label>
+                <Select value={(newAssignment.officerId as string) || ""} onValueChange={(v) => {
+                  const selected = staff.find((s) => s.id === v);
+                  setNewAssignment((a) => ({ ...a, officerId: v, officerName: selected?.fullName || "" }));
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Officer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {staff.filter((s) => s.isActive).map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.fullName} ({s.role.replace("_", " ")})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm">Assignment</label>
+                <Input
+                  value={(newAssignment.assignment as string) || ""}
+                  onChange={(e) => setNewAssignment((a) => ({ ...a, assignment: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">Location</label>
+                <Input
+                  value={(newAssignment.location as string) || ""}
+                  onChange={(e) => setNewAssignment((a) => ({ ...a, location: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">Priority</label>
+                <Select
+                  value={(newAssignment.priority as string) || "medium"}
+                  onValueChange={(v) => setNewAssignment((a) => ({ ...a, priority: v as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm">Start Time</label>
+                <Input
+                  type="datetime-local"
+                  value={new Date(newAssignment.startTime || new Date()).toISOString().slice(0, 16)}
+                  onChange={(e) => setNewAssignment((a) => ({ ...a, startTime: new Date(e.target.value) as any }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm">End Time</label>
+                <Input
+                  type="datetime-local"
+                  value={new Date(newAssignment.endTime || new Date()).toISOString().slice(0, 16)}
+                  onChange={(e) => setNewAssignment((a) => ({ ...a, endTime: new Date(e.target.value) as any }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAssignOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    const payload: any = {
+                      officerId: newAssignment.officerId,
+                      officerName: newAssignment.officerName,
+                      assignment: newAssignment.assignment,
+                      location: newAssignment.location,
+                      startTime: newAssignment.startTime,
+                      endTime: newAssignment.endTime,
+                      status: newAssignment.status,
+                      priority: newAssignment.priority,
+                    };
+                    const res = await api.post("/assignments", payload);
+                    if (res.ok) {
+                      setIsAssignOpen(false);
+                      await fetchAssignments();
+                    }
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+              >
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

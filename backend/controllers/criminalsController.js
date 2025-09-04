@@ -47,6 +47,15 @@ export async function getHandler(_req, params) {
         { success: false, error: "Criminal record not found" },
         { status: 404 },
       );
+    try {
+      const { listConvictions, listArrests, listWarrants } = await import("../../backend/models/criminalHistoryModel.js");
+      const [convictions, arrests, warrants] = await Promise.all([
+        listConvictions(rec.id),
+        listArrests(rec.id),
+        listWarrants(rec.id),
+      ]);
+      rec.criminalHistory = { convictions, arrests, warrants };
+    } catch {}
     return NextResponse.json({ success: true, data: rec });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -15,6 +15,10 @@ export async function listIncidents(limit = 100, offset = 0, filters = {}) {
     where.push(`severity = @p${params.length + 1}`);
     params.push(filters.severity);
   }
+  if (filters.reportedBy) {
+    where.push(`reported_by = @p${params.length + 1}`);
+    params.push(filters.reportedBy);
+  }
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   params.push(offset);
   params.push(limit);

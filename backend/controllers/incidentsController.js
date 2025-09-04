@@ -7,6 +7,7 @@ import {
   deleteIncident,
 } from "../../backend/models/incidentModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
+import { notifyIncidentUpdate } from "../../backend/controllers/realtimeController.js";
 
 function getAuthUserId(req) {
   const authHeader = req.headers.get("authorization");
@@ -34,10 +35,21 @@ export async function listIncidentsHandler(req) {
     const status = searchParams.get("status") || undefined;
     const incidentType = searchParams.get("incidentType") || undefined;
     const severity = searchParams.get("severity") || undefined;
+    const reportedByParam = searchParams.get("reportedBy") || undefined;
+    let reportedBy = undefined;
+    if (reportedByParam) {
+      if (reportedByParam === "me") {
+        const uid = getAuthUserId(req);
+        if (uid) reportedBy = uid;
+      } else {
+        reportedBy = reportedByParam;
+      }
+    }
     const rows = await listIncidents(limit, offset, {
       status,
       incidentType,
       severity,
+      reportedBy,
     });
     return NextResponse.json({
       success: true,
@@ -119,6 +131,7 @@ export async function createIncidentHandler(req) {
       relatedCaseId: body.relatedCaseId || null,
     };
     const created = await createIncident(payload);
+    try { notifyIncidentUpdate({ type: "created", incident: created }); } catch {}
     return NextResponse.json(
       { success: true, data: created, message: "Incident created" },
       { status: 201 },
@@ -151,6 +164,7 @@ export async function updateIncidentHandler(req, params) {
         { success: false, error: "Incident not found" },
         { status: 404 },
       );
+    try { notifyIncidentUpdate({ type: "updated", incident: updated }); } catch {}
     return NextResponse.json({
       success: true,
       data: updated,
@@ -178,6 +192,7 @@ export async function deleteIncidentHandler(req, params) {
       );
     }
     await deleteIncident(params.id);
+    try { notifyIncidentUpdate({ type: "deleted", id: params.id }); } catch {}
     return NextResponse.json({ success: true, message: "Incident deleted" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
