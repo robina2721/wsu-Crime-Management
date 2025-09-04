@@ -468,14 +468,55 @@ export default function CaseManagement() {
                           </Button>
                           
                           {!case_.assignedTo && canAssignCases && (
-                            <Button 
-                              size="sm" 
-                              className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
-                              onClick={() => handleAssignCase(case_.id, user?.id || '')}
-                            >
-                              <UserCheck className="w-4 h-4 mr-1" />
-                              Assign
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
+                                onClick={async () => {
+                                  try {
+                                    const res = await api.get('/crimes/active-officers');
+                                    if (res.ok) {
+                                      const d = await res.json();
+                                      if (d.success) setOfficers(d.data.officers);
+                                    }
+                                    setSelectedOfficer('');
+                                    setAssignOpen(true);
+                                    setActiveCase(case_);
+                                  } catch (e) { console.error(e); }
+                                }}
+                              >
+                                <UserCheck className="w-4 h-4 mr-1" />
+                                Assign
+                              </Button>
+                              <Dialog open={assignOpen && activeCase?.id === case_.id} onOpenChange={(o) => { if (!o) setAssignOpen(false); }}>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Assign Officer</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-3">
+                                    <Label>Select active officer</Label>
+                                    <Select value={selectedOfficer} onValueChange={setSelectedOfficer}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Choose officer" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {officers.map((o) => (
+                                          <SelectItem key={o.id} value={o.id}>{o.name} ({o.role.replace('_',' ')}) - Active cases: {o.activeCaseCount}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <div className="flex justify-end gap-2">
+                                      <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
+                                      <Button disabled={!selectedOfficer} onClick={async () => {
+                                        if (!activeCase || !selectedOfficer) return;
+                                        const res = await api.put(`/crimes/${activeCase.id}`, { assignedTo: selectedOfficer });
+                                        if (res.ok) { setAssignOpen(false); fetchCases(); }
+                                      }}>Assign</Button>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </>
                           )}
                         </>
                       )}
