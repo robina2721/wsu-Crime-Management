@@ -934,6 +934,38 @@ export default function CriminalDatabase() {
                         No convictions on record
                       </div>
                     )}
+
+                    {canModifyRecords && (
+                      <div className="border-t pt-4 space-y-2">
+                        <div className="font-semibold">Add Conviction</div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <Input placeholder="Crime Type" onChange={(e:any) => (window as any)._cvType = e.target.value} />
+                          <Input placeholder="Date" type="date" onChange={(e:any) => (window as any)._cvDate = e.target.value} />
+                          <Input placeholder="Court" onChange={(e:any) => (window as any)._cvCourt = e.target.value} />
+                          <Input placeholder="Case Number" onChange={(e:any) => (window as any)._cvCase = e.target.value} />
+                          <Input placeholder="Sentence" onChange={(e:any) => (window as any)._cvSentence = e.target.value} className="md:col-span-2" />
+                          <Input placeholder="Description" onChange={(e:any) => (window as any)._cvDesc = e.target.value} className="md:col-span-3" />
+                        </div>
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={async () => {
+                            if (!selectedCriminal) return;
+                            const payload:any = {
+                              crimeType: (window as any)._cvType || undefined,
+                              date: (window as any)._cvDate || undefined,
+                              court: (window as any)._cvCourt || undefined,
+                              caseNumber: (window as any)._cvCase || undefined,
+                              sentence: (window as any)._cvSentence || undefined,
+                              description: (window as any)._cvDesc || undefined,
+                            };
+                            const res = await api.post(`/criminals/${selectedCriminal.id}/convictions`, payload);
+                            if (res.ok) {
+                              const d = await (await api.get(`/criminals/${selectedCriminal.id}`)).json();
+                              if (d.success) setSelectedCriminal(d.data);
+                            }
+                          }}>Add</Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
