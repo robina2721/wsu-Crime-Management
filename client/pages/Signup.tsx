@@ -37,6 +37,15 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+  const [employeeDetails, setEmployeeDetails] = useState({
+    employeeId: "",
+    department: "",
+    badgeNumber: "",
+    rank: "",
+  });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>("");
+  const isEmployee = form.requestedRole !== UserRole.CITIZEN;
 
   const roleOptions = [
     { value: UserRole.CITIZEN, label: "Citizen" },
