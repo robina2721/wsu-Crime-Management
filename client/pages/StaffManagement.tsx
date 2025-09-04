@@ -497,7 +497,7 @@ export default function StaffManagement() {
                     </CardDescription>
                   </div>
                   {canAssignStaff && (
-                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
+                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAssignOpen(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       New Assignment
                     </Button>
