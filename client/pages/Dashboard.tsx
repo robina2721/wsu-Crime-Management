@@ -271,6 +271,81 @@ export default function Dashboard() {
                       <UserCheck className="w-4 h-4 mr-2" />
                       Staff Management
                     </Button>
+                    <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-crime-red hover:bg-crime-red-dark text-white justify-start">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Case
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Create New Case</DialogTitle>
+                          <DialogDescription>Open a new case record</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Title</Label>
+                              <Input value={newCase.title} onChange={(e) => setNewCase(prev => ({...prev, title: e.target.value}))} placeholder="Case title" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Category</Label>
+                              <Select value={newCase.category} onValueChange={(v) => setNewCase(prev => ({...prev, category: v}))}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {['theft','assault','burglary','fraud','vandalism','drug_offense','domestic_violence','traffic_violation','other'].map(c => (
+                                    <SelectItem key={c} value={c}>{c.replace('_',' ')}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Priority</Label>
+                              <Select value={newCase.priority} onValueChange={(v) => setNewCase(prev => ({...prev, priority: v}))}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {['low','medium','high','critical'].map(p => (<SelectItem key={p} value={p}>{p}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Date of Incident</Label>
+                              <Input type="datetime-local" value={newCase.dateIncident} onChange={(e) => setNewCase(prev => ({...prev, dateIncident: e.target.value}))} />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Location</Label>
+                            <Input value={newCase.location} onChange={(e) => setNewCase(prev => ({...prev, location: e.target.value}))} placeholder="Location" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Description</Label>
+                            <Textarea value={newCase.description} onChange={(e) => setNewCase(prev => ({...prev, description: e.target.value}))} placeholder="Case description" rows={4} />
+                          </div>
+                          <div className="flex gap-2 justify-end pt-2">
+                            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                            <Button onClick={async () => {
+                              try {
+                                const payload = {
+                                  title: newCase.title,
+                                  description: newCase.description,
+                                  category: newCase.category,
+                                  priority: newCase.priority,
+                                  location: newCase.location,
+                                  dateIncident: newCase.dateIncident,
+                                };
+                                const res = await api.post('/crimes', payload);
+                                if (res.ok) { setCreateOpen(false); setNewCase({ title:'', category:'other', priority:'medium', location:'', dateIncident: new Date().toISOString().slice(0,16), description:''}); }
+                              } catch (e) { console.error(e); }
+                            }}>Create</Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       onClick={() => navigate("/reports")}
                       className="w-full bg-crime-yellow hover:bg-yellow-600 text-crime-black justify-start"
