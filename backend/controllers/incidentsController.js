@@ -7,6 +7,7 @@ import {
   deleteIncident,
 } from "../../backend/models/incidentModel.js";
 import { findUserById } from "../../backend/models/userModel.js";
+import { notifyIncidentUpdate } from "../../backend/controllers/realtimeController.js";
 
 function getAuthUserId(req) {
   const authHeader = req.headers.get("authorization");
@@ -119,6 +120,7 @@ export async function createIncidentHandler(req) {
       relatedCaseId: body.relatedCaseId || null,
     };
     const created = await createIncident(payload);
+    try { notifyIncidentUpdate({ type: "created", incident: created }); } catch {}
     return NextResponse.json(
       { success: true, data: created, message: "Incident created" },
       { status: 201 },
@@ -151,6 +153,7 @@ export async function updateIncidentHandler(req, params) {
         { success: false, error: "Incident not found" },
         { status: 404 },
       );
+    try { notifyIncidentUpdate({ type: "updated", incident: updated }); } catch {}
     return NextResponse.json({
       success: true,
       data: updated,
@@ -178,6 +181,7 @@ export async function deleteIncidentHandler(req, params) {
       );
     }
     await deleteIncident(params.id);
+    try { notifyIncidentUpdate({ type: "deleted", id: params.id }); } catch {}
     return NextResponse.json({ success: true, message: "Incident deleted" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
