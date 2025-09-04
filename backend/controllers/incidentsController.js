@@ -35,10 +35,21 @@ export async function listIncidentsHandler(req) {
     const status = searchParams.get("status") || undefined;
     const incidentType = searchParams.get("incidentType") || undefined;
     const severity = searchParams.get("severity") || undefined;
+    const reportedByParam = searchParams.get("reportedBy") || undefined;
+    let reportedBy = undefined;
+    if (reportedByParam) {
+      if (reportedByParam === "me") {
+        const uid = getAuthUserId(req);
+        if (uid) reportedBy = uid;
+      } else {
+        reportedBy = reportedByParam;
+      }
+    }
     const rows = await listIncidents(limit, offset, {
       status,
       incidentType,
       severity,
+      reportedBy,
     });
     return NextResponse.json({
       success: true,
