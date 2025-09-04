@@ -504,6 +504,51 @@ export async function createMessageHandler(req, params) {
         { status: 403 },
       );
 
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      const msgField = form.get("message");
+      const messageText = typeof msgField === "string" ? msgField : "";
+      const files = form.getAll("files").filter((f) => typeof f !== "string");
+      const createdMsg = await addCrimeMessage(report.id, {
+        senderId: user.id,
+        senderRole: user.role,
+        message: messageText || "",
+      });
+      const saved = [];
+      if (files.length) {
+        const dir = path.join(process.cwd(), "public", "uploads", "messages", report.id);
+        fs.mkdirSync(dir, { recursive: true });
+        for (const file of files) {
+          const arrayBuffer = await file.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const safeName = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`.replace(/\s+/g, "_");
+          const filePath = path.join(dir, safeName);
+          fs.writeFileSync(filePath, buffer);
+          const relUrl = `/uploads/messages/${report.id}/${safeName}`;
+          const att = await addCrimeMessageAttachment(createdMsg.id, report.id, {
+            fileName: relUrl,
+            fileType: file.type || null,
+          });
+          saved.push(att);
+        }
+      }
+      createdMsg.attachments = saved;
+      try {
+        notifyCrimeMessage(report.id, {
+          ...createdMsg,
+          reportedBy: report.reportedBy,
+          assignedTo: report.assignedTo,
+          recipientId:
+            user.id === report.reportedBy ? report.assignedTo : report.reportedBy,
+        });
+      } catch {}
+      return NextResponse.json(
+        { success: true, data: createdMsg, message: "Message sent" },
+        { status: 201 },
+      );
+    }
+
     const body = await req.json();
     if (!body.message || typeof body.message !== "string")
       return NextResponse.json(
