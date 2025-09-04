@@ -13,15 +13,19 @@ import {
   addStatusUpdate,
   getStatusUpdatesByCrime,
   addCrimeMessage,
-  getCrimeMessages,
+  getCrimeMessagesWithAttachments,
+  addCrimeMessageAttachment,
+  getActiveCaseCountsForOfficers,
 } from "../../backend/models/crimeModel.js";
-import { findUserById } from "../../backend/models/userModel.js";
+import { listUsers, findUserById } from "../../backend/models/userModel.js";
 import {
   notifyCrimeUpdate,
   notifyCrimeMessage,
   notifyStatusUpdate,
 } from "../../backend/controllers/realtimeController.js";
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 function getAuthUserId(req) {
   const authHeader = req.headers.get("authorization");
