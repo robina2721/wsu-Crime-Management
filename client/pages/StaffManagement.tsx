@@ -44,6 +44,7 @@ import {
   XCircle,
   AlertTriangle,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 
 interface StaffAssignment {
   id: string;
