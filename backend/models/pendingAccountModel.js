@@ -107,13 +107,28 @@ export async function approvePendingAccount(id, toUserData = {}) {
   const now = new Date();
   const userId =
     global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
-  // Determine password
-  let plain = toUserData.password || null;
-  if (!plain) {
-    plain = `Temp${Math.random().toString(36).slice(2, 8)}`;
-  }
+
+  // Parse any documents saved during signup (e.g. passwordHash, photo, details)
+  let docs = {};
+  try {
+    if (pending.documents) {
+      docs = JSON.parse(pending.documents);
+    }
+  } catch {}
+
+  // Determine password/hash
   const bcrypt = (await import("bcryptjs")).default;
-  const hashed = plain.startsWith("$2") ? plain : await bcrypt.hash(plain, 10);
+  let plain = toUserData.password || null;
+  let hashed = null;
+  if (plain) {
+    hashed = plain.startsWith("$2") ? plain : await bcrypt.hash(plain, 10);
+  } else if (docs.passwordHash) {
+    hashed = docs.passwordHash;
+  } else {
+    plain = `Temp${Math.random().toString(36).slice(2, 8)}`;
+    hashed = await bcrypt.hash(plain, 10);
+  }
+
   await queryRows(
     `INSERT INTO users (id, username, password, role, full_name, email, phone, is_active, created_at, updated_at)
      VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)`,
@@ -130,11 +145,20 @@ export async function approvePendingAccount(id, toUserData = {}) {
       now,
     ],
   );
+
+  // If a photo was provided during signup, persist it to user_photos
+  try {
+    if (docs.photo && docs.photo.mime && docs.photo.dataBase64) {
+      const { saveUserPhoto } = await import("../../backend/models/userPhotoModel.js");
+      await saveUserPhoto(userId, docs.photo.mime, docs.photo.dataBase64);
+    }
+  } catch {}
+
   await queryRows(
     `UPDATE pending_accounts SET status = @p1, updated_at = @p2 WHERE id = @p3`,
     ["approved", now, id],
   );
-  return { userId, pendingId: id, tempPassword: plain };
+  return { userId, pendingId: id, tempPassword: plain || undefined };
 }
 
 export async function rejectPendingAccount(id, reason = null) {
