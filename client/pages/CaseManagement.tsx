@@ -37,6 +37,14 @@ export default function CaseManagement() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [activeCase, setActiveCase] = useState<any | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [messageFiles, setMessageFiles] = useState<File[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [officers, setOfficers] = useState<any[]>([]);
+  const [selectedOfficer, setSelectedOfficer] = useState<string>("");
 
   const canManageAllCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD]);
   const canAssignCases = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.POLICE_HEAD, UserRole.DETECTIVE_OFFICER]);
