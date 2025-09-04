@@ -343,10 +343,122 @@ export default function CaseManagement() {
                     </div>
 
                     <div className="flex gap-2 ml-4">
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
+                      <Dialog open={isViewOpen && activeCase?.id === case_.id} onOpenChange={(o) => { if (!o) { setIsViewOpen(false); setActiveCase(null); } }}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            try {
+                              const res = await api.get(`/crimes/${case_.id}`);
+                              if (res.ok) {
+                                const d = await res.json();
+                                if (d.success) {
+                                  setActiveCase(d.data);
+                                  setIsViewOpen(true);
+                                  const mRes = await api.get(`/crimes/${case_.id}/messages`);
+                                  if (mRes.ok) {
+                                    const mData = await mRes.json();
+                                    if (mData.success) setMessages(mData.data.messages);
+                                  }
+                                }
+                              }
+                            } catch (e) { console.error(e); }
+                          }}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Case Details - {activeCase?.title}</DialogTitle>
+                          </DialogHeader>
+                          <Tabs defaultValue="details">
+                            <TabsList>
+                              <TabsTrigger value="details">Details</TabsTrigger>
+                              <TabsTrigger value="evidence">Evidence</TabsTrigger>
+                              <TabsTrigger value="contact">Contact Citizen</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="details">
+                              <div className="space-y-2">
+                                <div className="text-sm text-gray-600">Category: {activeCase?.category}</div>
+                                <div className="text-sm text-gray-600">Location: {activeCase?.location}</div>
+                                <div className="text-sm text-gray-600">Reported: {activeCase ? new Date(activeCase.dateReported).toLocaleString() : ""}</div>
+                                <div className="text-sm text-gray-600">Description:</div>
+                                <div className="whitespace-pre-wrap">{activeCase?.description}</div>
+                              </div>
+                            </TabsContent>
+                            <TabsContent value="evidence">
+                              <div className="grid grid-cols-2 gap-3">
+                                {(activeCase?.evidence || []).map((ev: any, i: number) => {
+                                  const name = typeof ev === 'string' ? ev : ev.fileName;
+                                  const type = typeof ev === 'string' ? '' : ev.fileType || '';
+                                  const isImg = type.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp)$/i.test(name);
+                                  const isVideo = type.startsWith('video/') || /\.(mp4|webm|ogg)$/i.test(name);
+                                  return (
+                                    <div key={i} className="p-2 border rounded">
+                                      {isImg ? (
+                                        <img src={name} alt={`ev-${i}`} className="h-28 w-full object-cover rounded" />
+                                      ) : isVideo ? (
+                                        <video src={name} controls className="h-28 w-full rounded" />
+                                      ) : (
+                                        <div className="text-sm truncate">{name}</div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </TabsContent>
+                            <TabsContent value="contact">
+                              <div className="space-y-3">
+                                <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white">
+                                  {messages.slice().reverse().map((m, idx) => (
+                                    <div key={m.id || idx} className="text-sm mb-2">
+                                      <span className="font-medium">{m.senderRole}:</span> {m.message}
+                                      <span className="text-xs text-gray-500 ml-2">{new Date(m.createdAt).toLocaleString()}</span>
+                                      {(m.attachments || []).map((att: any, aidx: number) => (
+                                        <div key={aidx} className="mt-1">
+                                          {att.fileType?.startsWith('image/') ? (
+                                            <img src={att.fileName} className="h-24 rounded" />
+                                          ) : att.fileType?.startsWith('video/') ? (
+                                            <video src={att.fileName} controls className="h-24 rounded" />
+                                          ) : (
+                                            <a href={att.fileName} target="_blank" className="text-blue-600 underline">Attachment</a>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Message</Label>
+                                  <Textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Write a message to the citizen..." />
+                                  <Input type="file" multiple accept="image/*,video/*" onChange={(e) => setMessageFiles(Array.from(e.target.files || []))} />
+                                  <div className="flex gap-2">
+                                    <Button onClick={async () => {
+                                      try {
+                                        if (!activeCase) return;
+                                        if (!newMessage && messageFiles.length === 0) return;
+                                        const form = new FormData();
+                                        if (newMessage) form.append('message', newMessage);
+                                        messageFiles.forEach(f => form.append('files', f));
+                                        const res = await api.post(`/crimes/${activeCase.id}/messages`, form);
+                                        if (res.ok) {
+                                          const d = await res.json();
+                                          if (d.success) {
+                                            setMessages(prev => [d.data, ...prev]);
+                                            setNewMessage('');
+                                            setMessageFiles([]);
+                                          }
+                                        }
+                                      } catch (e) { console.error(e); }
+                                    }}>
+                                      Send
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+                          </Tabs>
+                        </DialogContent>
+                      </Dialog>
                       
                       {canManageAllCases && (
                         <>
