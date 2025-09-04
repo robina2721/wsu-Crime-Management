@@ -463,7 +463,7 @@ export async function listMessagesHandler(req, params) {
 
     const limit = 100,
       offset = 0;
-    const messages = await getCrimeMessages(report.id, limit, offset);
+    const messages = await getCrimeMessagesWithAttachments(report.id, limit, offset);
     return NextResponse.json({
       success: true,
       data: { messages, total: messages.length, limit, offset },
