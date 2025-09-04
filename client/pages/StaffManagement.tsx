@@ -459,6 +459,19 @@ export default function StaffManagement() {
                               <Button
                                 size="sm"
                                 className="flex-1 bg-crime-yellow hover:bg-yellow-600 text-crime-black"
+                                onClick={() => {
+                                  setNewAssignment({
+                                    officerId: member.id,
+                                    officerName: member.fullName,
+                                    assignment: "",
+                                    location: "",
+                                    startTime: new Date(),
+                                    endTime: new Date(),
+                                    status: "active",
+                                    priority: "medium",
+                                  });
+                                  setIsAssignOpen(true);
+                                }}
                               >
                                 <UserCheck className="w-4 h-4 mr-1" />
                                 Assign
