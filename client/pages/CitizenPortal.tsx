@@ -325,22 +325,35 @@ export default function CitizenPortal() {
         location: data.location || "",
         dateIncident: (data.dateIncident || new Date()).toString(),
         reportedBy: user?.id || "citizen",
-        evidence: (data.evidence as string[]) || [],
+        evidence: [],
         witnesses: witnesses,
       };
       const res = await api.post("/crimes", payload);
       if (res.ok) {
         const created = await res.json();
         const r = created.data;
+        // Upload evidence files if any
+        let uploadedEvidence: any[] = [];
+        if (evidenceFiles.length) {
+          try {
+            const form = new FormData();
+            evidenceFiles.forEach((f) => form.append("files", f));
+            const upRes = await api.post(`/crimes/${r.id}/evidence`, form);
+            if (upRes.ok) {
+              const upData = await upRes.json();
+              if (upData.success) uploadedEvidence = upData.data || [];
+            }
+          } catch {}
+        }
         const normalized: CrimeReport = {
           ...r,
           dateReported: new Date(r.dateReported),
           dateIncident: new Date(r.dateIncident),
           createdAt: new Date(r.createdAt),
           updatedAt: new Date(r.updatedAt),
-          evidence: [],
+          evidence: (uploadedEvidence || []).map((e: any) => e.fileName) as any,
           witnesses: [],
-        };
+        } as any;
         setReports((prev) => [normalized, ...prev]);
         setFormData({});
         setWitnesses([]);
@@ -706,23 +719,30 @@ export default function CitizenPortal() {
                               </div>
 
                               {report.evidence &&
-                                report.evidence.length > 0 && (
+                                (report.evidence as any).length > 0 && (
                                   <div>
                                     <Label>Evidence</Label>
                                     <div className="grid grid-cols-2 gap-2 mt-2">
-                                      {report.evidence.map(
-                                        (evidence, index) => (
-                                          <div
-                                            key={index}
-                                            className="flex items-center gap-2 p-2 border rounded"
-                                          >
-                                            <Camera className="h-4 w-4 text-gray-400" />
-                                            <span className="text-sm truncate">
-                                              {evidence}
-                                            </span>
+                                      {(report.evidence as any).map((ev: any, index: number) => {
+                                        const name = typeof ev === "string" ? ev : ev.fileName;
+                                        const type = typeof ev === "string" ? "" : ev.fileType || "";
+                                        const isImg = type.startsWith("image/") || name.match(/\.(png|jpg|jpeg|gif|webp)$/i);
+                                        const isVideo = type.startsWith("video/") || name.match(/\.(mp4|webm|ogg)$/i);
+                                        return (
+                                          <div key={index} className="p-2 border rounded">
+                                            {isImg ? (
+                                              <img src={name} alt={`evidence-${index}`} className="h-24 w-full object-cover rounded" />
+                                            ) : isVideo ? (
+                                              <video src={name} controls className="h-24 w-full rounded" />
+                                            ) : (
+                                              <div className="flex items-center gap-2">
+                                                <Camera className="h-4 w-4 text-gray-400" />
+                                                <span className="text-sm truncate">{name}</span>
+                                              </div>
+                                            )}
                                           </div>
-                                        ),
-                                      )}
+                                        );
+                                      })}
                                     </div>
                                   </div>
                                 )}
