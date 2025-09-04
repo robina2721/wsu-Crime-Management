@@ -1257,6 +1257,116 @@ export default function CriminalDatabase() {
           </DialogContent>
         </Dialog>
       )}
+
+      {canModifyRecords && (
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Criminal Record</DialogTitle>
+              <DialogDescription>Update personal info and physical description</DialogDescription>
+            </DialogHeader>
+            {editRecord && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="text-sm">Full Name</label>
+                  <Input value={editRecord.fullName} onChange={(e) => setEditRecord((r:any) => ({ ...r, fullName: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Date of Birth</label>
+                  <Input type="date" value={editRecord.dateOfBirth} onChange={(e) => setEditRecord((r:any) => ({ ...r, dateOfBirth: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">National ID</label>
+                  <Input value={editRecord.nationalId} onChange={(e) => setEditRecord((r:any) => ({ ...r, nationalId: e.target.value }))} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-sm">Address</label>
+                  <Input value={editRecord.address} onChange={(e) => setEditRecord((r:any) => ({ ...r, address: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Phone</label>
+                  <Input value={editRecord.phone} onChange={(e) => setEditRecord((r:any) => ({ ...r, phone: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Aliases (comma separated)</label>
+                  <Input value={editRecord.aliases} onChange={(e) => setEditRecord((r:any) => ({ ...r, aliases: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Height (cm)</label>
+                  <Input type="number" value={editRecord.heightCm} onChange={(e) => setEditRecord((r:any) => ({ ...r, heightCm: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Weight (kg)</label>
+                  <Input type="number" value={editRecord.weightKg} onChange={(e) => setEditRecord((r:any) => ({ ...r, weightKg: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Eye Color</label>
+                  <Input value={editRecord.eyeColor} onChange={(e) => setEditRecord((r:any) => ({ ...r, eyeColor: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Hair Color</label>
+                  <Input value={editRecord.hairColor} onChange={(e) => setEditRecord((r:any) => ({ ...r, hairColor: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm">Risk Level</label>
+                  <Select value={editRecord.riskLevel} onValueChange={(v) => setEditRecord((r:any) => ({ ...r, riskLevel: v }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Risk Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={RiskLevel.LOW}>Low</SelectItem>
+                      <SelectItem value={RiskLevel.MEDIUM}>Medium</SelectItem>
+                      <SelectItem value={RiskLevel.HIGH}>High</SelectItem>
+                      <SelectItem value={RiskLevel.CRITICAL}>Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm">Status</label>
+                  <Select value={editRecord.isActive ? "active" : "inactive"} onValueChange={(v) => setEditRecord((r:any) => ({ ...r, isActive: v === "active" }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                try {
+                  if (!editingId || !editRecord) return;
+                  const payload:any = {
+                    fullName: editRecord.fullName,
+                    dateOfBirth: editRecord.dateOfBirth || null,
+                    nationalId: editRecord.nationalId || null,
+                    address: editRecord.address || null,
+                    phone: editRecord.phone || null,
+                    aliases: editRecord.aliases,
+                    heightCm: editRecord.heightCm ? Number(editRecord.heightCm) : null,
+                    weightKg: editRecord.weightKg ? Number(editRecord.weightKg) : null,
+                    eyeColor: editRecord.eyeColor || null,
+                    hairColor: editRecord.hairColor || null,
+                    riskLevel: editRecord.riskLevel,
+                    isActive: !!editRecord.isActive,
+                  };
+                  const res = await api.put(`/criminals/${editingId}`, payload);
+                  if (res.ok) {
+                    setIsEditOpen(false);
+                    setEditingId(null);
+                    setEditRecord(null);
+                    await fetchCriminals();
+                  }
+                } catch (e) { console.error(e); }
+              }}>Save Changes</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
