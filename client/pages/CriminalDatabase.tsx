@@ -1118,6 +1118,39 @@ export default function CriminalDatabase() {
                         No active warrants
                       </div>
                     )}
+
+                    {canModifyRecords && (
+                      <div className="border-t pt-4 space-y-2">
+                        <div className="font-semibold">Add Warrant</div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <Input placeholder="Type (arrest/search)" onChange={(e:any) => (window as any)._waType = e.target.value} />
+                          <Input placeholder="Status (active/executed)" onChange={(e:any) => (window as any)._waStatus = e.target.value} />
+                          <Input placeholder="Issuing Court" onChange={(e:any) => (window as any)._waCourt = e.target.value} />
+                          <Input placeholder="Issue Date" type="date" onChange={(e:any) => (window as any)._waIssue = e.target.value} />
+                          <Input placeholder="Expiry Date" type="date" onChange={(e:any) => (window as any)._waExpiry = e.target.value} />
+                          <Input placeholder="Charges (comma separated)" onChange={(e:any) => (window as any)._waCharges = e.target.value} className="md:col-span-2" />
+                        </div>
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={async () => {
+                            if (!selectedCriminal) return;
+                            const charges = ((window as any)._waCharges || "").split(",").map((s:string)=>s.trim()).filter(Boolean);
+                            const payload:any = {
+                              type: (window as any)._waType || undefined,
+                              status: (window as any)._waStatus || undefined,
+                              issuingCourt: (window as any)._waCourt || undefined,
+                              issueDate: (window as any)._waIssue || undefined,
+                              expiryDate: (window as any)._waExpiry || undefined,
+                              charges,
+                            };
+                            const res = await api.post(`/criminals/${selectedCriminal.id}/warrants`, payload);
+                            if (res.ok) {
+                              const d = await (await api.get(`/criminals/${selectedCriminal.id}`)).json();
+                              if (d.success) setSelectedCriminal(d.data);
+                            }
+                          }}>Add</Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
