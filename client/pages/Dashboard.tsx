@@ -44,6 +44,117 @@ export default function Dashboard() {
   const { user, logout, hasRole, hasAnyRole } = useAuth();
   const navigate = useNavigate();
 
+  const [stats, setStats] = React.useState({
+    activeCases: 0,
+    criticalAlerts: 0,
+    officersOnDuty: "—",
+    reportsToday: 0,
+  });
+  const [activity, setActivity] = React.useState<any[]>([]);
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [newCase, setNewCase] = React.useState({
+    title: "",
+    category: "other",
+    priority: "medium",
+    location: "",
+    dateIncident: new Date().toISOString().slice(0, 16),
+    description: "",
+  });
+
+  React.useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      try {
+        const res = await api.get("/crimes?limit=100");
+        if (res.ok) {
+          const data = await res.json();
+          const reports = data.data?.reports || [];
+          const today = new Date();
+          const isSameDay = (d: string) => new Date(d).toDateString() === today.toDateString();
+          setStats((prev) => ({
+            ...prev,
+            activeCases: reports.filter((r: any) => ["reported", "under_investigation", "assigned"].includes(r.status)).length,
+            criticalAlerts: reports.filter((r: any) => r.priority === "critical").length,
+            reportsToday: reports.filter((r: any) => isSameDay(r.dateReported || r.createdAt)).length,
+          }));
+        }
+      } catch {}
+      try {
+        const uRes = await api.get("/users?isActive=true");
+        if (uRes.ok) {
+          const uData = await uRes.json();
+          setStats((prev) => ({ ...prev, officersOnDuty: String(uData.data?.users?.length ?? "—") }));
+        }
+      } catch {
+        setStats((prev) => ({ ...prev, officersOnDuty: "—" }));
+      }
+    };
+    load();
+  }, [user]);
+
+  React.useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    if (!token) return;
+    const c = new EventSource(`/api/realtime/crimes?token=${encodeURIComponent(token)}`);
+    const i = new EventSource(`/api/realtime/incidents?token=${encodeURIComponent(token)}`);
+    const handleCrime = (payload: any) => {
+      if (payload?.type === "crime_update" && payload.data) {
+        const r = payload.data;
+        setActivity((prev) => [
+          {
+            time: new Date().toLocaleTimeString(),
+            action: `Case updated: ${r.title}`,
+            location: r.location || "",
+            type: r.priority === "critical" ? "high" : r.priority === "high" ? "medium" : "low",
+          },
+          ...prev,
+        ].slice(0, 20));
+      }
+      if (payload?.type === "status_update" && payload.data) {
+        setActivity((prev) => [
+          { time: new Date().toLocaleTimeString(), action: `Status update: ${payload.data.update.status}`, location: "", type: "low" },
+          ...prev,
+        ].slice(0, 20));
+      }
+      if (payload?.type === "crime_message") {
+        setActivity((prev) => [
+          { time: new Date().toLocaleTimeString(), action: `New message on a case`, location: "", type: "low" },
+          ...prev,
+        ].slice(0, 20));
+      }
+    };
+    const handleIncident = (payload: any) => {
+      if (payload?.type === "incident_update") {
+        const ev = payload.data;
+        const inc = ev.incident || ev;
+        const kind = ev.type || "updated";
+        setActivity((prev) => [
+          {
+            time: new Date().toLocaleTimeString(),
+            action: `Incident ${kind}: ${inc.title}`,
+            location: inc.location || "",
+            type: inc.severity === "critical" ? "high" : inc.severity === "high" ? "medium" : "low",
+          },
+          ...prev,
+        ].slice(0, 20));
+      }
+    };
+    c.onmessage = (e) => {
+      try {
+        handleCrime(JSON.parse(e.data));
+      } catch {}
+    };
+    i.onmessage = (e) => {
+      try {
+        handleIncident(JSON.parse(e.data));
+      } catch {}
+    };
+    return () => {
+      c.close();
+      i.close();
+    };
+  }, []);
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -56,64 +167,6 @@ export default function Dashboard() {
   ]);
   const isHR = hasRole(UserRole.HR_MANAGER);
   const isCitizen = hasRole(UserRole.CITIZEN);
-
-  const quickStats = [
-    {
-      title: "Active Cases",
-      value: "24",
-      icon: FileText,
-      color: "text-crime-red",
-      bgColor: "bg-red-50",
-    },
-    {
-      title: "Critical Alerts",
-      value: "3",
-      icon: AlertTriangle,
-      color: "text-crime-yellow",
-      bgColor: "bg-yellow-50",
-    },
-    {
-      title: "Officers on Duty",
-      value: "18",
-      icon: Shield,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-    },
-    {
-      title: "Reports Today",
-      value: "7",
-      icon: TrendingUp,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-  ];
-
-  const recentActivity = [
-    {
-      time: "10 min ago",
-      action: "New theft report filed",
-      location: "Downtown Area",
-      type: "high",
-    },
-    {
-      time: "25 min ago",
-      action: "Case #2024-001 updated",
-      location: "North District",
-      type: "medium",
-    },
-    {
-      time: "1 hour ago",
-      action: "Officer patrol assigned",
-      location: "Market Street",
-      type: "low",
-    },
-    {
-      time: "2 hours ago",
-      action: "Evidence logged",
-      location: "Station #1",
-      type: "medium",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
