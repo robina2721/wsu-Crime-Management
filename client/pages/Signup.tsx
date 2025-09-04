@@ -55,13 +55,32 @@ export default function Signup() {
     { value: UserRole.HR_MANAGER, label: "HR Manager" },
   ];
 
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setInfo("");
     setIsLoading(true);
     try {
-      const res = await api.post("/auth/signup", form);
+      let payload: any = { ...form };
+      if (isEmployee) {
+        if (!photoFile) {
+          setError("Photo is required for employee accounts");
+          setIsLoading(false);
+          return;
+        }
+        const dataUrl = await fileToDataUrl(photoFile);
+        payload.photo = dataUrl;
+        payload.details = { ...employeeDetails };
+      }
+      const res = await api.post("/auth/signup", payload);
       const data = await res.json();
       if (res.ok && data.success) {
         if (data.token && data.user) {
