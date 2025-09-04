@@ -500,30 +500,15 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg"
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full mt-2 ${
-                          activity.type === "high"
-                            ? "bg-crime-red"
-                            : activity.type === "medium"
-                              ? "bg-crime-yellow"
-                              : "bg-green-500"
-                        }`}
-                      ></div>
+                  {activity.map((a, index) => (
+                    <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${a.type === 'high' ? 'bg-crime-red' : a.type === 'medium' ? 'bg-crime-yellow' : 'bg-green-500'}`}></div>
                       <div className="flex-1">
-                        <p className="font-medium text-crime-black">
-                          {activity.action}
-                        </p>
+                        <p className="font-medium text-crime-black">{a.action}</p>
                         <div className="flex items-center text-sm text-gray-600 mt-1">
                           <Clock className="w-4 h-4 mr-1" />
-                          <span>{activity.time}</span>
-                          <span className="mx-2">•</span>
-                          <MapPin className="w-4 h-4 mr-1" />
-                          <span>{activity.location}</span>
+                          <span>{a.time}</span>
+                          {a.location ? (<><span className="mx-2">•</span><MapPin className="w-4 h-4 mr-1" /><span>{a.location}</span></>) : null}
                         </div>
                       </div>
                     </div>
