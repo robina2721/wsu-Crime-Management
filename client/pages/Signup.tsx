@@ -83,15 +83,21 @@ export default function Signup() {
       const res = await api.post("/auth/signup", payload);
       const data = await res.json();
       if (res.ok && data.success) {
+        // Show success dropdown and redirect to login (do not auto-login)
+        setShowSuccess(true);
+        // If system returns token (auto-login), still redirect user to login page after showing success
+        setTimeout(() => {
+          navigate('/login');
+        }, 3500);
         if (data.token && data.user) {
-          localStorage.setItem("auth_token", data.token);
-          localStorage.setItem("user_data", JSON.stringify(data.user));
-          navigate("/dashboard");
-          return;
+          // Clear any token that might have been issued unintentionally
+          try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch {}
         }
-        setInfo(
-          "Your request has been submitted for approval. You will be notified once approved.",
-        );
+        if (!isEmployee) {
+          setInfo("Signup successful. Redirecting to login...");
+        } else {
+          setInfo("Your request has been submitted for approval. Redirecting to login...");
+        }
       } else {
         setError(data.message || "Signup failed");
       }
