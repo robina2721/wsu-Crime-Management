@@ -17,6 +17,10 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() || "/";
 
+  // Hide header on landing and auth pages for a clean welcome page
+  const hiddenRoutes = ["/", "/login", "/signup"];
+  if (hiddenRoutes.includes(pathname)) return null;
+
   return (
     <header className="bg-crime-black text-white sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
