@@ -759,6 +759,106 @@ export default function UserManagement() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Edit User Dialog */}
+            {editUser && (
+              <Dialog open={isEditDialogOpen} onOpenChange={(v) => { if(!v) setEditUser(null); setIsEditDialogOpen(v); }}>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Edit User</DialogTitle>
+                    <DialogDescription>Update user details</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Full Name</Label>
+                      <Input value={editUser.fullName} onChange={(e) => setEditUser({ ...editUser, fullName: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Username</Label>
+                        <Input value={editUser.username} onChange={(e) => setEditUser({ ...editUser, username: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email</Label>
+                        <Input value={editUser.email || ''} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Phone</Label>
+                        <Input value={editUser.phone || ''} onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Role</Label>
+                        <Select value={editUser.role} onValueChange={(val) => setEditUser({ ...editUser, role: val as UserRole })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={UserRole.SUPER_ADMIN}>Super Admin</SelectItem>
+                            <SelectItem value={UserRole.POLICE_HEAD}>Police Head</SelectItem>
+                            <SelectItem value={UserRole.DETECTIVE_OFFICER}>Detective Officer</SelectItem>
+                            <SelectItem value={UserRole.PREVENTIVE_OFFICER}>Preventive Officer</SelectItem>
+                            <SelectItem value={UserRole.HR_MANAGER}>HR Manager</SelectItem>
+                            <SelectItem value={UserRole.CITIZEN}>Citizen</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <Button className="bg-crime-red text-white" onClick={async () => {
+                        if (!editUser) return;
+                        try {
+                          const updates: any = { fullName: editUser.fullName, username: editUser.username, email: editUser.email, phone: editUser.phone, role: editUser.role };
+                          const res = await api.put(`/users/${editUser.id}`, updates);
+                          if (res.ok) {
+                            const d = await res.json();
+                            const updated = d.data;
+                            setUsers(prev => prev.map(u => u.id === updated.id ? { ...u, ...updated, createdAt: new Date(updated.createdAt), updatedAt: new Date(updated.updatedAt) } : u));
+                            setIsEditDialogOpen(false);
+                            setEditUser(null);
+                          }
+                        } catch (e) { console.error('Failed to update user', e); }
+                      }}>Save</Button>
+                      <Button variant="outline" onClick={() => { setIsEditDialogOpen(false); setEditUser(null); }}>Cancel</Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            {/* Reset Password Dialog */}
+            {resetUser && (
+              <Dialog open={isResetDialogOpen} onOpenChange={(v) => { if(!v) setResetUser(null); setIsResetDialogOpen(v); }}>
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Reset Password</DialogTitle>
+                    <DialogDescription>Set a new password for {resetUser.fullName}</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>New Password</Label>
+                      <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <Button className="bg-crime-red text-white" onClick={async () => {
+                        if (!resetUser || !newPassword) return;
+                        try {
+                          const res = await api.post(`/users/${resetUser.id}/reset-password`, { password: newPassword });
+                          if (res.ok) {
+                            setIsResetDialogOpen(false);
+                            setResetUser(null);
+                            setNewPassword('');
+                          }
+                        } catch (e) { console.error('Failed to reset password', e); }
+                      }}>Reset</Button>
+                      <Button variant="outline" onClick={() => { setIsResetDialogOpen(false); setResetUser(null); setNewPassword(''); }}>Cancel</Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+
           </TabsContent>
 
           <TabsContent value="pending" className="space-y-6">
