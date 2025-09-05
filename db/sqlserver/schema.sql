@@ -116,3 +116,19 @@ BEGIN
   )
 END
 GO
+
+-- Failed login / audit table
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[failed_login_attempts]') AND type in (N'U'))
+BEGIN
+  CREATE TABLE failed_login_attempts (
+    id NVARCHAR(64) NOT NULL PRIMARY KEY,
+    username NVARCHAR(128) NULL,
+    user_id NVARCHAR(64) NULL,
+    ip_address NVARCHAR(64) NULL,
+    country NVARCHAR(128) NULL,
+    success BIT NOT NULL,
+    reason NVARCHAR(256) NULL,
+    attempt_time DATETIME2 NOT NULL
+  )
+END
+GO
