@@ -297,6 +297,23 @@ export default function Signup() {
               </div>
             )}
 
+            {showSuccess && (
+              <div className="mb-4">
+                <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-md flex items-start justify-between">
+                  <div>
+                    <div className="font-semibold">Signup successful</div>
+                    <div className="text-sm">You will be redirected to login shortly.</div>
+                  </div>
+                  <button aria-expanded={successOpen} onClick={() => setSuccessOpen(v => !v)} className="ml-4 text-green-700">{successOpen ? '▴' : '▾'}</button>
+                </div>
+                {successOpen && (
+                  <div className="mt-2 text-sm text-gray-700 bg-white p-3 rounded border">
+                    Thank you for signing up. If your account requires approval it will be reviewed by the admin. After approval you can login using your credentials.
+                  </div>
+                )}
+              </div>
+            )}
+
             <Button
               type="submit"
               disabled={isLoading}
