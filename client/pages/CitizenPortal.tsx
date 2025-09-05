@@ -1009,6 +1009,13 @@ export default function CitizenPortal() {
                               </div>
                             </div>
                           )}
+
+                          {/* If draft contains evidence filenames but files are not attached, prompt to reattach */}
+                          {(!evidenceFiles.length && formData.evidence && formData.evidence.length) && (
+                            <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
+                              Saved evidence placeholders detected: {formData.evidence.join(', ')}. Please re-attach files to include them with submission.
+                            </div>
+                          )}
                         </div>
 
                         <div>
