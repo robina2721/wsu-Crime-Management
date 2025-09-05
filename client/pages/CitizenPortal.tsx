@@ -112,6 +112,40 @@ export default function CitizenPortal() {
   >({});
   const [currentTab, setCurrentTab] = useState("incident");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
+  const [submissionStatus, setSubmissionStatus] = useState<null | { type: 'success' | 'error', message: string }>(null);
+
+  // Restore draft from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('crime_report_draft');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d) {
+          if (d.formData) setFormData(d.formData);
+          if (Array.isArray(d.witnesses)) setWitnesses(d.witnesses);
+          if (d.currentTab) setCurrentTab(d.currentTab);
+          if (d.reportType) setReportType(d.reportType);
+          // evidenceFiles cannot be restored (files are not persisted); keep names in formData.evidence
+          if (d.formData && d.formData.evidence) {
+            setFormData((prev) => ({ ...prev, evidence: d.formData.evidence }));
+          }
+        }
+      }
+    } catch (e) {}
+  }, []);
+
+  // Persist draft whenever these change
+  useEffect(() => {
+    try {
+      const draft = {
+        formData: { ...formData },
+        witnesses: [...witnesses],
+        currentTab,
+        reportType,
+      };
+      localStorage.setItem('crime_report_draft', JSON.stringify(draft));
+    } catch (e) {}
+  }, [formData, witnesses, currentTab, reportType]);
 
   // Incidents state
   const [incidents, setIncidents] = useState<IncidentReport[]>([]);
