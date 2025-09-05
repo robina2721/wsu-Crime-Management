@@ -2,10 +2,25 @@ import {
   findUserById,
   findUserByUsername,
   createUser,
+  updateUser,
 } from "../../backend/models/userModel.js";
 import { createPendingAccount } from "../../backend/models/pendingAccountModel.js";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { recordLoginAttempt, countRecentFailedAttempts, clearFailedAttemptsForUser } from "../../backend/models/securityModel.js";
+
+function getRequestIp(req) {
+  const fwd = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || req.headers.get('x-client-ip');
+  if (fwd) return fwd.split(',')[0].trim();
+  // Not available: return null
+  return null;
+}
+
+function getRequestCountry(req) {
+  const c = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country') || req.headers.get('x-country') || req.headers.get('x-geo-country');
+  if (c) return c;
+  return null;
+}
 
 export async function loginHandler(req) {
   try {
@@ -17,20 +32,56 @@ export async function loginHandler(req) {
       );
     }
     const user = await findUserByUsername(username);
-    if (!user || !user.isActive)
+    const ip = getRequestIp(req);
+    const country = getRequestCountry(req);
+
+    if (!user) {
+      // Record failed attempt for unknown user
+      try { await recordLoginAttempt({ username, userId: null, ip, country, success: false, reason: 'user_not_found' }); } catch(e){}
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
       );
+    }
+
+    if (!user.isActive) {
+      // Record attempt
+      try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: false, reason: 'account_inactive' }); } catch(e){}
+      return NextResponse.json(
+        { success: false, message: "Account inactive" },
+        { status: 403 },
+      );
+    }
+
     const pwd = user.password || "";
     const ok = pwd.startsWith("$2")
       ? await bcrypt.compare(password, pwd)
       : password === pwd;
-    if (!ok)
+    if (!ok) {
+      // record failed
+      try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: false, reason: 'invalid_password' }); } catch(e){}
+      // check threshold
+      try {
+        const count = await countRecentFailedAttempts({ userId: user.id, minutes: 60 });
+        const threshold = 5;
+        if (count >= threshold) {
+          // deactivate account
+          await updateUser(user.id, { isActive: false });
+          // record lock event
+          try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: false, reason: 'account_locked' }); } catch(e){}
+        }
+      } catch (e) {}
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
       );
+    }
+
+    // success
+    try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: true, reason: 'login_success' }); } catch(e){}
+    // optionally clear previous failures
+    try { await clearFailedAttemptsForUser(user.id); } catch(e){}
+
     const token = `token_${user.id}_${Date.now()}`;
     const { password: _p, ...userWithoutPassword } = user;
     return NextResponse.json({
