@@ -96,6 +96,15 @@ export default function UserManagement() {
   });
   const [newUserPhoto, setNewUserPhoto] = useState<File | null>(null);
 
+  // Edit user state
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Reset password state
+  const [resetUser, setResetUser] = useState<User | null>(null);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+
   const canManageUsers = hasRole(UserRole.SUPER_ADMIN);
   const canApproveAccounts = hasAnyRole([
     UserRole.SUPER_ADMIN,
