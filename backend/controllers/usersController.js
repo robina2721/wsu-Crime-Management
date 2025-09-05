@@ -148,8 +148,9 @@ export async function deleteUserHandler(req, params) {
         { status: 403 },
       );
     }
-    await deleteUser(params.id);
-    return NextResponse.json({ success: true, message: "User deleted" });
+    // Soft-disable: mark account inactive instead of deleting
+    await updateUser(params.id, { isActive: false });
+    return NextResponse.json({ success: true, message: "User deactivated (soft-delete). Use activate to restore." });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
