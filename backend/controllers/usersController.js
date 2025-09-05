@@ -214,8 +214,6 @@ export async function getUserPhotoHandler(req, params) {
   }
 }
 
-import bcrypt from 'bcryptjs';
-
 export async function resetPasswordHandler(req, params) {
   try {
     const user = await getAuthUser(req);
