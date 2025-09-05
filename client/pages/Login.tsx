@@ -79,7 +79,7 @@ export default function Login() {
         <Link to="/">
           <Button
             variant="outline"
-            className="h-9 border-white/40 text-white hover:bg-white hover:text-crime-black"
+            className="h-9 border-white/40 text-Black hover:bg-white hover:text-crime-black"
           >
             ← Home
           </Button>
@@ -91,8 +91,8 @@ export default function Login() {
 
       <Card className="w-full max-w-md relative z-10 border-crime-red shadow-2xl">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-crime-red rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="flex justify-center">
+            <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-crime-black">
@@ -195,6 +195,12 @@ export default function Login() {
             >
               {isLoading ? t("login.authenticating") : t("login.secureLogin")}
             </Button>
+             <div className="text-center text-sm text-gray-600 pt-2">
+                          Do Not have an account?{" "}
+                          <Link className="text-crime-red hover:underline" to="/signup">
+                            Signup Here
+                          </Link>
+                        </div>
           </form>
 
           <div className="border-t pt-4">
@@ -206,7 +212,7 @@ export default function Login() {
       </Card>
 
       <div className="absolute bottom-4 left-4 text-white/60 text-xs">
-        {t("footer.dept")} © 2024
+        {t("footer.dept")} © 2025
       </div>
     </div>
   );

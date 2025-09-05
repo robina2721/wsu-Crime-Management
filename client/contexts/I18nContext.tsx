@@ -22,7 +22,7 @@ const translations: Record<Lang, Dict> = {
   en: {
     "app.title": "Crime Management System",
     "city.name": "Wolaita Sodo City",
-    "login.accessSystem": "Login / Access System",
+    "login.accessSystem": "Login",
     "hero.leadingBadge": "Ethiopia's Leading Crime Management Platform",
     "hero.welcome": "Welcome to",
     "hero.securePortal": "Access Secure Portal",
@@ -375,7 +375,7 @@ const translations: Record<Lang, Dict> = {
     // Wolaytatto (Wolaita)
     "app.title": "Wolaytta Xoossa Qeyyanna Shishsha",
     "city.name": "Wolaytta Soodo Gaama",
-    "login.accessSystem": "Qillaa / Shishsha Gaamanchuwaa",
+    "login.accessSystem": "Qillaa",
     "hero.leadingBadge": "Itiyoophiya Heezzo Qeyyanna Shishsha Maadda",
     "hero.welcome": "Aykaashsha!",
     "hero.securePortal": "Shishsha Gaamanchuwaa Eqqa",

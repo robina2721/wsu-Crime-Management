@@ -108,7 +108,7 @@ export default function Signup() {
         <Link to="/">
           <Button
             variant="outline"
-            className="h-9 border-white/40 text-white hover:bg-white hover:text-crime-black"
+            className="h-9 border-white/40 text-black hover:bg-white hover:text-crime-black"
           >
             ← Home
           </Button>
@@ -120,8 +120,8 @@ export default function Signup() {
       <div className="absolute inset-0 bg-black/20"></div>
       <Card className="w-full max-w-md relative z-10 border-crime-red shadow-2xl">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-crime-red rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-white" />
+           <div className="flex justify-center">
+            <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-crime-black">
@@ -138,6 +138,7 @@ export default function Signup() {
               <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
+                placeholder="Your Name + Surname"
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                 required
@@ -147,6 +148,7 @@ export default function Signup() {
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
+                placeholder="Use Unique Username"
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
                 required
@@ -157,6 +159,7 @@ export default function Signup() {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  placeholder="Type valid Email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -166,6 +169,7 @@ export default function Signup() {
                 <Label htmlFor="phone">Phone</Label>
                 <Input
                   id="phone"
+                  placeholder="Use ET Phone Number"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
@@ -175,6 +179,7 @@ export default function Signup() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                placeholder="At least 6 characters"
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
