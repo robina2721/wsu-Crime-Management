@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import bcrypt from 'bcryptjs';
 import {
   listUsers,
   createUser,
