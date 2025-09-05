@@ -536,10 +536,12 @@ export default function CitizenPortal() {
         setFormData({});
         setWitnesses([]);
         setEvidenceFiles([]);
-        setShowNewReportForm(false);
-        setReportType("incident");
+        localStorage.removeItem('crime_report_draft');
+        setSubmissionStatus({ type: 'success', message: 'Incident submitted successfully' });
+        setTimeout(() => { setShowNewReportForm(false); setReportType("incident"); setSubmissionStatus(null); }, 1200);
       } catch (e) {
         console.error("Failed to create incident", e);
+        setSubmissionStatus({ type: 'error', message: 'Failed to submit incident' });
       }
     }
   };
