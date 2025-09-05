@@ -37,6 +37,8 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
   const [employeeDetails, setEmployeeDetails] = useState({
     employeeId: "",
     department: "",
