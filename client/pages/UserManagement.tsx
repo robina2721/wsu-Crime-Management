@@ -721,24 +721,14 @@ export default function UserManagement() {
                               </span>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => { setEditUser(user_); setIsEditDialogOpen(true); }}>
                                 <Edit className="w-4 h-4 mr-1" />
                                 Edit
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => { setResetUser(user_); setIsResetDialogOpen(true); }}>
                                 <Key className="w-4 h-4 mr-1" />
                                 Reset Password
                               </Button>
-                              {user_.id !== user?.id && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-1" />
-                                  Delete
-                                </Button>
-                              )}
                             </div>
                           </div>
                         )}
