@@ -498,7 +498,12 @@ export default function CitizenPortal() {
           setFormData({});
           setWitnesses([]);
           setEvidenceFiles([]);
-          setShowNewReportForm(false);
+          localStorage.removeItem('crime_report_draft');
+          setSubmissionStatus({ type: 'success', message: 'Report submitted successfully' });
+          // auto-close after short delay
+          setTimeout(() => { setShowNewReportForm(false); setSubmissionStatus(null); }, 1200);
+        } else {
+          setSubmissionStatus({ type: 'error', message: 'Failed to submit report' });
         }
       } catch (e) {
         console.error("Failed to submit report", e);
