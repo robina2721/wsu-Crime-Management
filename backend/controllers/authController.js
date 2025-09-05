@@ -8,6 +8,7 @@ import { createPendingAccount } from "../../backend/models/pendingAccountModel.j
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { recordLoginAttempt, countRecentFailedAttempts, clearFailedAttemptsForUser } from "../../backend/models/securityModel.js";
+import geoip from "geoip-lite";
 
 function getRequestIp(req) {
   const fwd = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || req.headers.get('x-client-ip');
@@ -16,9 +17,20 @@ function getRequestIp(req) {
   return null;
 }
 
-function getRequestCountry(req) {
-  const c = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country') || req.headers.get('x-country') || req.headers.get('x-geo-country');
-  if (c) return c;
+function getRequestCountry(req, ip) {
+  // Prefer explicit geo headers
+  const headerCountry = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country') || req.headers.get('x-country') || req.headers.get('x-geo-country');
+  if (headerCountry) return headerCountry;
+  // Fallback to geoip lookup if IP provided
+  try {
+    const lookupIp = ip || getRequestIp(req);
+    if (lookupIp) {
+      const info = geoip.lookup(lookupIp);
+      if (info && info.country) return info.country;
+    }
+  } catch (e) {
+    // ignore
+  }
   return null;
 }
 
