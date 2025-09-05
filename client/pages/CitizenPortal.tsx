@@ -1180,10 +1180,8 @@ export default function CitizenPortal() {
                       type="button"
                       variant="outline"
                       onClick={() => {
+                        // Keep draft saved; close dialog without clearing draft so user can continue later
                         setShowNewReportForm(false);
-                        setFormData({});
-                        setWitnesses([]);
-                        setEvidenceFiles([]);
                       }}
                     >
                       {t("general.cancel")}
@@ -1194,6 +1192,13 @@ export default function CitizenPortal() {
                       </Button>
                     )}
                   </div>
+
+                  {/* submission feedback */}
+                  {submissionStatus && (
+                    <div className={`mt-4 p-3 rounded ${submissionStatus.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                      {submissionStatus.message}
+                    </div>
+                  )}
                 </form>
               </DialogContent>
             </Dialog>
