@@ -579,3 +579,62 @@ export async function createMessageHandler(req, params) {
     return NextResponse.json({ success: false, error: msg }, { status });
   }
 }
+
+export async function uploadEvidenceHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const report = await getCrime(params.id);
+    if (!report) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
+      return NextResponse.json({ success: false, error: "Content-Type must be multipart/form-data" }, { status: 400 });
+    }
+    const form = await req.formData();
+    const files = form.getAll("files").filter((f) => typeof f !== "string");
+    if (!files.length) return NextResponse.json({ success: false, error: "No files provided" }, { status: 400 });
+
+    const dir = path.join(process.cwd(), "public", "uploads", "evidence", report.id);
+    fs.mkdirSync(dir, { recursive: true });
+    const payload = [];
+    for (const file of files) {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const safeName = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`.replace(/\s+/g, "_");
+      const filePath = path.join(dir, safeName);
+      fs.writeFileSync(filePath, buffer);
+      const relUrl = `/uploads/evidence/${report.id}/${safeName}`;
+      payload.push({ fileName: relUrl, fileType: file.type || null, description: null });
+    }
+    const saved = await createEvidenceForCrime(report.id, payload, { uploadedBy: user.id });
+    try { notifyCrimeUpdate({ ...report, evidence: await getEvidenceByCrime(report.id) }); } catch {}
+    return NextResponse.json({ success: true, data: saved, message: "Evidence uploaded" }, { status: 201 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+export async function listActiveOfficersHandler(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "100");
+    const offset = parseInt(searchParams.get("offset") || "0");
+    const roleFilters = ["preventive_officer", "detective_officer"];
+    const officers = [];
+    for (const role of roleFilters) {
+      const rows = await listUsers(limit, offset, { role, isActive: true });
+      officers.push(...rows);
+    }
+    const ids = officers.map((u) => u.id);
+    const activeCounts = await getActiveCaseCountsForOfficers(ids);
+    const items = officers.map((u) => ({ id: u.id, name: u.fullName || u.username, role: u.role, activeCases: activeCounts[u.id] || 0 }));
+    return NextResponse.json({ success: true, data: { officers: items, total: items.length, limit, offset } });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
