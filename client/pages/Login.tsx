@@ -46,7 +46,10 @@ export default function Login() {
     setIsLoading(true);
     setError("");
 
-    const roleToSend = typeof selectedRole === 'string' && selectedRole ? selectedRole : undefined;
+    const roleToSend =
+      typeof selectedRole === "string" && selectedRole
+        ? selectedRole
+        : undefined;
     const success = await login(username, password, roleToSend);
     if (success) {
       navigate("/dashboard");
@@ -196,12 +199,12 @@ export default function Login() {
             >
               {isLoading ? t("login.authenticating") : t("login.secureLogin")}
             </Button>
-             <div className="text-center text-sm text-gray-600 pt-2">
-                          Do Not have an account?{" "}
-                          <Link className="text-crime-red hover:underline" to="/signup">
-                            Signup Here
-                          </Link>
-                        </div>
+            <div className="text-center text-sm text-gray-600 pt-2">
+              Do Not have an account?{" "}
+              <Link className="text-crime-red hover:underline" to="/signup">
+                Signup Here
+              </Link>
+            </div>
           </form>
 
           <div className="border-t pt-4">

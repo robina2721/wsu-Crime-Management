@@ -52,7 +52,14 @@ export async function loginHandler(req) {
     const username = body.username;
     const password = body.password;
     // accept different names from client for the selected role
-    const selectedRole = (body.role || body.selectedRole || body.requestedRole || "").toString().toLowerCase();
+    const selectedRole = (
+      body.role ||
+      body.selectedRole ||
+      body.requestedRole ||
+      ""
+    )
+      .toString()
+      .toLowerCase();
 
     if (!username || !password) {
       return NextResponse.json(
@@ -190,7 +197,10 @@ export async function loginHandler(req) {
           });
         } catch (e) {}
         return NextResponse.json(
-          { success: false, message: "Invalid role selection. Check your role and try again." },
+          {
+            success: false,
+            message: "Invalid role selection. Check your role and try again.",
+          },
           { status: 401 },
         );
       }
