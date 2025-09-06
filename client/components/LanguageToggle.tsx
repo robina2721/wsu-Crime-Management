@@ -1,8 +1,18 @@
 import React from "react";
 import { useI18n } from "@/contexts/I18nContext";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "./ui/select";
 
-export default function LanguageToggle({ className = "" }: { className?: string }) {
+export default function LanguageToggle({
+  className = "",
+}: {
+  className?: string;
+}) {
   const { lang, setLang } = useI18n();
 
   return (

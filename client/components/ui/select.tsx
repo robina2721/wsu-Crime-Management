@@ -19,7 +19,8 @@ function findTriggerClass(children: any) {
   React.Children.forEach(children, (c: any) => {
     if (!c) return;
     const typeName = c?.type?.displayName || c?.type?.name;
-    if (typeName === "SelectTrigger" && c.props && c.props.className) found = c.props.className;
+    if (typeName === "SelectTrigger" && c.props && c.props.className)
+      found = c.props.className;
     else if (c.props && c.props.children) {
       const inner = findTriggerClass(c.props.children);
       if (inner) found = inner;
@@ -33,7 +34,8 @@ function findPlaceholder(children: any) {
   React.Children.forEach(children, (c: any) => {
     if (!c) return;
     const typeName = c?.type?.displayName || c?.type?.name;
-    if (typeName === "SelectValue" && c.props && c.props.placeholder) ph = c.props.placeholder;
+    if (typeName === "SelectValue" && c.props && c.props.placeholder)
+      ph = c.props.placeholder;
     else if (c.props && c.props.children) {
       const inner = findPlaceholder(c.props.children);
       if (inner) ph = inner;
@@ -42,7 +44,14 @@ function findPlaceholder(children: any) {
   return ph;
 }
 
-export function Select({ value, onValueChange, children, className, style, ...props }: any) {
+export function Select({
+  value,
+  onValueChange,
+  children,
+  className,
+  style,
+  ...props
+}: any) {
   const items = collectOptions(children);
   const triggerClass = findTriggerClass(children) || "";
   const placeholder = findPlaceholder(children) || "Select...";
@@ -61,7 +70,12 @@ export function Select({ value, onValueChange, children, className, style, ...pr
   }, []);
 
   return (
-    <div ref={ref} className={cn("relative inline-block text-left", className)} style={style} {...props}>
+    <div
+      ref={ref}
+      className={cn("relative inline-block text-left", className)}
+      style={style}
+      {...props}
+    >
       <button
         type="button"
         onClick={() => setOpen((s) => !s)}
@@ -72,7 +86,9 @@ export function Select({ value, onValueChange, children, className, style, ...pr
       >
         <div className="flex items-center gap-2 truncate">
           {value ? (
-            <span className="truncate">{selected ? selected.props.children : String(value)}</span>
+            <span className="truncate">
+              {selected ? selected.props.children : String(value)}
+            </span>
           ) : (
             <span className="text-gray-400 truncate">{placeholder}</span>
           )}
@@ -81,7 +97,10 @@ export function Select({ value, onValueChange, children, className, style, ...pr
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className={cn("w-4 h-4 text-gray-500 transition-transform", open && "rotate-180")}
+          className={cn(
+            "w-4 h-4 text-gray-500 transition-transform",
+            open && "rotate-180",
+          )}
         >
           <path
             fillRule="evenodd"
@@ -125,14 +144,20 @@ export function Select({ value, onValueChange, children, className, style, ...pr
 }
 
 export const SelectGroup = ({ children }: any) => <>{children}</>;
-export const SelectValue = ({ children, placeholder }: any) => <>{children ?? placeholder}</>;
+export const SelectValue = ({ children, placeholder }: any) => (
+  <>{children ?? placeholder}</>
+);
 export const SelectTrigger = ({ children, className }: any) => <>{children}</>;
 export const SelectContent = ({ children }: any) => <>{children}</>;
 export const SelectLabel = ({ children, className }: any) => (
-  <div className={cn("py-1.5 pl-2 pr-2 text-sm font-semibold", className)}>{children}</div>
+  <div className={cn("py-1.5 pl-2 pr-2 text-sm font-semibold", className)}>
+    {children}
+  </div>
 );
 export const SelectItem = ({ children }: any) => <>{children}</>;
-export const SelectSeparator = ({ children }: any) => <div className="h-px bg-muted my-2" />;
+export const SelectSeparator = ({ children }: any) => (
+  <div className="h-px bg-muted my-2" />
+);
 export const SelectScrollUpButton = () => null;
 export const SelectScrollDownButton = () => null;
 

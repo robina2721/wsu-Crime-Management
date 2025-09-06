@@ -675,15 +675,20 @@ export default function CriminalDatabase() {
                         size="sm"
                         onClick={async () => {
                           try {
-                            const res = await api.get(`/criminals/${criminal.id}`);
+                            const res = await api.get(
+                              `/criminals/${criminal.id}`,
+                            );
                             const data = await res.json();
                             if (data.success) {
                               setSelectedCriminal({
                                 ...data.data,
                                 personalInfo: {
                                   ...data.data.personalInfo,
-                                  dateOfBirth: data.data.personalInfo?.dateOfBirth
-                                    ? new Date(data.data.personalInfo.dateOfBirth)
+                                  dateOfBirth: data.data.personalInfo
+                                    ?.dateOfBirth
+                                    ? new Date(
+                                        data.data.personalInfo.dateOfBirth,
+                                      )
                                     : null,
                                 },
                               });
@@ -699,24 +704,39 @@ export default function CriminalDatabase() {
                       </Button>
 
                       {canModifyRecords && (
-                        <Button variant="outline" size="sm" onClick={() => {
-                          setEditingId(criminal.id);
-                          setEditRecord({
-                            fullName: criminal.personalInfo.fullName || "",
-                            dateOfBirth: criminal.personalInfo.dateOfBirth ? new Date(criminal.personalInfo.dateOfBirth).toISOString().slice(0,10) : "",
-                            nationalId: criminal.personalInfo.nationalId || "",
-                            address: criminal.personalInfo.address || "",
-                            phone: criminal.personalInfo.phone || "",
-                            aliases: (criminal.personalInfo.aliases || []).join(", "),
-                            heightCm: criminal.physicalDescription.height || "",
-                            weightKg: criminal.physicalDescription.weight || "",
-                            eyeColor: criminal.physicalDescription.eyeColor || "",
-                            hairColor: criminal.physicalDescription.hairColor || "",
-                            riskLevel: criminal.riskLevel,
-                            isActive: criminal.isActive,
-                          });
-                          setIsEditOpen(true);
-                        }}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingId(criminal.id);
+                            setEditRecord({
+                              fullName: criminal.personalInfo.fullName || "",
+                              dateOfBirth: criminal.personalInfo.dateOfBirth
+                                ? new Date(criminal.personalInfo.dateOfBirth)
+                                    .toISOString()
+                                    .slice(0, 10)
+                                : "",
+                              nationalId:
+                                criminal.personalInfo.nationalId || "",
+                              address: criminal.personalInfo.address || "",
+                              phone: criminal.personalInfo.phone || "",
+                              aliases: (
+                                criminal.personalInfo.aliases || []
+                              ).join(", "),
+                              heightCm:
+                                criminal.physicalDescription.height || "",
+                              weightKg:
+                                criminal.physicalDescription.weight || "",
+                              eyeColor:
+                                criminal.physicalDescription.eyeColor || "",
+                              hairColor:
+                                criminal.physicalDescription.hairColor || "",
+                              riskLevel: criminal.riskLevel,
+                              isActive: criminal.isActive,
+                            });
+                            setIsEditOpen(true);
+                          }}
+                        >
                           <Fingerprint className="w-4 h-4 mr-1" />
                           Update
                         </Button>
@@ -940,30 +960,78 @@ export default function CriminalDatabase() {
                       <div className="border-t pt-4 space-y-2">
                         <div className="font-semibold">Add Conviction</div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <Input placeholder="Crime Type" onChange={(e:any) => (window as any)._cvType = e.target.value} />
-                          <Input placeholder="Date" type="date" onChange={(e:any) => (window as any)._cvDate = e.target.value} />
-                          <Input placeholder="Court" onChange={(e:any) => (window as any)._cvCourt = e.target.value} />
-                          <Input placeholder="Case Number" onChange={(e:any) => (window as any)._cvCase = e.target.value} />
-                          <Input placeholder="Sentence" onChange={(e:any) => (window as any)._cvSentence = e.target.value} className="md:col-span-2" />
-                          <Input placeholder="Description" onChange={(e:any) => (window as any)._cvDesc = e.target.value} className="md:col-span-3" />
+                          <Input
+                            placeholder="Crime Type"
+                            onChange={(e: any) =>
+                              ((window as any)._cvType = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Date"
+                            type="date"
+                            onChange={(e: any) =>
+                              ((window as any)._cvDate = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Court"
+                            onChange={(e: any) =>
+                              ((window as any)._cvCourt = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Case Number"
+                            onChange={(e: any) =>
+                              ((window as any)._cvCase = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Sentence"
+                            onChange={(e: any) =>
+                              ((window as any)._cvSentence = e.target.value)
+                            }
+                            className="md:col-span-2"
+                          />
+                          <Input
+                            placeholder="Description"
+                            onChange={(e: any) =>
+                              ((window as any)._cvDesc = e.target.value)
+                            }
+                            className="md:col-span-3"
+                          />
                         </div>
                         <div className="flex justify-end">
-                          <Button size="sm" onClick={async () => {
-                            if (!selectedCriminal) return;
-                            const payload:any = {
-                              crimeType: (window as any)._cvType || undefined,
-                              date: (window as any)._cvDate || undefined,
-                              court: (window as any)._cvCourt || undefined,
-                              caseNumber: (window as any)._cvCase || undefined,
-                              sentence: (window as any)._cvSentence || undefined,
-                              description: (window as any)._cvDesc || undefined,
-                            };
-                            const res = await api.post(`/criminals/${selectedCriminal.id}/convictions`, payload);
-                            if (res.ok) {
-                              const d = await (await api.get(`/criminals/${selectedCriminal.id}`)).json();
-                              if (d.success) setSelectedCriminal(d.data);
-                            }
-                          }}>Add</Button>
+                          <Button
+                            size="sm"
+                            onClick={async () => {
+                              if (!selectedCriminal) return;
+                              const payload: any = {
+                                crimeType: (window as any)._cvType || undefined,
+                                date: (window as any)._cvDate || undefined,
+                                court: (window as any)._cvCourt || undefined,
+                                caseNumber:
+                                  (window as any)._cvCase || undefined,
+                                sentence:
+                                  (window as any)._cvSentence || undefined,
+                                description:
+                                  (window as any)._cvDesc || undefined,
+                              };
+                              const res = await api.post(
+                                `/criminals/${selectedCriminal.id}/convictions`,
+                                payload,
+                              );
+                              if (res.ok) {
+                                const d = await (
+                                  await api.get(
+                                    `/criminals/${selectedCriminal.id}`,
+                                  )
+                                ).json();
+                                if (d.success) setSelectedCriminal(d.data);
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -1022,29 +1090,73 @@ export default function CriminalDatabase() {
                       <div className="border-t pt-4 space-y-2">
                         <div className="font-semibold">Add Arrest</div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <Input placeholder="Date" type="date" onChange={(e:any) => (window as any)._arDate = e.target.value} />
-                          <Input placeholder="Disposition" onChange={(e:any) => (window as any)._arDisp = e.target.value} />
-                          <Input placeholder="Arresting Officer" onChange={(e:any) => (window as any)._arOfficer = e.target.value} />
-                          <Input placeholder="Location" onChange={(e:any) => (window as any)._arLoc = e.target.value} />
-                          <Input placeholder="Charges (comma separated)" onChange={(e:any) => (window as any)._arCharges = e.target.value} className="md:col-span-2" />
+                          <Input
+                            placeholder="Date"
+                            type="date"
+                            onChange={(e: any) =>
+                              ((window as any)._arDate = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Disposition"
+                            onChange={(e: any) =>
+                              ((window as any)._arDisp = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Arresting Officer"
+                            onChange={(e: any) =>
+                              ((window as any)._arOfficer = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Location"
+                            onChange={(e: any) =>
+                              ((window as any)._arLoc = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Charges (comma separated)"
+                            onChange={(e: any) =>
+                              ((window as any)._arCharges = e.target.value)
+                            }
+                            className="md:col-span-2"
+                          />
                         </div>
                         <div className="flex justify-end">
-                          <Button size="sm" onClick={async () => {
-                            if (!selectedCriminal) return;
-                            const charges = ((window as any)._arCharges || "").split(",").map((s:string)=>s.trim()).filter(Boolean);
-                            const payload:any = {
-                              date: (window as any)._arDate || undefined,
-                              disposition: (window as any)._arDisp || undefined,
-                              arrestingOfficer: (window as any)._arOfficer || undefined,
-                              location: (window as any)._arLoc || undefined,
-                              charges,
-                            };
-                            const res = await api.post(`/criminals/${selectedCriminal.id}/arrests`, payload);
-                            if (res.ok) {
-                              const d = await (await api.get(`/criminals/${selectedCriminal.id}`)).json();
-                              if (d.success) setSelectedCriminal(d.data);
-                            }
-                          }}>Add</Button>
+                          <Button
+                            size="sm"
+                            onClick={async () => {
+                              if (!selectedCriminal) return;
+                              const charges = ((window as any)._arCharges || "")
+                                .split(",")
+                                .map((s: string) => s.trim())
+                                .filter(Boolean);
+                              const payload: any = {
+                                date: (window as any)._arDate || undefined,
+                                disposition:
+                                  (window as any)._arDisp || undefined,
+                                arrestingOfficer:
+                                  (window as any)._arOfficer || undefined,
+                                location: (window as any)._arLoc || undefined,
+                                charges,
+                              };
+                              const res = await api.post(
+                                `/criminals/${selectedCriminal.id}/arrests`,
+                                payload,
+                              );
+                              if (res.ok) {
+                                const d = await (
+                                  await api.get(
+                                    `/criminals/${selectedCriminal.id}`,
+                                  )
+                                ).json();
+                                if (d.success) setSelectedCriminal(d.data);
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -1124,31 +1236,82 @@ export default function CriminalDatabase() {
                       <div className="border-t pt-4 space-y-2">
                         <div className="font-semibold">Add Warrant</div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <Input placeholder="Type (arrest/search)" onChange={(e:any) => (window as any)._waType = e.target.value} />
-                          <Input placeholder="Status (active/executed)" onChange={(e:any) => (window as any)._waStatus = e.target.value} />
-                          <Input placeholder="Issuing Court" onChange={(e:any) => (window as any)._waCourt = e.target.value} />
-                          <Input placeholder="Issue Date" type="date" onChange={(e:any) => (window as any)._waIssue = e.target.value} />
-                          <Input placeholder="Expiry Date" type="date" onChange={(e:any) => (window as any)._waExpiry = e.target.value} />
-                          <Input placeholder="Charges (comma separated)" onChange={(e:any) => (window as any)._waCharges = e.target.value} className="md:col-span-2" />
+                          <Input
+                            placeholder="Type (arrest/search)"
+                            onChange={(e: any) =>
+                              ((window as any)._waType = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Status (active/executed)"
+                            onChange={(e: any) =>
+                              ((window as any)._waStatus = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Issuing Court"
+                            onChange={(e: any) =>
+                              ((window as any)._waCourt = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Issue Date"
+                            type="date"
+                            onChange={(e: any) =>
+                              ((window as any)._waIssue = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Expiry Date"
+                            type="date"
+                            onChange={(e: any) =>
+                              ((window as any)._waExpiry = e.target.value)
+                            }
+                          />
+                          <Input
+                            placeholder="Charges (comma separated)"
+                            onChange={(e: any) =>
+                              ((window as any)._waCharges = e.target.value)
+                            }
+                            className="md:col-span-2"
+                          />
                         </div>
                         <div className="flex justify-end">
-                          <Button size="sm" onClick={async () => {
-                            if (!selectedCriminal) return;
-                            const charges = ((window as any)._waCharges || "").split(",").map((s:string)=>s.trim()).filter(Boolean);
-                            const payload:any = {
-                              type: (window as any)._waType || undefined,
-                              status: (window as any)._waStatus || undefined,
-                              issuingCourt: (window as any)._waCourt || undefined,
-                              issueDate: (window as any)._waIssue || undefined,
-                              expiryDate: (window as any)._waExpiry || undefined,
-                              charges,
-                            };
-                            const res = await api.post(`/criminals/${selectedCriminal.id}/warrants`, payload);
-                            if (res.ok) {
-                              const d = await (await api.get(`/criminals/${selectedCriminal.id}`)).json();
-                              if (d.success) setSelectedCriminal(d.data);
-                            }
-                          }}>Add</Button>
+                          <Button
+                            size="sm"
+                            onClick={async () => {
+                              if (!selectedCriminal) return;
+                              const charges = ((window as any)._waCharges || "")
+                                .split(",")
+                                .map((s: string) => s.trim())
+                                .filter(Boolean);
+                              const payload: any = {
+                                type: (window as any)._waType || undefined,
+                                status: (window as any)._waStatus || undefined,
+                                issuingCourt:
+                                  (window as any)._waCourt || undefined,
+                                issueDate:
+                                  (window as any)._waIssue || undefined,
+                                expiryDate:
+                                  (window as any)._waExpiry || undefined,
+                                charges,
+                              };
+                              const res = await api.post(
+                                `/criminals/${selectedCriminal.id}/warrants`,
+                                payload,
+                              );
+                              if (res.ok) {
+                                const d = await (
+                                  await api.get(
+                                    `/criminals/${selectedCriminal.id}`,
+                                  )
+                                ).json();
+                                if (d.success) setSelectedCriminal(d.data);
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -1257,7 +1420,9 @@ export default function CriminalDatabase() {
                 <label className="text-sm">Aliases (comma separated)</label>
                 <Input
                   value={newRecord.aliases}
-                  onChange={(e) => setNewRecord((r) => ({ ...r, aliases: e.target.value }))}
+                  onChange={(e) =>
+                    setNewRecord((r) => ({ ...r, aliases: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -1265,7 +1430,9 @@ export default function CriminalDatabase() {
                 <Input
                   type="number"
                   value={newRecord.heightCm}
-                  onChange={(e) => setNewRecord((r) => ({ ...r, heightCm: e.target.value }))}
+                  onChange={(e) =>
+                    setNewRecord((r) => ({ ...r, heightCm: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -1273,21 +1440,27 @@ export default function CriminalDatabase() {
                 <Input
                   type="number"
                   value={newRecord.weightKg}
-                  onChange={(e) => setNewRecord((r) => ({ ...r, weightKg: e.target.value }))}
+                  onChange={(e) =>
+                    setNewRecord((r) => ({ ...r, weightKg: e.target.value }))
+                  }
                 />
               </div>
               <div>
                 <label className="text-sm">Eye Color</label>
                 <Input
                   value={newRecord.eyeColor}
-                  onChange={(e) => setNewRecord((r) => ({ ...r, eyeColor: e.target.value }))}
+                  onChange={(e) =>
+                    setNewRecord((r) => ({ ...r, eyeColor: e.target.value }))
+                  }
                 />
               </div>
               <div>
                 <label className="text-sm">Hair Color</label>
                 <Input
                   value={newRecord.hairColor}
-                  onChange={(e) => setNewRecord((r) => ({ ...r, hairColor: e.target.value }))}
+                  onChange={(e) =>
+                    setNewRecord((r) => ({ ...r, hairColor: e.target.value }))
+                  }
                 />
               </div>
               <div className="md:col-span-2">
@@ -1320,11 +1493,16 @@ export default function CriminalDatabase() {
                     if (newRecord.address)
                       fd.append("address", newRecord.address);
                     if (newRecord.phone) fd.append("phone", newRecord.phone);
-                    if (newRecord.aliases) fd.append("aliases", newRecord.aliases);
-                    if (newRecord.heightCm) fd.append("heightCm", String(newRecord.heightCm));
-                    if (newRecord.weightKg) fd.append("weightKg", String(newRecord.weightKg));
-                    if (newRecord.eyeColor) fd.append("eyeColor", newRecord.eyeColor);
-                    if (newRecord.hairColor) fd.append("hairColor", newRecord.hairColor);
+                    if (newRecord.aliases)
+                      fd.append("aliases", newRecord.aliases);
+                    if (newRecord.heightCm)
+                      fd.append("heightCm", String(newRecord.heightCm));
+                    if (newRecord.weightKg)
+                      fd.append("weightKg", String(newRecord.weightKg));
+                    if (newRecord.eyeColor)
+                      fd.append("eyeColor", newRecord.eyeColor);
+                    if (newRecord.hairColor)
+                      fd.append("hairColor", newRecord.hairColor);
                     fd.append("riskLevel", newRecord.riskLevel as any);
                     fd.append("isActive", String(newRecord.isActive));
                     if (newRecord.photo) fd.append("photo", newRecord.photo);
@@ -1360,53 +1538,143 @@ export default function CriminalDatabase() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Edit Criminal Record</DialogTitle>
-              <DialogDescription>Update personal info and physical description</DialogDescription>
+              <DialogDescription>
+                Update personal info and physical description
+              </DialogDescription>
             </DialogHeader>
             {editRecord && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="text-sm">Full Name</label>
-                  <Input value={editRecord.fullName} onChange={(e) => setEditRecord((r:any) => ({ ...r, fullName: e.target.value }))} />
+                  <Input
+                    value={editRecord.fullName}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        fullName: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Date of Birth</label>
-                  <Input type="date" value={editRecord.dateOfBirth} onChange={(e) => setEditRecord((r:any) => ({ ...r, dateOfBirth: e.target.value }))} />
+                  <Input
+                    type="date"
+                    value={editRecord.dateOfBirth}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        dateOfBirth: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">National ID</label>
-                  <Input value={editRecord.nationalId} onChange={(e) => setEditRecord((r:any) => ({ ...r, nationalId: e.target.value }))} />
+                  <Input
+                    value={editRecord.nationalId}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        nationalId: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div className="md:col-span-2">
                   <label className="text-sm">Address</label>
-                  <Input value={editRecord.address} onChange={(e) => setEditRecord((r:any) => ({ ...r, address: e.target.value }))} />
+                  <Input
+                    value={editRecord.address}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        address: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Phone</label>
-                  <Input value={editRecord.phone} onChange={(e) => setEditRecord((r:any) => ({ ...r, phone: e.target.value }))} />
+                  <Input
+                    value={editRecord.phone}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        phone: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Aliases (comma separated)</label>
-                  <Input value={editRecord.aliases} onChange={(e) => setEditRecord((r:any) => ({ ...r, aliases: e.target.value }))} />
+                  <Input
+                    value={editRecord.aliases}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        aliases: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Height (cm)</label>
-                  <Input type="number" value={editRecord.heightCm} onChange={(e) => setEditRecord((r:any) => ({ ...r, heightCm: e.target.value }))} />
+                  <Input
+                    type="number"
+                    value={editRecord.heightCm}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        heightCm: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Weight (kg)</label>
-                  <Input type="number" value={editRecord.weightKg} onChange={(e) => setEditRecord((r:any) => ({ ...r, weightKg: e.target.value }))} />
+                  <Input
+                    type="number"
+                    value={editRecord.weightKg}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        weightKg: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Eye Color</label>
-                  <Input value={editRecord.eyeColor} onChange={(e) => setEditRecord((r:any) => ({ ...r, eyeColor: e.target.value }))} />
+                  <Input
+                    value={editRecord.eyeColor}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        eyeColor: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Hair Color</label>
-                  <Input value={editRecord.hairColor} onChange={(e) => setEditRecord((r:any) => ({ ...r, hairColor: e.target.value }))} />
+                  <Input
+                    value={editRecord.hairColor}
+                    onChange={(e) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        hairColor: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Risk Level</label>
-                  <Select value={editRecord.riskLevel} onValueChange={(v) => setEditRecord((r:any) => ({ ...r, riskLevel: v }))}>
+                  <Select
+                    value={editRecord.riskLevel}
+                    onValueChange={(v) =>
+                      setEditRecord((r: any) => ({ ...r, riskLevel: v }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Risk Level" />
                     </SelectTrigger>
@@ -1414,13 +1682,23 @@ export default function CriminalDatabase() {
                       <SelectItem value={RiskLevel.LOW}>Low</SelectItem>
                       <SelectItem value={RiskLevel.MEDIUM}>Medium</SelectItem>
                       <SelectItem value={RiskLevel.HIGH}>High</SelectItem>
-                      <SelectItem value={RiskLevel.CRITICAL}>Critical</SelectItem>
+                      <SelectItem value={RiskLevel.CRITICAL}>
+                        Critical
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <label className="text-sm">Status</label>
-                  <Select value={editRecord.isActive ? "active" : "inactive"} onValueChange={(v) => setEditRecord((r:any) => ({ ...r, isActive: v === "active" }))}>
+                  <Select
+                    value={editRecord.isActive ? "active" : "inactive"}
+                    onValueChange={(v) =>
+                      setEditRecord((r: any) => ({
+                        ...r,
+                        isActive: v === "active",
+                      }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -1433,33 +1711,48 @@ export default function CriminalDatabase() {
               </div>
             )}
             <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                try {
-                  if (!editingId || !editRecord) return;
-                  const payload:any = {
-                    fullName: editRecord.fullName,
-                    dateOfBirth: editRecord.dateOfBirth || null,
-                    nationalId: editRecord.nationalId || null,
-                    address: editRecord.address || null,
-                    phone: editRecord.phone || null,
-                    aliases: editRecord.aliases,
-                    heightCm: editRecord.heightCm ? Number(editRecord.heightCm) : null,
-                    weightKg: editRecord.weightKg ? Number(editRecord.weightKg) : null,
-                    eyeColor: editRecord.eyeColor || null,
-                    hairColor: editRecord.hairColor || null,
-                    riskLevel: editRecord.riskLevel,
-                    isActive: !!editRecord.isActive,
-                  };
-                  const res = await api.put(`/criminals/${editingId}`, payload);
-                  if (res.ok) {
-                    setIsEditOpen(false);
-                    setEditingId(null);
-                    setEditRecord(null);
-                    await fetchCriminals();
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    if (!editingId || !editRecord) return;
+                    const payload: any = {
+                      fullName: editRecord.fullName,
+                      dateOfBirth: editRecord.dateOfBirth || null,
+                      nationalId: editRecord.nationalId || null,
+                      address: editRecord.address || null,
+                      phone: editRecord.phone || null,
+                      aliases: editRecord.aliases,
+                      heightCm: editRecord.heightCm
+                        ? Number(editRecord.heightCm)
+                        : null,
+                      weightKg: editRecord.weightKg
+                        ? Number(editRecord.weightKg)
+                        : null,
+                      eyeColor: editRecord.eyeColor || null,
+                      hairColor: editRecord.hairColor || null,
+                      riskLevel: editRecord.riskLevel,
+                      isActive: !!editRecord.isActive,
+                    };
+                    const res = await api.put(
+                      `/criminals/${editingId}`,
+                      payload,
+                    );
+                    if (res.ok) {
+                      setIsEditOpen(false);
+                      setEditingId(null);
+                      setEditRecord(null);
+                      await fetchCriminals();
+                    }
+                  } catch (e) {
+                    console.error(e);
                   }
-                } catch (e) { console.error(e); }
-              }}>Save Changes</Button>
+                }}
+              >
+                Save Changes
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

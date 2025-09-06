@@ -66,7 +66,14 @@ import {
   Monitor,
 } from "lucide-react";
 import type { SafetyInformation as SafetyInformationType } from "../../shared/types";
-import { SafetyCategory, Priority, ResourceType, SafetyResource, EmergencyContact, EmergencyType } from "../../shared/types";
+import {
+  SafetyCategory,
+  Priority,
+  ResourceType,
+  SafetyResource,
+  EmergencyContact,
+  EmergencyType,
+} from "../../shared/types";
 
 // Mock data for demonstration
 const mockEmergencyContacts: EmergencyContact[] = [
@@ -338,9 +345,8 @@ export default function SafetyInformation() {
   >(mockEmergencyContacts);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [selectedInfo, setSelectedInfo] = useState<SafetyInformationType | null>(
-    null,
-  );
+  const [selectedInfo, setSelectedInfo] =
+    useState<SafetyInformationType | null>(null);
   const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
 
   const filteredSafetyInfo = safetyInfo.filter((info) => {

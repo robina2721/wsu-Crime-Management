@@ -44,7 +44,13 @@ import {
   XCircle,
   AlertTriangle,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../components/ui/dialog";
 
 interface StaffAssignment {
   id: string;
@@ -68,7 +74,9 @@ export default function StaffManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [newUserPhoto, setNewUserPhoto] = useState<File | null>(null);
-  const [newAssignment, setNewAssignment] = useState<Partial<StaffAssignment>>({});
+  const [newAssignment, setNewAssignment] = useState<Partial<StaffAssignment>>(
+    {},
+  );
   const [isAssignOpen, setIsAssignOpen] = useState(false);
 
   const canManageStaff = hasAnyRole([
@@ -512,7 +520,10 @@ export default function StaffManagement() {
                     </CardDescription>
                   </div>
                   {canAssignStaff && (
-                    <Button className="bg-crime-red hover:bg-crime-red-dark text-white" onClick={() => setIsAssignOpen(true)}>
+                    <Button
+                      className="bg-crime-red hover:bg-crime-red-dark text-white"
+                      onClick={() => setIsAssignOpen(true)}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       New Assignment
                     </Button>
@@ -618,24 +629,35 @@ export default function StaffManagement() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>New Assignment</DialogTitle>
-              <DialogDescription>Create or update a staff assignment</DialogDescription>
+              <DialogDescription>
+                Create or update a staff assignment
+              </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="text-sm">Officer</label>
-                <Select value={(newAssignment.officerId as string) || ""} onValueChange={(v) => {
-                  const selected = staff.find((s) => s.id === v);
-                  setNewAssignment((a) => ({ ...a, officerId: v, officerName: selected?.fullName || "" }));
-                }}>
+                <Select
+                  value={(newAssignment.officerId as string) || ""}
+                  onValueChange={(v) => {
+                    const selected = staff.find((s) => s.id === v);
+                    setNewAssignment((a) => ({
+                      ...a,
+                      officerId: v,
+                      officerName: selected?.fullName || "",
+                    }));
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Officer" />
                   </SelectTrigger>
                   <SelectContent>
-                    {staff.filter((s) => s.isActive).map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.fullName} ({s.role.replace("_", " ")})
-                      </SelectItem>
-                    ))}
+                    {staff
+                      .filter((s) => s.isActive)
+                      .map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.fullName} ({s.role.replace("_", " ")})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -643,21 +665,33 @@ export default function StaffManagement() {
                 <label className="text-sm">Assignment</label>
                 <Input
                   value={(newAssignment.assignment as string) || ""}
-                  onChange={(e) => setNewAssignment((a) => ({ ...a, assignment: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAssignment((a) => ({
+                      ...a,
+                      assignment: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div>
                 <label className="text-sm">Location</label>
                 <Input
                   value={(newAssignment.location as string) || ""}
-                  onChange={(e) => setNewAssignment((a) => ({ ...a, location: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAssignment((a) => ({
+                      ...a,
+                      location: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div>
                 <label className="text-sm">Priority</label>
                 <Select
                   value={(newAssignment.priority as string) || "medium"}
-                  onValueChange={(v) => setNewAssignment((a) => ({ ...a, priority: v as any }))}
+                  onValueChange={(v) =>
+                    setNewAssignment((a) => ({ ...a, priority: v as any }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Priority" />
@@ -674,16 +708,30 @@ export default function StaffManagement() {
                 <label className="text-sm">Start Time</label>
                 <Input
                   type="datetime-local"
-                  value={new Date(newAssignment.startTime || new Date()).toISOString().slice(0, 16)}
-                  onChange={(e) => setNewAssignment((a) => ({ ...a, startTime: new Date(e.target.value) as any }))}
+                  value={new Date(newAssignment.startTime || new Date())
+                    .toISOString()
+                    .slice(0, 16)}
+                  onChange={(e) =>
+                    setNewAssignment((a) => ({
+                      ...a,
+                      startTime: new Date(e.target.value) as any,
+                    }))
+                  }
                 />
               </div>
               <div>
                 <label className="text-sm">End Time</label>
                 <Input
                   type="datetime-local"
-                  value={new Date(newAssignment.endTime || new Date()).toISOString().slice(0, 16)}
-                  onChange={(e) => setNewAssignment((a) => ({ ...a, endTime: new Date(e.target.value) as any }))}
+                  value={new Date(newAssignment.endTime || new Date())
+                    .toISOString()
+                    .slice(0, 16)}
+                  onChange={(e) =>
+                    setNewAssignment((a) => ({
+                      ...a,
+                      endTime: new Date(e.target.value) as any,
+                    }))
+                  }
                 />
               </div>
             </div>

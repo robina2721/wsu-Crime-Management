@@ -2,10 +2,21 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IncidentType, Priority } from "@shared/types";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { Label } from "../components/ui/label";
 import { api } from "@/lib/api";
 
@@ -72,7 +83,9 @@ export default function ReportIncident() {
           <CardContent>
             <div className="space-y-4">
               {error && (
-                <div className="text-red-700 bg-red-50 p-3 rounded">{error}</div>
+                <div className="text-red-700 bg-red-50 p-3 rounded">
+                  {error}
+                </div>
               )}
 
               <div className="space-y-2">
@@ -80,7 +93,9 @@ export default function ReportIncident() {
                 <Input
                   id="reporterName"
                   value={form.reporterName}
-                  onChange={(e) => setForm({ ...form, reporterName: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, reporterName: e.target.value })
+                  }
                   placeholder="Your name (will appear on the report)"
                 />
               </div>
@@ -100,7 +115,9 @@ export default function ReportIncident() {
                 <Input
                   id="location"
                   value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, location: e.target.value })
+                  }
                   placeholder="Where did this happen?"
                 />
               </div>
@@ -110,7 +127,9 @@ export default function ReportIncident() {
                   <Label htmlFor="incidentType">Incident Type</Label>
                   <Select
                     value={form.incidentType}
-                    onValueChange={(v: any) => setForm({ ...form, incidentType: v })}
+                    onValueChange={(v: any) =>
+                      setForm({ ...form, incidentType: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -129,7 +148,9 @@ export default function ReportIncident() {
                   <Label htmlFor="severity">Severity</Label>
                   <Select
                     value={form.severity}
-                    onValueChange={(v: any) => setForm({ ...form, severity: v })}
+                    onValueChange={(v: any) =>
+                      setForm({ ...form, severity: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Severity" />
@@ -151,7 +172,9 @@ export default function ReportIncident() {
                   id="dateOccurred"
                   type="datetime-local"
                   value={form.dateOccurred}
-                  onChange={(e) => setForm({ ...form, dateOccurred: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, dateOccurred: e.target.value })
+                  }
                 />
               </div>
 
@@ -160,13 +183,19 @@ export default function ReportIncident() {
                 <Textarea
                   id="description"
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
                   rows={6}
                 />
               </div>
 
               <div className="flex gap-3">
-                <Button onClick={handleSubmit} className="bg-crime-red text-white" disabled={loading}>
+                <Button
+                  onClick={handleSubmit}
+                  className="bg-crime-red text-white"
+                  disabled={loading}
+                >
                   Submit Incident
                 </Button>
                 <Link to="/">
@@ -175,7 +204,8 @@ export default function ReportIncident() {
               </div>
 
               <p className="text-sm text-gray-500 mt-2">
-                Note: To report a crime that requires police action, please sign up and log in.
+                Note: To report a crime that requires police action, please sign
+                up and log in.
               </p>
             </div>
           </CardContent>

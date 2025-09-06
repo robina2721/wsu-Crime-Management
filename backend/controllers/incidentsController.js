@@ -83,10 +83,19 @@ export async function createIncidentHandler(req) {
     const user = await getAuthUser(req);
     const body = await req.json();
 
-    const required = ["title", "description", "incidentType", "location", "dateOccurred"];
+    const required = [
+      "title",
+      "description",
+      "incidentType",
+      "location",
+      "dateOccurred",
+    ];
     for (const k of required) {
       if (!body[k])
-        return NextResponse.json({ success: false, error: `Missing required field: ${k}` }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: `Missing required field: ${k}` },
+          { status: 400 },
+        );
     }
 
     // If authenticated, ensure role allows incident creation. Anonymous users can file non-crime incidents.
@@ -103,7 +112,10 @@ export async function createIncidentHandler(req) {
           user,
         )
       ) {
-        return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: "Forbidden" },
+          { status: 403 },
+        );
       }
     }
 
@@ -115,7 +127,9 @@ export async function createIncidentHandler(req) {
       location: body.location,
       dateOccurred: body.dateOccurred,
       reportedBy: user ? user.id : null,
-      reporterName: user ? (user.fullName || user.username) : (body.reporterName || "Anonymous"),
+      reporterName: user
+        ? user.fullName || user.username
+        : body.reporterName || "Anonymous",
       status: "reported",
       followUpRequired: !!body.followUpRequired,
       relatedCaseId: body.relatedCaseId || null,
@@ -125,7 +139,10 @@ export async function createIncidentHandler(req) {
     try {
       notifyIncidentUpdate({ type: "created", incident: created });
     } catch {}
-    return NextResponse.json({ success: true, data: created, message: "Incident created" }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: created, message: "Incident created" },
+      { status: 201 },
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
@@ -154,7 +171,9 @@ export async function updateIncidentHandler(req, params) {
         { success: false, error: "Incident not found" },
         { status: 404 },
       );
-    try { notifyIncidentUpdate({ type: "updated", incident: updated }); } catch {}
+    try {
+      notifyIncidentUpdate({ type: "updated", incident: updated });
+    } catch {}
     return NextResponse.json({
       success: true,
       data: updated,
@@ -182,7 +201,9 @@ export async function deleteIncidentHandler(req, params) {
       );
     }
     await deleteIncident(params.id);
-    try { notifyIncidentUpdate({ type: "deleted", id: params.id }); } catch {}
+    try {
+      notifyIncidentUpdate({ type: "deleted", id: params.id });
+    } catch {}
     return NextResponse.json({ success: true, message: "Incident deleted" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

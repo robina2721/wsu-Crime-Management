@@ -53,6 +53,7 @@ This repository contains a full-stack Crime Management System built with Next.js
 5. When incidents or other events change, controllers may call `realtimeController` hooks to notify EventSource/WebSocket subscribers.
 
 Special flows:
+
 - Incident Reporting: there is a public page (`/report-incident`) that allows anonymous submissions for general incidents. Reporting crimes that require action should be done by authenticated users (notes shown in the UI). The backend `createIncidentHandler` was updated to allow anonymous submissions while still validating required fields; `reportedBy` is null for anonymous reports and `reporterName` defaults to `Anonymous`.
 - Language toggle: the language chooser is implemented in `client/components/LanguageToggle.tsx` and uses a compact dropdown with short labels `ENG`, `WOL`, `AMH`. Language strings are provided in `client/contexts/I18nContext.tsx`.
 
@@ -69,7 +70,6 @@ Special flows:
 2. Environment variables
 
    Create a `.env.local` (or set environment variables via your environment) and include at least:
-
    - NEXT_PUBLIC_API_BASE_URL (defaults to `/api`)
    - Any MSSQL connection values used by `backend/db.js` if running the DB locally
 
@@ -110,8 +110,9 @@ Special flows:
 - For production, configure secrets in your host (Vercel/Netlify) or via the MCP connection in Builder.
 
 Recommended env vars (examples):
+
 - NEXT_PUBLIC_API_BASE_URL=/api
-- MSSQL__HOST, MSSQL__USER, MSSQL__PASSWORD, MSSQL__DATABASE (if using backend/db.js in env-driven mode)
+- MSSQL**HOST, MSSQL**USER, MSSQL**PASSWORD, MSSQL**DATABASE (if using backend/db.js in env-driven mode)
 
 ---
 
@@ -175,9 +176,10 @@ This project will benefit from connecting these MCP servers in Builder.io:
 ---
 
 If you'd like, I can also:
+
 - Generate an OpenAPI (Swagger) spec from controllers,
 - Add endpoint tests for the main APIs,
 - Add CI steps for typecheck & linting,
 - Or create a migration plan to move from MSSQL to Neon/Postgres.
 
-Tell me which of those you'd like next and I will add it to the project. 
+Tell me which of those you'd like next and I will add it to the project.

@@ -160,8 +160,8 @@ export default function Index() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <div className="flex justify-center">
-            <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
-          </div>
+                <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
+              </div>
               <div>
                 <h1 className="text-xl font-bold text-white">
                   {t("app.title")}
