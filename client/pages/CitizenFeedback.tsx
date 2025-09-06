@@ -269,7 +269,7 @@ export default function CitizenFeedback() {
     user &&
     ["super_admin", "police_head", "hr_manager"].includes(user.role as any);
 
-  const respondToFeedback = async (item: CitizenFeedback) => {
+  const respondToFeedback = async (item: CitizenFeedbackType) => {
     const text = (responseById[item.id] || "").trim();
     if (!text) return;
     const res = await api.post(`/feedback/${item.id}/respond`, {
