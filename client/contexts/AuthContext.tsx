@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string, role?: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing session on mount
     const token = localStorage.getItem('auth_token');
     const userData = localStorage.getItem('user_data');
-    
+
     if (token && userData) {
       try {
         const parsedUser = JSON.parse(userData);
@@ -47,9 +47,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, password: string, role?: string): Promise<boolean> => {
     try {
-      const response = await api.post('/auth/login', { username, password });
+      const body: any = { username, password };
+      if (role) body.role = role;
+      const response = await api.post('/auth/login', body);
 
       // Check if response is ok before trying to parse
       if (!response.ok) {
