@@ -216,7 +216,7 @@ export default function CitizenFeedback() {
         const created = await res.json();
         if (created.success) {
           const f = created.data;
-          const normalized: CitizenFeedback = {
+          const normalized: CitizenFeedbackType = {
             ...f,
             respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
             submittedAt: new Date(f.submittedAt),
@@ -280,7 +280,7 @@ export default function CitizenFeedback() {
       const data = await res.json();
       if (data.success) {
         const f = data.data;
-        const normalized: CitizenFeedback = {
+        const normalized: CitizenFeedbackType = {
           ...f,
           respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
           submittedAt: new Date(f.submittedAt),
