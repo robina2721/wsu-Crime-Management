@@ -59,11 +59,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const body: any = { username, password };
       if (role) body.role = role;
+      console.debug('[auth] sending login request', { body });
       const response = await api.post("/auth/login", body);
 
       // Check if response is ok before trying to parse
       if (!response.ok) {
-        console.error("Login failed with status:", response.status);
+        let text = '';
+        try { text = await response.text(); } catch (e) {}
+        console.error("Login failed with status:", response.status, text);
         return false;
       }
 
@@ -73,6 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       try {
         data = await responseClone.json();
+        console.debug('[auth] login response', { status: response.status, data });
       } catch (parseError) {
         console.error("Failed to parse response JSON:", parseError);
         return false;
