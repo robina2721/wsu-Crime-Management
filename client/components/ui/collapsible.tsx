@@ -1,9 +1,7 @@
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
+import * as React from "react";
 
-const Collapsible = CollapsiblePrimitive.Root;
+export const Collapsible = ({ open, children }: any) => open ? <div>{children}</div> : null;
+export const CollapsibleTrigger = ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>;
+export const CollapsibleContent = ({ children }: any) => <div>{children}</div>;
 
-const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger;
-
-const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent;
-
-export { Collapsible, CollapsibleTrigger, CollapsibleContent };
+export default Collapsible;
