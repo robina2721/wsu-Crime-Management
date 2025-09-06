@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/
 import { Checkbox } from "../components/ui/checkbox";
 import { FileText, Download, TrendingUp, Users, BarChart3, PieChart, Activity, Award } from "lucide-react";
 import { HRReport, HRReportType, HRReportStatus, ReportParameters, Department, OfficerRank } from "../../shared/types";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../components/ui/select";
 
 export default function HRReports() {
   const { user } = useAuth();
