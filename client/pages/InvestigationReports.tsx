@@ -25,7 +25,7 @@ import {
   Download,
   Users,
   MessageSquare,
-  Timeline,
+  Activity,
   Scale,
   Paperclip
 } from 'lucide-react';
