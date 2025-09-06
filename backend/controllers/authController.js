@@ -43,9 +43,32 @@ export async function loginHandler(req) {
         { status: 400 },
       );
     }
-    const user = await findUserByUsername(username);
-    const ip = getRequestIp(req);
-    const country = getRequestCountry(req);
+    let user = null;
+    let ip = getRequestIp(req);
+    let country = getRequestCountry(req);
+    try {
+      user = await findUserByUsername(username);
+    } catch (dbErr) {
+      // If DB not configured or failing, allow dev fallback users in non-production for convenience
+      if (process.env.NODE_ENV !== 'production') {
+        const devUsers = {
+          admin: { id: '1', username: 'admin', password: 'admin123', role: 'super_admin', fullName: 'System Admin', email: 'admin@example.com', isActive: 1 },
+          chief: { id: '2', username: 'chief', password: 'chief123', role: 'police_head', fullName: 'Police Chief', email: 'chief@example.com', isActive: 1 },
+          hr: { id: '3', username: 'hr', password: 'hr123', role: 'hr_manager', fullName: 'HR Manager', email: 'hr@example.com', isActive: 1 },
+          officer_mulugeta: { id: '4', username: 'officer_mulugeta', password: 'officer123', role: 'preventive_officer', fullName: 'Officer Mulugeta Kebede', email: 'mulugeta@example.com', isActive: 1 },
+          detective_abel: { id: '5', username: 'detective_abel', password: 'detective123', role: 'detective_officer', fullName: 'Detective Abel Tadesse', email: 'abel@example.com', isActive: 1 },
+          mekbib: { id: '6', username: 'mekbib', password: 'password', role: 'citizen', fullName: 'Mekbib Yohannes', email: 'mekbib@example.com', isActive: 1 },
+        };
+        const du = devUsers[username];
+        if (du) {
+          user = du;
+        } else {
+          console.error('DB error during findUserByUsername and no dev fallback user:', dbErr);
+        }
+      } else {
+        throw dbErr;
+      }
+    }
 
     if (!user) {
       // Record failed attempt for unknown user
