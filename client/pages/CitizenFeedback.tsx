@@ -65,13 +65,8 @@ import {
   MessageCircle,
   Info,
 } from "lucide-react";
-import type {
-  CitizenFeedback as CitizenFeedbackType,
-  FeedbackType,
-  FeedbackCategory,
-  FeedbackStatus,
-  Priority,
-} from "../../shared/types";
+import type { CitizenFeedback as CitizenFeedbackType } from "../../shared/types";
+import { FeedbackType, FeedbackCategory, FeedbackStatus, Priority } from "../../shared/types";
 
 // Using real data via API
 
