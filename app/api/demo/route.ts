@@ -4,5 +4,5 @@ import { DemoResponse } from "@shared/api";
 
 export async function GET() {
   const response: DemoResponse = { message: "Hello from Next API" };
-  return NextResponse.json(response);
+  return NextResp.json(response);
 }
