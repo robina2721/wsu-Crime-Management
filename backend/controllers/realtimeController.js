@@ -12,6 +12,7 @@ function getAuthUserIdFromToken(token) {
 function createStreamHandler(userId, eventType = "connected") {
   let streamClosed = false;
   let keepalive;
+  let cleanupRef = null;
 
   return new ReadableStream({
     start(controller) {
@@ -49,21 +50,19 @@ function createStreamHandler(userId, eventType = "connected") {
         }
         try {
           controller.close();
-        } catch (e) {
-          // Already closed
-        }
+        } catch (e) {}
       }
 
-      controller._cleanup = cleanup;
+      cleanupRef = cleanup;
 
       setTimeout(() => {
         cleanup();
-      }, 5 * 60 * 1000); // auto-close after 5 minutes
+      }, 5 * 60 * 1000);
     },
     cancel() {
-      if (typeof this._cleanup === "function") {
-        this._cleanup();
-      }
+      try {
+        if (typeof cleanupRef === "function") cleanupRef();
+      } catch {}
     },
   });
 }
@@ -196,5 +195,28 @@ export function notifyStatusUpdate(crimeId, update, audience) {
     }
   } catch (err) {
     console.error("notifyStatusUpdate error:", err);
+  }
+}
+
+export function notifyIncidentUpdate(payload) {
+  try {
+    // payload: { type: 'created'|'updated'|'deleted', incident?, id? }
+    const incident = payload?.incident;
+    const recipients = new Set();
+    if (incident?.reportedBy) recipients.add(incident.reportedBy);
+    // Could add more recipients based on assignment if modeled in future
+    for (const userId of recipients) {
+      const subs = subscribersByUser.get(userId);
+      if (!subs || subs.size === 0) continue;
+      for (const sub of subs) {
+        try {
+          sub.send({ type: "incident_update", data: payload });
+        } catch (err) {
+          console.error("Failed to send incident update:", err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("notifyIncidentUpdate error:", err);
   }
 }

@@ -81,29 +81,8 @@ export async function getIncidentHandler(_req, params) {
 export async function createIncidentHandler(req) {
   try {
     const user = await getAuthUser(req);
-    if (!user)
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 },
-      );
-    if (
-      !allow(
-        [
-          "citizen",
-          "preventive_officer",
-          "detective_officer",
-          "police_head",
-          "super_admin",
-        ],
-        user,
-      )
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden" },
-        { status: 403 },
-      );
-    }
     const body = await req.json();
+
     const required = [
       "title",
       "description",
@@ -111,12 +90,35 @@ export async function createIncidentHandler(req) {
       "location",
       "dateOccurred",
     ];
-    for (const k of required)
+    for (const k of required) {
       if (!body[k])
         return NextResponse.json(
           { success: false, error: `Missing required field: ${k}` },
           { status: 400 },
         );
+    }
+
+    // If authenticated, ensure role allows incident creation. Anonymous users can file non-crime incidents.
+    if (user) {
+      if (
+        !allow(
+          [
+            "citizen",
+            "preventive_officer",
+            "detective_officer",
+            "police_head",
+            "super_admin",
+          ],
+          user,
+        )
+      ) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden" },
+          { status: 403 },
+        );
+      }
+    }
+
     const payload = {
       title: body.title,
       description: body.description,
@@ -124,14 +126,19 @@ export async function createIncidentHandler(req) {
       severity: body.severity || "low",
       location: body.location,
       dateOccurred: body.dateOccurred,
-      reportedBy: user.id,
-      reporterName: user.fullName || user.username,
+      reportedBy: user ? user.id : null,
+      reporterName: user
+        ? user.fullName || user.username
+        : body.reporterName || "Anonymous",
       status: "reported",
       followUpRequired: !!body.followUpRequired,
       relatedCaseId: body.relatedCaseId || null,
     };
+
     const created = await createIncident(payload);
-    try { notifyIncidentUpdate({ type: "created", incident: created }); } catch {}
+    try {
+      notifyIncidentUpdate({ type: "created", incident: created });
+    } catch {}
     return NextResponse.json(
       { success: true, data: created, message: "Incident created" },
       { status: 201 },
@@ -164,7 +171,9 @@ export async function updateIncidentHandler(req, params) {
         { success: false, error: "Incident not found" },
         { status: 404 },
       );
-    try { notifyIncidentUpdate({ type: "updated", incident: updated }); } catch {}
+    try {
+      notifyIncidentUpdate({ type: "updated", incident: updated });
+    } catch {}
     return NextResponse.json({
       success: true,
       data: updated,
@@ -192,7 +201,9 @@ export async function deleteIncidentHandler(req, params) {
       );
     }
     await deleteIncident(params.id);
-    try { notifyIncidentUpdate({ type: "deleted", id: params.id }); } catch {}
+    try {
+      notifyIncidentUpdate({ type: "deleted", id: params.id });
+    } catch {}
     return NextResponse.json({ success: true, message: "Incident deleted" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

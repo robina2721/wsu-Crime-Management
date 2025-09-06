@@ -65,8 +65,8 @@ import {
   HeadphonesIcon,
   Monitor,
 } from "lucide-react";
+import type { SafetyInformation as SafetyInformationType } from "../../shared/types";
 import {
-  SafetyInformation,
   SafetyCategory,
   Priority,
   ResourceType,
@@ -145,7 +145,7 @@ const mockEmergencyContacts: EmergencyContact[] = [
   },
 ];
 
-const mockSafetyInfo: SafetyInformation[] = [
+const mockSafetyInfo: SafetyInformationType[] = [
   {
     id: "1",
     title: "Home Security Basics",
@@ -339,15 +339,14 @@ const mockSafetyInfo: SafetyInformation[] = [
 export default function SafetyInformation() {
   const { user } = useAuth();
   const [safetyInfo, setSafetyInfo] =
-    useState<SafetyInformation[]>(mockSafetyInfo);
+    useState<SafetyInformationType[]>(mockSafetyInfo);
   const [emergencyContacts, setEmergencyContacts] = useState<
     EmergencyContact[]
   >(mockEmergencyContacts);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [selectedInfo, setSelectedInfo] = useState<SafetyInformation | null>(
-    null,
-  );
+  const [selectedInfo, setSelectedInfo] =
+    useState<SafetyInformationType | null>(null);
   const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
 
   const filteredSafetyInfo = safetyInfo.filter((info) => {

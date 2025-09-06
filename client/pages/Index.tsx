@@ -160,8 +160,8 @@ export default function Index() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <div className="flex justify-center">
-            <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
-          </div>
+                <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
+              </div>
               <div>
                 <h1 className="text-xl font-bold text-white">
                   {t("app.title")}
@@ -230,15 +230,15 @@ export default function Index() {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <a href="tel:0465510347">
+              <Link to="/report-incident">
                 <Button
                   size="lg"
                   className="bg-crime-yellow hover:bg-yellow-500 text-crime-black px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
                   <Phone className="mr-2 w-5 h-5" />
-                  {t("hero.emergency")}
+                  Report Incident
                 </Button>
-              </a>
+              </Link>
             </div>
 
             {/* Trust indicators */}

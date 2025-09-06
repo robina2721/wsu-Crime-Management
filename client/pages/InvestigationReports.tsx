@@ -1,22 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { InvestigationReport, ReportType, ReportStatus, Interview, IntervieweeType, TimelineEvent, UserRole } from '@shared/types';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Label } from '../components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Filter, 
-  Calendar, 
-  User, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  InvestigationReport,
+  ReportType,
+  ReportStatus,
+  Interview,
+  IntervieweeType,
+  TimelineEvent,
+  UserRole,
+} from "@shared/types";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import { Label } from "../components/ui/label";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import {
+  FileText,
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  User,
   Clock,
   CheckCircle,
   AlertTriangle,
@@ -25,33 +57,43 @@ import {
   Download,
   Users,
   MessageSquare,
-  Timeline,
+  Activity,
   Scale,
-  Paperclip
-} from 'lucide-react';
+  Paperclip,
+} from "lucide-react";
 
 export default function InvestigationReports() {
   const { user, hasRole, hasAnyRole } = useAuth();
   const [reports, setReports] = useState<InvestigationReport[]>([]);
-  const [filteredReports, setFilteredReports] = useState<InvestigationReport[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedReport, setSelectedReport] = useState<InvestigationReport | null>(null);
+  const [filteredReports, setFilteredReports] = useState<InvestigationReport[]>(
+    [],
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedReport, setSelectedReport] =
+    useState<InvestigationReport | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [newReport, setNewReport] = useState({
-    caseId: '',
-    title: '',
+    caseId: "",
+    title: "",
     reportType: ReportType.PRELIMINARY,
-    summary: '',
-    findings: '',
-    recommendations: ''
+    summary: "",
+    findings: "",
+    recommendations: "",
   });
 
-  const canCreateReports = hasAnyRole([UserRole.DETECTIVE_OFFICER, UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]);
-  const canViewAllReports = hasAnyRole([UserRole.POLICE_HEAD, UserRole.SUPER_ADMIN]);
+  const canCreateReports = hasAnyRole([
+    UserRole.DETECTIVE_OFFICER,
+    UserRole.POLICE_HEAD,
+    UserRole.SUPER_ADMIN,
+  ]);
+  const canViewAllReports = hasAnyRole([
+    UserRole.POLICE_HEAD,
+    UserRole.SUPER_ADMIN,
+  ]);
 
   useEffect(() => {
     fetchReports();
@@ -65,126 +107,148 @@ export default function InvestigationReports() {
     // Mock data - In production, fetch from API
     const mockReports: InvestigationReport[] = [
       {
-        id: 'IR-001',
-        caseId: '1',
-        title: 'Preliminary Investigation - Market Street Theft',
-        investigatorId: '3',
-        investigatorName: 'Detective Sara Alemayehu',
+        id: "IR-001",
+        caseId: "1",
+        title: "Preliminary Investigation - Market Street Theft",
+        investigatorId: "3",
+        investigatorName: "Detective Sara Alemayehu",
         reportType: ReportType.PRELIMINARY,
-        summary: 'Initial investigation into theft of mobile devices from Market Street vendor. Multiple witnesses interviewed, security footage reviewed.',
-        findings: 'Evidence suggests organized theft ring targeting mobile vendors. Suspect identified through witness statements and CCTV footage. Pattern matches previous similar incidents in area.',
-        recommendations: 'Continue surveillance of suspect. Interview additional witnesses. Coordinate with vendors to implement security measures.',
+        summary:
+          "Initial investigation into theft of mobile devices from Market Street vendor. Multiple witnesses interviewed, security footage reviewed.",
+        findings:
+          "Evidence suggests organized theft ring targeting mobile vendors. Suspect identified through witness statements and CCTV footage. Pattern matches previous similar incidents in area.",
+        recommendations:
+          "Continue surveillance of suspect. Interview additional witnesses. Coordinate with vendors to implement security measures.",
         evidence: [],
         interviews: [
           {
-            id: 'INT-001',
+            id: "INT-001",
             intervieweeType: IntervieweeType.WITNESS,
-            intervieweeName: 'Kebede Alemu',
-            date: new Date('2024-01-16T14:00:00'),
-            location: 'Police Station',
+            intervieweeName: "Kebede Alemu",
+            date: new Date("2024-01-16T14:00:00"),
+            location: "Police Station",
             duration: 45,
-            summary: 'Witness observed suspect acting suspiciously around vendor stalls',
-            keyPoints: ['Suspect was wearing dark jacket', 'Approached multiple stalls', 'Left quickly after theft'],
-            conductedBy: 'Detective Sara Alemayehu'
+            summary:
+              "Witness observed suspect acting suspiciously around vendor stalls",
+            keyPoints: [
+              "Suspect was wearing dark jacket",
+              "Approached multiple stalls",
+              "Left quickly after theft",
+            ],
+            conductedBy: "Detective Sara Alemayehu",
           },
           {
-            id: 'INT-002',
+            id: "INT-002",
             intervieweeType: IntervieweeType.VICTIM,
-            intervieweeName: 'Meron Tadesse (Vendor)',
-            date: new Date('2024-01-16T15:30:00'),
-            location: 'Market Street',
+            intervieweeName: "Meron Tadesse (Vendor)",
+            date: new Date("2024-01-16T15:30:00"),
+            location: "Market Street",
             duration: 30,
-            summary: 'Victim provided details of stolen items and timeline',
-            keyPoints: ['3 smartphones stolen', 'Theft occurred around 2:00 PM', 'No previous security incidents'],
-            conductedBy: 'Detective Sara Alemayehu'
-          }
+            summary: "Victim provided details of stolen items and timeline",
+            keyPoints: [
+              "3 smartphones stolen",
+              "Theft occurred around 2:00 PM",
+              "No previous security incidents",
+            ],
+            conductedBy: "Detective Sara Alemayehu",
+          },
         ],
         timeline: [
           {
-            id: 'TL-001',
-            date: new Date('2024-01-15T14:00:00'),
-            event: 'Theft reported by vendor',
-            location: 'Market Street',
-            source: 'Victim statement',
-            verified: true
+            id: "TL-001",
+            date: new Date("2024-01-15T14:00:00"),
+            event: "Theft reported by vendor",
+            location: "Market Street",
+            source: "Victim statement",
+            verified: true,
           },
           {
-            id: 'TL-002',
-            date: new Date('2024-01-15T14:15:00'),
-            event: 'Police arrived on scene',
-            location: 'Market Street',
-            source: 'Police log',
-            verified: true
+            id: "TL-002",
+            date: new Date("2024-01-15T14:15:00"),
+            event: "Police arrived on scene",
+            location: "Market Street",
+            source: "Police log",
+            verified: true,
           },
           {
-            id: 'TL-003',
-            date: new Date('2024-01-15T15:00:00'),
-            event: 'Initial witness statements taken',
-            location: 'Market Street',
-            source: 'Officer report',
-            verified: true
-          }
+            id: "TL-003",
+            date: new Date("2024-01-15T15:00:00"),
+            event: "Initial witness statements taken",
+            location: "Market Street",
+            source: "Officer report",
+            verified: true,
+          },
         ],
         status: ReportStatus.SUBMITTED,
-        createdAt: new Date('2024-01-16T16:00:00'),
-        submittedAt: new Date('2024-01-16T18:00:00')
+        createdAt: new Date("2024-01-16T16:00:00"),
+        submittedAt: new Date("2024-01-16T18:00:00"),
       },
       {
-        id: 'IR-002',
-        caseId: '2',
-        title: 'Progress Report - Domestic Violence Investigation',
-        investigatorId: '3',
-        investigatorName: 'Detective Sara Alemayehu',
+        id: "IR-002",
+        caseId: "2",
+        title: "Progress Report - Domestic Violence Investigation",
+        investigatorId: "3",
+        investigatorName: "Detective Sara Alemayehu",
         reportType: ReportType.PROGRESS,
-        summary: 'Ongoing investigation into domestic violence case. Additional evidence collected, interviews with family members conducted.',
-        findings: 'Pattern of escalating violence documented. Medical records support victim statements. Suspect has history of similar incidents.',
-        recommendations: 'Recommend filing formal charges. Victim safety plan implemented. Continued monitoring required.',
+        summary:
+          "Ongoing investigation into domestic violence case. Additional evidence collected, interviews with family members conducted.",
+        findings:
+          "Pattern of escalating violence documented. Medical records support victim statements. Suspect has history of similar incidents.",
+        recommendations:
+          "Recommend filing formal charges. Victim safety plan implemented. Continued monitoring required.",
         evidence: [],
         interviews: [
           {
-            id: 'INT-003',
+            id: "INT-003",
             intervieweeType: IntervieweeType.VICTIM,
-            intervieweeName: 'Protected Identity',
-            date: new Date('2024-01-16T10:00:00'),
-            location: 'Safe Location',
+            intervieweeName: "Protected Identity",
+            date: new Date("2024-01-16T10:00:00"),
+            location: "Safe Location",
             duration: 90,
-            summary: 'Detailed account of incidents over past 6 months',
-            keyPoints: ['Escalating threats', 'Physical violence documented', 'Fear for personal safety'],
-            conductedBy: 'Detective Sara Alemayehu'
-          }
+            summary: "Detailed account of incidents over past 6 months",
+            keyPoints: [
+              "Escalating threats",
+              "Physical violence documented",
+              "Fear for personal safety",
+            ],
+            conductedBy: "Detective Sara Alemayehu",
+          },
         ],
         timeline: [
           {
-            id: 'TL-004',
-            date: new Date('2024-01-16T08:00:00'),
-            event: 'Medical examination completed',
-            location: 'Hospital',
-            source: 'Medical report',
-            verified: true
-          }
+            id: "TL-004",
+            date: new Date("2024-01-16T08:00:00"),
+            event: "Medical examination completed",
+            location: "Hospital",
+            source: "Medical report",
+            verified: true,
+          },
         ],
         status: ReportStatus.APPROVED,
-        createdAt: new Date('2024-01-16T12:00:00'),
-        submittedAt: new Date('2024-01-16T16:00:00'),
-        approvedAt: new Date('2024-01-16T20:00:00'),
-        approvedBy: 'Chief Inspector Dawit Tadesse'
+        createdAt: new Date("2024-01-16T12:00:00"),
+        submittedAt: new Date("2024-01-16T16:00:00"),
+        approvedAt: new Date("2024-01-16T20:00:00"),
+        approvedBy: "Chief Inspector Dawit Tadesse",
       },
       {
-        id: 'IR-003',
-        caseId: '3',
-        title: 'Final Report - Vehicle Break-in Investigation',
-        investigatorId: '8',
-        investigatorName: 'Detective Habtamu Desta',
+        id: "IR-003",
+        caseId: "3",
+        title: "Final Report - Vehicle Break-in Investigation",
+        investigatorId: "8",
+        investigatorName: "Detective Habtamu Desta",
         reportType: ReportType.FINAL,
-        summary: 'Completed investigation into vehicle break-in at City Center parking lot. Suspect identified and arrested.',
-        findings: 'Security footage revealed suspect identity. Physical evidence linked suspect to multiple similar crimes. Stolen items recovered.',
-        recommendations: 'Case ready for prosecution. Recommend enhanced security measures at parking facilities.',
+        summary:
+          "Completed investigation into vehicle break-in at City Center parking lot. Suspect identified and arrested.",
+        findings:
+          "Security footage revealed suspect identity. Physical evidence linked suspect to multiple similar crimes. Stolen items recovered.",
+        recommendations:
+          "Case ready for prosecution. Recommend enhanced security measures at parking facilities.",
         evidence: [],
         interviews: [],
         timeline: [],
         status: ReportStatus.DRAFT,
-        createdAt: new Date('2024-01-17T09:00:00')
-      }
+        createdAt: new Date("2024-01-17T09:00:00"),
+      },
     ];
 
     setReports(mockReports);
@@ -195,24 +259,29 @@ export default function InvestigationReports() {
     let filtered = [...reports];
 
     if (searchTerm) {
-      filtered = filtered.filter(report => 
-        report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.caseId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.investigatorName.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (report) =>
+          report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          report.caseId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          report.investigatorName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(report => report.reportType === typeFilter);
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((report) => report.reportType === typeFilter);
     }
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(report => report.status === statusFilter);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((report) => report.status === statusFilter);
     }
 
     // If user is detective, only show their own reports unless they can view all
     if (hasRole(UserRole.DETECTIVE_OFFICER) && !canViewAllReports) {
-      filtered = filtered.filter(report => report.investigatorId === user?.id);
+      filtered = filtered.filter(
+        (report) => report.investigatorId === user?.id,
+      );
     }
 
     setFilteredReports(filtered);
@@ -222,7 +291,7 @@ export default function InvestigationReports() {
     if (!user) return;
 
     const report: InvestigationReport = {
-      id: `IR-${String(reports.length + 1).padStart(3, '0')}`,
+      id: `IR-${String(reports.length + 1).padStart(3, "0")}`,
       caseId: newReport.caseId,
       title: newReport.title,
       investigatorId: user.id,
@@ -235,47 +304,62 @@ export default function InvestigationReports() {
       interviews: [],
       timeline: [],
       status: ReportStatus.DRAFT,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
-    setReports(prev => [report, ...prev]);
+    setReports((prev) => [report, ...prev]);
     setIsCreateDialogOpen(false);
     setNewReport({
-      caseId: '',
-      title: '',
+      caseId: "",
+      title: "",
       reportType: ReportType.PRELIMINARY,
-      summary: '',
-      findings: '',
-      recommendations: ''
+      summary: "",
+      findings: "",
+      recommendations: "",
     });
   };
 
   const getStatusBadgeColor = (status: ReportStatus) => {
     switch (status) {
-      case ReportStatus.DRAFT: return 'bg-gray-100 text-gray-800';
-      case ReportStatus.SUBMITTED: return 'bg-blue-100 text-blue-800';
-      case ReportStatus.UNDER_REVIEW: return 'bg-yellow-100 text-yellow-800';
-      case ReportStatus.APPROVED: return 'bg-green-100 text-green-800';
-      case ReportStatus.REJECTED: return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case ReportStatus.DRAFT:
+        return "bg-gray-100 text-gray-800";
+      case ReportStatus.SUBMITTED:
+        return "bg-blue-100 text-blue-800";
+      case ReportStatus.UNDER_REVIEW:
+        return "bg-yellow-100 text-yellow-800";
+      case ReportStatus.APPROVED:
+        return "bg-green-100 text-green-800";
+      case ReportStatus.REJECTED:
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getTypeBadgeColor = (type: ReportType) => {
     switch (type) {
-      case ReportType.PRELIMINARY: return 'bg-blue-500 text-white';
-      case ReportType.PROGRESS: return 'bg-yellow-500 text-white';
-      case ReportType.FINAL: return 'bg-green-500 text-white';
-      case ReportType.SUPPLEMENTAL: return 'bg-purple-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case ReportType.PRELIMINARY:
+        return "bg-blue-500 text-white";
+      case ReportType.PROGRESS:
+        return "bg-yellow-500 text-white";
+      case ReportType.FINAL:
+        return "bg-green-500 text-white";
+      case ReportType.SUPPLEMENTAL:
+        return "bg-purple-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
     }
   };
 
   const reportStats = {
     total: filteredReports.length,
-    draft: filteredReports.filter(r => r.status === ReportStatus.DRAFT).length,
-    submitted: filteredReports.filter(r => r.status === ReportStatus.SUBMITTED).length,
-    approved: filteredReports.filter(r => r.status === ReportStatus.APPROVED).length
+    draft: filteredReports.filter((r) => r.status === ReportStatus.DRAFT)
+      .length,
+    submitted: filteredReports.filter(
+      (r) => r.status === ReportStatus.SUBMITTED,
+    ).length,
+    approved: filteredReports.filter((r) => r.status === ReportStatus.APPROVED)
+      .length,
   };
 
   if (isLoading) {
@@ -294,10 +378,15 @@ export default function InvestigationReports() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold mb-2">Investigation Reports</h1>
-              <p className="text-gray-300">Create and manage detailed investigation reports</p>
+              <p className="text-gray-300">
+                Create and manage detailed investigation reports
+              </p>
             </div>
             {canCreateReports && (
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button className="bg-crime-red hover:bg-crime-red-dark text-white">
                     <Plus className="w-4 h-4 mr-2" />
@@ -318,24 +407,42 @@ export default function InvestigationReports() {
                         <Input
                           id="caseId"
                           value={newReport.caseId}
-                          onChange={(e) => setNewReport(prev => ({ ...prev, caseId: e.target.value }))}
+                          onChange={(e) =>
+                            setNewReport((prev) => ({
+                              ...prev,
+                              caseId: e.target.value,
+                            }))
+                          }
                           placeholder="e.g., CASE-001"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="reportType">Report Type</Label>
-                        <Select 
-                          value={newReport.reportType} 
-                          onValueChange={(value) => setNewReport(prev => ({ ...prev, reportType: value as ReportType }))}
+                        <Select
+                          value={newReport.reportType}
+                          onValueChange={(value) =>
+                            setNewReport((prev) => ({
+                              ...prev,
+                              reportType: value as ReportType,
+                            }))
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value={ReportType.PRELIMINARY}>Preliminary</SelectItem>
-                            <SelectItem value={ReportType.PROGRESS}>Progress</SelectItem>
-                            <SelectItem value={ReportType.FINAL}>Final</SelectItem>
-                            <SelectItem value={ReportType.SUPPLEMENTAL}>Supplemental</SelectItem>
+                            <SelectItem value={ReportType.PRELIMINARY}>
+                              Preliminary
+                            </SelectItem>
+                            <SelectItem value={ReportType.PROGRESS}>
+                              Progress
+                            </SelectItem>
+                            <SelectItem value={ReportType.FINAL}>
+                              Final
+                            </SelectItem>
+                            <SelectItem value={ReportType.SUPPLEMENTAL}>
+                              Supplemental
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -346,7 +453,12 @@ export default function InvestigationReports() {
                       <Input
                         id="title"
                         value={newReport.title}
-                        onChange={(e) => setNewReport(prev => ({ ...prev, title: e.target.value }))}
+                        onChange={(e) =>
+                          setNewReport((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
                         placeholder="Brief title describing the investigation"
                       />
                     </div>
@@ -356,7 +468,12 @@ export default function InvestigationReports() {
                       <Textarea
                         id="summary"
                         value={newReport.summary}
-                        onChange={(e) => setNewReport(prev => ({ ...prev, summary: e.target.value }))}
+                        onChange={(e) =>
+                          setNewReport((prev) => ({
+                            ...prev,
+                            summary: e.target.value,
+                          }))
+                        }
                         placeholder="Brief overview of the investigation..."
                         rows={3}
                       />
@@ -367,7 +484,12 @@ export default function InvestigationReports() {
                       <Textarea
                         id="findings"
                         value={newReport.findings}
-                        onChange={(e) => setNewReport(prev => ({ ...prev, findings: e.target.value }))}
+                        onChange={(e) =>
+                          setNewReport((prev) => ({
+                            ...prev,
+                            findings: e.target.value,
+                          }))
+                        }
                         placeholder="Detailed findings from the investigation..."
                         rows={4}
                       />
@@ -378,17 +500,28 @@ export default function InvestigationReports() {
                       <Textarea
                         id="recommendations"
                         value={newReport.recommendations}
-                        onChange={(e) => setNewReport(prev => ({ ...prev, recommendations: e.target.value }))}
+                        onChange={(e) =>
+                          setNewReport((prev) => ({
+                            ...prev,
+                            recommendations: e.target.value,
+                          }))
+                        }
                         placeholder="Recommendations for next steps..."
                         rows={3}
                       />
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                      <Button onClick={handleCreateReport} className="bg-crime-red hover:bg-crime-red-dark text-white">
+                      <Button
+                        onClick={handleCreateReport}
+                        className="bg-crime-red hover:bg-crime-red-dark text-white"
+                      >
                         Create Report
                       </Button>
-                      <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsCreateDialogOpen(false)}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -406,28 +539,36 @@ export default function InvestigationReports() {
           <Card>
             <CardContent className="p-6 text-center">
               <FileText className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{reportStats.total}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {reportStats.total}
+              </h3>
               <p className="text-gray-600">Total Reports</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Edit className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{reportStats.draft}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {reportStats.draft}
+              </h3>
               <p className="text-gray-600">Draft</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{reportStats.submitted}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {reportStats.submitted}
+              </h3>
               <p className="text-gray-600">Submitted</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="text-2xl font-bold text-crime-black">{reportStats.approved}</h3>
+              <h3 className="text-2xl font-bold text-crime-black">
+                {reportStats.approved}
+              </h3>
               <p className="text-gray-600">Approved</p>
             </CardContent>
           </Card>
@@ -452,17 +593,21 @@ export default function InvestigationReports() {
                   className="pl-10"
                 />
               </div>
-              
+
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Report Type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value={ReportType.PRELIMINARY}>Preliminary</SelectItem>
+                  <SelectItem value={ReportType.PRELIMINARY}>
+                    Preliminary
+                  </SelectItem>
                   <SelectItem value={ReportType.PROGRESS}>Progress</SelectItem>
                   <SelectItem value={ReportType.FINAL}>Final</SelectItem>
-                  <SelectItem value={ReportType.SUPPLEMENTAL}>Supplemental</SelectItem>
+                  <SelectItem value={ReportType.SUPPLEMENTAL}>
+                    Supplemental
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -473,10 +618,18 @@ export default function InvestigationReports() {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value={ReportStatus.DRAFT}>Draft</SelectItem>
-                  <SelectItem value={ReportStatus.SUBMITTED}>Submitted</SelectItem>
-                  <SelectItem value={ReportStatus.UNDER_REVIEW}>Under Review</SelectItem>
-                  <SelectItem value={ReportStatus.APPROVED}>Approved</SelectItem>
-                  <SelectItem value={ReportStatus.REJECTED}>Rejected</SelectItem>
+                  <SelectItem value={ReportStatus.SUBMITTED}>
+                    Submitted
+                  </SelectItem>
+                  <SelectItem value={ReportStatus.UNDER_REVIEW}>
+                    Under Review
+                  </SelectItem>
+                  <SelectItem value={ReportStatus.APPROVED}>
+                    Approved
+                  </SelectItem>
+                  <SelectItem value={ReportStatus.REJECTED}>
+                    Rejected
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -494,22 +647,27 @@ export default function InvestigationReports() {
           <CardContent>
             <div className="space-y-4">
               {filteredReports.map((report) => (
-                <div key={report.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div
+                  key={report.id}
+                  className="border rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <FileText className="w-5 h-5 text-crime-red" />
-                        <h3 className="text-lg font-semibold text-crime-black">{report.title}</h3>
+                        <h3 className="text-lg font-semibold text-crime-black">
+                          {report.title}
+                        </h3>
                         <Badge className={getTypeBadgeColor(report.reportType)}>
                           {report.reportType.toUpperCase()}
                         </Badge>
                         <Badge className={getStatusBadgeColor(report.status)}>
-                          {report.status.replace('_', ' ').toUpperCase()}
+                          {report.status.replace("_", " ").toUpperCase()}
                         </Badge>
                       </div>
-                      
+
                       <p className="text-gray-600 mb-3">{report.summary}</p>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Scale className="w-4 h-4 mr-1" />
@@ -534,8 +692,12 @@ export default function InvestigationReports() {
                           <div className="flex items-center text-sm">
                             <Clock className="w-4 h-4 mr-2 text-blue-600" />
                             <span className="text-blue-800">
-                              Submitted: {new Date(report.submittedAt).toLocaleDateString()}
-                              {report.approvedAt && ` • Approved: ${new Date(report.approvedAt).toLocaleDateString()}`}
+                              Submitted:{" "}
+                              {new Date(
+                                report.submittedAt,
+                              ).toLocaleDateString()}
+                              {report.approvedAt &&
+                                ` • Approved: ${new Date(report.approvedAt).toLocaleDateString()}`}
                             </span>
                           </div>
                         </div>
@@ -543,8 +705,8 @@ export default function InvestigationReports() {
                     </div>
 
                     <div className="flex gap-2 ml-4">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => {
                           setSelectedReport(report);
@@ -554,8 +716,9 @@ export default function InvestigationReports() {
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
-                      
-                      {(report.investigatorId === user?.id || canViewAllReports) && (
+
+                      {(report.investigatorId === user?.id ||
+                        canViewAllReports) && (
                         <>
                           <Button variant="outline" size="sm">
                             <Edit className="w-4 h-4 mr-1" />
@@ -575,8 +738,12 @@ export default function InvestigationReports() {
               {filteredReports.length === 0 && (
                 <div className="text-center py-12">
                   <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No reports found</h3>
-                  <p className="text-gray-500">Try adjusting your search and filter criteria</p>
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    No reports found
+                  </h3>
+                  <p className="text-gray-500">
+                    Try adjusting your search and filter criteria
+                  </p>
                 </div>
               )}
             </div>
@@ -584,7 +751,10 @@ export default function InvestigationReports() {
         </Card>
 
         {/* Report Details Dialog */}
-        <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <Dialog
+          open={isDetailsDialogOpen}
+          onOpenChange={setIsDetailsDialogOpen}
+        >
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center">
@@ -595,7 +765,7 @@ export default function InvestigationReports() {
                 Complete investigation report information
               </DialogDescription>
             </DialogHeader>
-            
+
             {selectedReport && (
               <Tabs defaultValue="overview" className="space-y-4">
                 <TabsList className="grid w-full grid-cols-4">
@@ -608,25 +778,35 @@ export default function InvestigationReports() {
                 <TabsContent value="overview" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">{selectedReport.title}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {selectedReport.title}
+                      </CardTitle>
                       <CardDescription>
-                        Case: {selectedReport.caseId} • Type: {selectedReport.reportType} • Status: {selectedReport.status}
+                        Case: {selectedReport.caseId} • Type:{" "}
+                        {selectedReport.reportType} • Status:{" "}
+                        {selectedReport.status}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
                         <h4 className="font-semibold mb-2">Summary</h4>
-                        <p className="text-gray-700">{selectedReport.summary}</p>
+                        <p className="text-gray-700">
+                          {selectedReport.summary}
+                        </p>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-semibold mb-2">Findings</h4>
-                        <p className="text-gray-700">{selectedReport.findings}</p>
+                        <p className="text-gray-700">
+                          {selectedReport.findings}
+                        </p>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-semibold mb-2">Recommendations</h4>
-                        <p className="text-gray-700">{selectedReport.recommendations}</p>
+                        <p className="text-gray-700">
+                          {selectedReport.recommendations}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -642,7 +822,9 @@ export default function InvestigationReports() {
                               {interview.intervieweeName}
                             </h4>
                             <Badge variant="outline">
-                              {interview.intervieweeType.replace('_', ' ').toUpperCase()}
+                              {interview.intervieweeType
+                                .replace("_", " ")
+                                .toUpperCase()}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3">
@@ -661,7 +843,9 @@ export default function InvestigationReports() {
                           </div>
                           <div className="mb-3">
                             <span className="font-medium">Summary:</span>
-                            <p className="text-gray-700 mt-1">{interview.summary}</p>
+                            <p className="text-gray-700 mt-1">
+                              {interview.summary}
+                            </p>
                           </div>
                           <div>
                             <span className="font-medium">Key Points:</span>
@@ -688,9 +872,17 @@ export default function InvestigationReports() {
                       <Card key={event.id}>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-semibold text-crime-black">{event.event}</h4>
-                            <Badge className={event.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                              {event.verified ? 'Verified' : 'Unverified'}
+                            <h4 className="font-semibold text-crime-black">
+                              {event.event}
+                            </h4>
+                            <Badge
+                              className={
+                                event.verified
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }
+                            >
+                              {event.verified ? "Verified" : "Unverified"}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -700,7 +892,7 @@ export default function InvestigationReports() {
                             </div>
                             <div>
                               <span className="font-medium">Location:</span>
-                              <div>{event.location || 'Not specified'}</div>
+                              <div>{event.location || "Not specified"}</div>
                             </div>
                             <div>
                               <span className="font-medium">Source:</span>
@@ -721,7 +913,9 @@ export default function InvestigationReports() {
                 <TabsContent value="evidence" className="space-y-4">
                   <div className="text-center py-8 text-gray-500">
                     <Paperclip className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p>Evidence management integration would be implemented here</p>
+                    <p>
+                      Evidence management integration would be implemented here
+                    </p>
                   </div>
                 </TabsContent>
               </Tabs>

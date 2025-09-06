@@ -65,8 +65,8 @@ import {
   MessageCircle,
   Info,
 } from "lucide-react";
+import type { CitizenFeedback as CitizenFeedbackType } from "../../shared/types";
 import {
-  CitizenFeedback,
   FeedbackType,
   FeedbackCategory,
   FeedbackStatus,
@@ -77,15 +77,15 @@ import {
 
 export default function CitizenFeedback() {
   const { user } = useAuth();
-  const [feedback, setFeedback] = useState<CitizenFeedback[]>([]);
+  const [feedback, setFeedback] = useState<CitizenFeedbackType[]>([]);
   const [showNewFeedbackForm, setShowNewFeedbackForm] = useState(false);
   const [selectedFeedback, setSelectedFeedback] =
-    useState<CitizenFeedback | null>(null);
+    useState<CitizenFeedbackType | null>(null);
+  const [formData, setFormData] = useState<Partial<CitizenFeedbackType>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [formData, setFormData] = useState<Partial<CitizenFeedback>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseById, setResponseById] = useState<Record<string, string>>({});
 
@@ -96,7 +96,7 @@ export default function CitizenFeedback() {
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
-            const list: CitizenFeedback[] = (data.data.feedback || []).map(
+            const list: CitizenFeedbackType[] = (data.data.feedback || []).map(
               (f: any) => ({
                 ...f,
                 respondedAt: f.respondedAt
@@ -196,7 +196,7 @@ export default function CitizenFeedback() {
     );
   };
 
-  const handleSubmitFeedback = async (data: Partial<CitizenFeedback>) => {
+  const handleSubmitFeedback = async (data: Partial<CitizenFeedbackType>) => {
     setIsSubmitting(true);
     try {
       const payload = {
@@ -215,7 +215,7 @@ export default function CitizenFeedback() {
         const created = await res.json();
         if (created.success) {
           const f = created.data;
-          const normalized: CitizenFeedback = {
+          const normalized: CitizenFeedbackType = {
             ...f,
             respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
             submittedAt: new Date(f.submittedAt),
@@ -268,7 +268,7 @@ export default function CitizenFeedback() {
     user &&
     ["super_admin", "police_head", "hr_manager"].includes(user.role as any);
 
-  const respondToFeedback = async (item: CitizenFeedback) => {
+  const respondToFeedback = async (item: CitizenFeedbackType) => {
     const text = (responseById[item.id] || "").trim();
     if (!text) return;
     const res = await api.post(`/feedback/${item.id}/respond`, {
@@ -279,7 +279,7 @@ export default function CitizenFeedback() {
       const data = await res.json();
       if (data.success) {
         const f = data.data;
-        const normalized: CitizenFeedback = {
+        const normalized: CitizenFeedbackType = {
           ...f,
           respondedAt: f.respondedAt ? new Date(f.respondedAt) : undefined,
           submittedAt: new Date(f.submittedAt),
