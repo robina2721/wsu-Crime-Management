@@ -80,7 +80,7 @@ export default function CriminalDatabase() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editRecord, setEditRecord] = useState<any | null>(null);
-  const [newRecord, setNewRecord] = useState({
+  const [newRecord, setNewRecord] = useState<any>({
     fullName: "",
     dateOfBirth: "",
     nationalId: "",
