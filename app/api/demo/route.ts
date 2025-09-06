@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { NextResponse } from "next/server";
+import { NextResponse as NextResp } from "next/server";
+import { NextResponse as NextResp } from "next/server";
 import { DemoResponse } from "@shared/api";
 
 export async function GET() {
