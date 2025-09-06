@@ -4,5 +4,5 @@ import { NextResponse as NextResp } from "next/server";
 
 export async function GET() {
   const message = process.env.PING_MESSAGE ?? "ping";
-  return NextResponse.json({ message });
+  return NextResp.json({ message });
 }
