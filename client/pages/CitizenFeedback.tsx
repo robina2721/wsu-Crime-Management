@@ -77,7 +77,7 @@ import type {
 
 export default function CitizenFeedback() {
   const { user } = useAuth();
-  const [feedback, setFeedback] = useState<CitizenFeedback[]>([]);
+  const [feedback, setFeedback] = useState<CitizenFeedbackType[]>([]);
   const [showNewFeedbackForm, setShowNewFeedbackForm] = useState(false);
   const [selectedFeedback, setSelectedFeedback] =
     useState<CitizenFeedback | null>(null);
