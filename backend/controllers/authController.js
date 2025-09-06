@@ -7,19 +7,31 @@ import {
 import { createPendingAccount } from "../../backend/models/pendingAccountModel.js";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import { recordLoginAttempt, countRecentFailedAttempts, clearFailedAttemptsForUser } from "../../backend/models/securityModel.js";
+import {
+  recordLoginAttempt,
+  countRecentFailedAttempts,
+  clearFailedAttemptsForUser,
+} from "../../backend/models/securityModel.js";
 import geoip from "geoip-lite";
 
 function getRequestIp(req) {
-  const fwd = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || req.headers.get('x-client-ip');
-  if (fwd) return fwd.split(',')[0].trim();
+  const fwd =
+    req.headers.get("x-forwarded-for") ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-client-ip");
+  if (fwd) return fwd.split(",")[0].trim();
   // Not available: return null
   return null;
 }
 
 function getRequestCountry(req, ip) {
   // Prefer explicit geo headers
-  const headerCountry = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country') || req.headers.get('x-country') || req.headers.get('x-geo-country');
+  const headerCountry =
+    req.headers.get("cf-ipcountry") ||
+    req.headers.get("x-vercel-ip-country") ||
+    req.headers.get("x-country") ||
+    req.headers.get("x-geo-country");
   if (headerCountry) return headerCountry;
   // Fallback to geoip lookup if IP provided
   try {
@@ -36,20 +48,115 @@ function getRequestCountry(req, ip) {
 
 export async function loginHandler(req) {
   try {
-    const { username, password } = await req.json();
+    const body = await req.json();
+    const username = body.username;
+    const password = body.password;
+    // accept different names from client for the selected role
+    const selectedRole = (
+      body.role ||
+      body.selectedRole ||
+      body.requestedRole ||
+      ""
+    )
+      .toString()
+      .toLowerCase();
+
     if (!username || !password) {
       return NextResponse.json(
         { success: false, message: "Username and password are required" },
         { status: 400 },
       );
     }
-    const user = await findUserByUsername(username);
-    const ip = getRequestIp(req);
-    const country = getRequestCountry(req);
+    let user = null;
+    let ip = getRequestIp(req);
+    let country = getRequestCountry(req);
+    try {
+      user = await findUserByUsername(username);
+    } catch (dbErr) {
+      // If DB not configured or failing, allow dev fallback users in non-production for convenience
+      if (process.env.NODE_ENV !== "production") {
+        const devUsers = {
+          admin: {
+            id: "1",
+            username: "admin",
+            password: "admin123",
+            role: "super_admin",
+            fullName: "System Admin",
+            email: "admin@example.com",
+            isActive: 1,
+          },
+          chief: {
+            id: "2",
+            username: "chief",
+            password: "chief123",
+            role: "police_head",
+            fullName: "Police Chief",
+            email: "chief@example.com",
+            isActive: 1,
+          },
+          hr: {
+            id: "3",
+            username: "hr",
+            password: "hr123",
+            role: "hr_manager",
+            fullName: "HR Manager",
+            email: "hr@example.com",
+            isActive: 1,
+          },
+          officer_mulugeta: {
+            id: "4",
+            username: "officer_mulugeta",
+            password: "officer123",
+            role: "preventive_officer",
+            fullName: "Officer Mulugeta Kebede",
+            email: "mulugeta@example.com",
+            isActive: 1,
+          },
+          detective_abel: {
+            id: "5",
+            username: "detective_abel",
+            password: "detective123",
+            role: "detective_officer",
+            fullName: "Detective Abel Tadesse",
+            email: "abel@example.com",
+            isActive: 1,
+          },
+          mekbib: {
+            id: "6",
+            username: "mekbib",
+            password: "password",
+            role: "citizen",
+            fullName: "Mekbib Yohannes",
+            email: "mekbib@example.com",
+            isActive: 1,
+          },
+        };
+        const du = devUsers[username];
+        if (du) {
+          user = du;
+        } else {
+          console.error(
+            "DB error during findUserByUsername and no dev fallback user:",
+            dbErr,
+          );
+        }
+      } else {
+        throw dbErr;
+      }
+    }
 
     if (!user) {
       // Record failed attempt for unknown user
-      try { await recordLoginAttempt({ username, userId: null, ip, country, success: false, reason: 'user_not_found' }); } catch(e){}
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: null,
+          ip,
+          country,
+          success: false,
+          reason: "user_not_found",
+        });
+      } catch (e) {}
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
@@ -58,11 +165,45 @@ export async function loginHandler(req) {
 
     if (!user.isActive) {
       // Record attempt
-      try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: false, reason: 'account_inactive' }); } catch(e){}
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: false,
+          reason: "account_inactive",
+        });
+      } catch (e) {}
       return NextResponse.json(
         { success: false, message: "Account inactive" },
         { status: 403 },
       );
+    }
+
+    // If the client provided a role selection, enforce it matches the user's role
+    if (selectedRole) {
+      const userRole = (user.role || "").toString().toLowerCase();
+      if (selectedRole !== userRole) {
+        // record failed role-mismatch attempt
+        try {
+          await recordLoginAttempt({
+            username,
+            userId: user.id,
+            ip,
+            country,
+            success: false,
+            reason: "invalid_role",
+          });
+        } catch (e) {}
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Invalid role selection. Check your role and try again.",
+          },
+          { status: 401 },
+        );
+      }
     }
 
     const pwd = user.password || "";
@@ -71,16 +212,37 @@ export async function loginHandler(req) {
       : password === pwd;
     if (!ok) {
       // record failed
-      try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: false, reason: 'invalid_password' }); } catch(e){}
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: false,
+          reason: "invalid_password",
+        });
+      } catch (e) {}
       // check threshold
       try {
-        const count = await countRecentFailedAttempts({ userId: user.id, minutes: 60 });
+        const count = await countRecentFailedAttempts({
+          userId: user.id,
+          minutes: 60,
+        });
         const threshold = 5;
         if (count >= threshold) {
           // deactivate account
           await updateUser(user.id, { isActive: false });
           // record lock event
-          try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: false, reason: 'account_locked' }); } catch(e){}
+          try {
+            await recordLoginAttempt({
+              username,
+              userId: user.id,
+              ip,
+              country,
+              success: false,
+              reason: "account_locked",
+            });
+          } catch (e) {}
         }
       } catch (e) {}
       return NextResponse.json(
@@ -90,9 +252,20 @@ export async function loginHandler(req) {
     }
 
     // success
-    try { await recordLoginAttempt({ username, userId: user.id, ip, country, success: true, reason: 'login_success' }); } catch(e){}
+    try {
+      await recordLoginAttempt({
+        username,
+        userId: user.id,
+        ip,
+        country,
+        success: true,
+        reason: "login_success",
+      });
+    } catch (e) {}
     // optionally clear previous failures
-    try { await clearFailedAttemptsForUser(user.id); } catch(e){}
+    try {
+      await clearFailedAttemptsForUser(user.id);
+    } catch (e) {}
 
     const token = `token_${user.id}_${Date.now()}`;
     const { password: _p, ...userWithoutPassword } = user;
@@ -111,8 +284,18 @@ export async function loginHandler(req) {
 
 export async function signupCitizenHandler(req) {
   try {
-    const { username, password, fullName, email, phone, requestedRole, photo, photoMime, photoBase64, details } =
-      await req.json();
+    const {
+      username,
+      password,
+      fullName,
+      email,
+      phone,
+      requestedRole,
+      photo,
+      photoMime,
+      photoBase64,
+      details,
+    } = await req.json();
     if (!username || !password || !fullName) {
       return NextResponse.json(
         {

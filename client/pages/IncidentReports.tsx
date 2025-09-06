@@ -90,27 +90,42 @@ export default function IncidentReports() {
   }, []);
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
     if (!token) return;
-    const es = new EventSource(`/api/realtime/incidents?token=${encodeURIComponent(token)}`);
+    const es = new EventSource(
+      `/api/realtime/incidents?token=${encodeURIComponent(token)}`,
+    );
     es.onmessage = (e) => {
       try {
         const payload = JSON.parse(e.data);
-        if (payload?.type === 'incident_update') {
+        if (payload?.type === "incident_update") {
           const ev = payload.data;
           const inc = ev.incident || ev;
-          setIncidents(prev => {
-            const idx = prev.findIndex(x => x.id === inc.id);
-            const normalized: IncidentReport = { ...inc, dateOccurred: new Date(inc.dateOccurred), createdAt: new Date(inc.createdAt), updatedAt: new Date(inc.updatedAt) };
-            if (ev.type === 'deleted') return prev.filter(x => x.id !== inc.id);
-            if (idx >= 0) { const copy = [...prev]; copy[idx] = { ...copy[idx], ...normalized }; return copy; }
+          setIncidents((prev) => {
+            const idx = prev.findIndex((x) => x.id === inc.id);
+            const normalized: IncidentReport = {
+              ...inc,
+              dateOccurred: new Date(inc.dateOccurred),
+              createdAt: new Date(inc.createdAt),
+              updatedAt: new Date(inc.updatedAt),
+            };
+            if (ev.type === "deleted")
+              return prev.filter((x) => x.id !== inc.id);
+            if (idx >= 0) {
+              const copy = [...prev];
+              copy[idx] = { ...copy[idx], ...normalized };
+              return copy;
+            }
             return [normalized, ...prev];
           });
         }
       } catch {}
     };
     es.onerror = () => {};
-    return () => { es.close(); };
+    return () => {
+      es.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -179,10 +194,8 @@ export default function IncidentReports() {
   };
 
   const handleCreateIncident = async () => {
-    if (!user) return;
-
     try {
-      const payload = {
+      const payload: any = {
         title: newIncident.title,
         description: newIncident.description,
         incidentType: newIncident.incidentType,
@@ -191,6 +204,16 @@ export default function IncidentReports() {
         dateOccurred: newIncident.dateOccurred,
         followUpRequired: newIncident.followUpRequired,
       };
+
+      // If user is logged in attach reporter info, otherwise allow anonymous report
+      if (user) {
+        payload.reportedBy = user.id;
+        payload.reporterName = user.fullName ?? user.username;
+      } else {
+        payload.reportedBy = null;
+        payload.reporterName = "Anonymous";
+      }
+
       const res = await api.post("/incidents", payload);
       if (!res.ok) return;
       const data = await res.json();
