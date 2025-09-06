@@ -65,15 +65,8 @@ import {
   HeadphonesIcon,
   Monitor,
 } from "lucide-react";
-import {
-  SafetyInformation,
-  SafetyCategory,
-  Priority,
-  ResourceType,
-  SafetyResource,
-  EmergencyContact,
-  EmergencyType,
-} from "../../shared/types";
+import type { SafetyInformation as SafetyInformationType } from "../../shared/types";
+import { SafetyCategory, Priority, ResourceType, SafetyResource, EmergencyContact, EmergencyType } from "../../shared/types";
 
 // Mock data for demonstration
 const mockEmergencyContacts: EmergencyContact[] = [
