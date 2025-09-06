@@ -112,6 +112,40 @@ export default function CitizenPortal() {
   >({});
   const [currentTab, setCurrentTab] = useState("incident");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
+  const [submissionStatus, setSubmissionStatus] = useState<null | { type: 'success' | 'error', message: string }>(null);
+
+  // Restore draft from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('crime_report_draft');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d) {
+          if (d.formData) setFormData(d.formData);
+          if (Array.isArray(d.witnesses)) setWitnesses(d.witnesses);
+          if (d.currentTab) setCurrentTab(d.currentTab);
+          if (d.reportType) setReportType(d.reportType);
+          // evidenceFiles cannot be restored (files are not persisted); keep names in formData.evidence
+          if (d.formData && d.formData.evidence) {
+            setFormData((prev) => ({ ...prev, evidence: d.formData.evidence }));
+          }
+        }
+      }
+    } catch (e) {}
+  }, []);
+
+  // Persist draft whenever these change
+  useEffect(() => {
+    try {
+      const draft = {
+        formData: { ...formData },
+        witnesses: [...witnesses],
+        currentTab,
+        reportType,
+      };
+      localStorage.setItem('crime_report_draft', JSON.stringify(draft));
+    } catch (e) {}
+  }, [formData, witnesses, currentTab, reportType]);
 
   // Incidents state
   const [incidents, setIncidents] = useState<IncidentReport[]>([]);
@@ -464,7 +498,12 @@ export default function CitizenPortal() {
           setFormData({});
           setWitnesses([]);
           setEvidenceFiles([]);
-          setShowNewReportForm(false);
+          localStorage.removeItem('crime_report_draft');
+          setSubmissionStatus({ type: 'success', message: 'Report submitted successfully' });
+          // auto-close after short delay
+          setTimeout(() => { setShowNewReportForm(false); setSubmissionStatus(null); }, 1200);
+        } else {
+          setSubmissionStatus({ type: 'error', message: 'Failed to submit report' });
         }
       } catch (e) {
         console.error("Failed to submit report", e);
@@ -497,10 +536,12 @@ export default function CitizenPortal() {
         setFormData({});
         setWitnesses([]);
         setEvidenceFiles([]);
-        setShowNewReportForm(false);
-        setReportType("incident");
+        localStorage.removeItem('crime_report_draft');
+        setSubmissionStatus({ type: 'success', message: 'Incident submitted successfully' });
+        setTimeout(() => { setShowNewReportForm(false); setReportType("incident"); setSubmissionStatus(null); }, 1200);
       } catch (e) {
         console.error("Failed to create incident", e);
+        setSubmissionStatus({ type: 'error', message: 'Failed to submit incident' });
       }
     }
   };
@@ -968,6 +1009,13 @@ export default function CitizenPortal() {
                               </div>
                             </div>
                           )}
+
+                          {/* If draft contains evidence filenames but files are not attached, prompt to reattach */}
+                          {(!evidenceFiles.length && formData.evidence && formData.evidence.length) && (
+                            <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
+                              Saved evidence placeholders detected: {formData.evidence.join(', ')}. Please re-attach files to include them with submission.
+                            </div>
+                          )}
                         </div>
 
                         <div>
@@ -1146,10 +1194,8 @@ export default function CitizenPortal() {
                       type="button"
                       variant="outline"
                       onClick={() => {
+                        // Keep draft saved; close dialog without clearing draft so user can continue later
                         setShowNewReportForm(false);
-                        setFormData({});
-                        setWitnesses([]);
-                        setEvidenceFiles([]);
                       }}
                     >
                       {t("general.cancel")}
@@ -1160,6 +1206,13 @@ export default function CitizenPortal() {
                       </Button>
                     )}
                   </div>
+
+                  {/* submission feedback */}
+                  {submissionStatus && (
+                    <div className={`mt-4 p-3 rounded ${submissionStatus.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                      {submissionStatus.message}
+                    </div>
+                  )}
                 </form>
               </DialogContent>
             </Dialog>

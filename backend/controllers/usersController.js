@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import bcrypt from 'bcryptjs';
 import {
   listUsers,
   createUser,
@@ -146,8 +148,9 @@ export async function deleteUserHandler(req, params) {
         { status: 403 },
       );
     }
-    await deleteUser(params.id);
-    return NextResponse.json({ success: true, message: "User deleted" });
+    // Soft-disable: mark account inactive instead of deleting
+    await updateUser(params.id, { isActive: false });
+    return NextResponse.json({ success: true, message: "User deactivated (soft-delete). Use activate to restore." });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
@@ -208,6 +211,26 @@ export async function getUserPhotoHandler(req, params) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+export async function resetPasswordHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    // Only super_admin or hr_manager can reset passwords or self
+    if (!requireRoles(user, ['super_admin', 'hr_manager']) && user.id !== params.id) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    }
+    const body = await req.json();
+    if (!body.password) return NextResponse.json({ success: false, error: 'Password required' }, { status: 400 });
+    const hashed = body.password.startsWith('$2') ? body.password : await bcrypt.hash(body.password, 10);
+    await updateUser(params.id, { password: hashed });
+    return NextResponse.json({ success: true, message: 'Password reset' });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes('SQL Server not configured') ? 503 : 500;
     return NextResponse.json({ success: false, error: msg }, { status });
   }
 }

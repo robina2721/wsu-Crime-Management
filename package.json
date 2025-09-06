@@ -65,7 +65,8 @@
     "jose": "^5.2.0",
     "bcryptjs": "^2.4.3",
     "react-router-dom": "^6.27.0",
-    "mssql": "^10.0.2"
+    "mssql": "^10.0.2",
+    "geoip-lite": "^1.4.2"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",

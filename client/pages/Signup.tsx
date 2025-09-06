@@ -37,6 +37,8 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
   const [employeeDetails, setEmployeeDetails] = useState({
     employeeId: "",
     department: "",
@@ -83,15 +85,21 @@ export default function Signup() {
       const res = await api.post("/auth/signup", payload);
       const data = await res.json();
       if (res.ok && data.success) {
+        // Show success dropdown and redirect to login (do not auto-login)
+        setShowSuccess(true);
+        // If system returns token (auto-login), still redirect user to login page after showing success
+        setTimeout(() => {
+          navigate('/login');
+        }, 3500);
         if (data.token && data.user) {
-          localStorage.setItem("auth_token", data.token);
-          localStorage.setItem("user_data", JSON.stringify(data.user));
-          navigate("/dashboard");
-          return;
+          // Clear any token that might have been issued unintentionally
+          try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch {}
         }
-        setInfo(
-          "Your request has been submitted for approval. You will be notified once approved.",
-        );
+        if (!isEmployee) {
+          setInfo("Signup successful. Redirecting to login...");
+        } else {
+          setInfo("Your request has been submitted for approval. Redirecting to login...");
+        }
       } else {
         setError(data.message || "Signup failed");
       }
@@ -286,6 +294,23 @@ export default function Signup() {
             {info && (
               <div className="text-sm bg-yellow-50 text-yellow-800 p-3 rounded-md">
                 {info}
+              </div>
+            )}
+
+            {showSuccess && (
+              <div className="mb-4">
+                <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-md flex items-start justify-between">
+                  <div>
+                    <div className="font-semibold">Signup successful</div>
+                    <div className="text-sm">You will be redirected to login shortly.</div>
+                  </div>
+                  <button aria-expanded={successOpen} onClick={() => setSuccessOpen(v => !v)} className="ml-4 text-green-700">{successOpen ? '▴' : '▾'}</button>
+                </div>
+                {successOpen && (
+                  <div className="mt-2 text-sm text-gray-700 bg-white p-3 rounded border">
+                    Thank you for signing up. If your account requires approval it will be reviewed by the admin. After approval you can login using your credentials.
+                  </div>
+                )}
               </div>
             )}
 

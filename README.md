@@ -6,11 +6,11 @@ A comprehensive, full-stack crime management system designed for Wolaita Sodo Ci
 ![React](https://img.shields.io/badge/React-18-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Express](https://img.shields.io/badge/Express-5-green)
-//to run mssql
-pnpm db:setup:mssql
+
 ## 🚀 Features
 
 ### Core Functionality
+
 - **Multi-Role Authentication**: Support for Super Admin, Police Head, HR Manager, Detective Officer, Preventive Officer, and Citizens
 - **Crime Reporting**: Comprehensive crime report filing and tracking system
 - **Case Management**: Advanced case tracking and assignment capabilities
@@ -18,6 +18,7 @@ pnpm db:setup:mssql
 - **Role-Based Access Control**: Secure access based on user roles and permissions
 
 ### Technical Features
+
 - **Modern UI**: Built with React 18 + TypeScript + TailwindCSS
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **Real-time Updates**: Live dashboard with activity monitoring
@@ -37,6 +38,7 @@ The application uses a carefully crafted color scheme that reflects the seriousn
 ## 🏗️ Tech Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks and functional components
 - **TypeScript** - Type-safe development
 - **React Router 6** - SPA routing with protected routes
@@ -46,12 +48,14 @@ The application uses a carefully crafted color scheme that reflects the seriousn
 - **Vite** - Fast build tool and dev server
 
 ### Backend
+
 - **Express.js** - Minimal and flexible Node.js web framework
 - **TypeScript** - Type-safe server development
 - **CORS** - Cross-origin resource sharing
 - **dotenv** - Environment variable management
 
 ### Development Tools
+
 - **PNPM** - Fast, disk space efficient package manager
 - **Vitest** - Unit testing framework
 - **ESLint + Prettier** - Code linting and formatting
@@ -60,22 +64,27 @@ The application uses a carefully crafted color scheme that reflects the seriousn
 ## 📦 Installation & Setup
 
 ### Prerequisites
+
 - Node.js 18 or higher
 - PNPM (recommended) or npm
 
 ### 1. Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd crime-management-system
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 pnpm install
 ```
 
 ### 3. Environment Setup
+
 Create a `.env` file in the root directory:
+
 ```env
 # Server Configuration
 PORT=8080
@@ -93,6 +102,7 @@ PING_MESSAGE=Crime Management System API
 ```
 
 ### 4. Start Development Server
+
 ```bash
 pnpm dev
 ```
@@ -103,20 +113,21 @@ The application will be available at `http://localhost:8080`
 
 The system comes with pre-configured users for testing:
 
-| Role | Username | Password | Description |
-|------|----------|----------|-------------|
-| Super Admin | `admin` | `admin123` | Full system access |
-| Police Head | `police_head` | `police123` | Senior police management |
-| Detective Officer | `detective` | `detective123` | Investigation specialist |
-| Preventive Officer | `officer` | `officer123` | Patrol and prevention |
-| HR Manager | `hr_manager` | `hr123` | Human resources |
-| Citizen | `citizen` | `citizen123` | Public reporting access |
+| Role               | Username      | Password       | Description              |
+| ------------------ | ------------- | -------------- | ------------------------ |
+| Super Admin        | `admin`       | `admin123`     | Full system access       |
+| Police Head        | `police_head` | `police123`    | Senior police management |
+| Detective Officer  | `detective`   | `detective123` | Investigation specialist |
+| Preventive Officer | `officer`     | `officer123`   | Patrol and prevention    |
+| HR Manager         | `hr_manager`  | `hr123`        | Human resources          |
+| Citizen            | `citizen`     | `citizen123`   | Public reporting access  |
 
 ⚠️ **Security Note**: Change these credentials in production!
 
 ## 🗄️ Database Setup (Production)
 
 ### Option 1: PlanetScale (Recommended)
+
 1. Create a PlanetScale account at [planetscale.com](https://planetscale.com)
 2. Create a new database named `crime_management`
 3. Get your connection string from the dashboard
@@ -124,13 +135,16 @@ The system comes with pre-configured users for testing:
 5. Run migrations to set up tables
 
 ### Option 2: Local MySQL/PostgreSQL
+
 1. Install MySQL or PostgreSQL locally
 2. Create a database named `crime_management`
 3. Update the connection string in `.env`
 4. Set up the database schema
 
 ### Database Schema
+
 The system requires the following main tables:
+
 - `users` - User accounts and roles
 - `crime_reports` - Crime incident reports
 - `cases` - Investigation cases
@@ -141,11 +155,13 @@ The system requires the following main tables:
 ## 🚀 Deployment
 
 ### Production Build
+
 ```bash
 pnpm build
 ```
 
 ### Start Production Server
+
 ```bash
 pnpm start
 ```
@@ -153,17 +169,20 @@ pnpm start
 ### Deploy to Cloud Platforms
 
 #### Netlify
+
 1. Connect your repository to Netlify
 2. Set build command: `pnpm build`
 3. Set publish directory: `dist/spa`
 4. Deploy!
 
 #### Vercel
+
 1. Connect your repository to Vercel
 2. Vercel will automatically detect the configuration
 3. Deploy!
 
 #### Traditional Server
+
 1. Build the application: `pnpm build`
 2. Upload the `dist` folder to your server
 3. Run: `node dist/server/node-build.mjs`
@@ -203,25 +222,28 @@ crime-management-system/
 ## 🔧 Configuration
 
 ### Tailwind Customization
+
 The design system is configured in `tailwind.config.ts` and `client/global.css`. Key color variables:
 
 ```css
 /* Crime Management Colors */
---crime-black: 0 0% 8%;          /* Deep black */
---crime-red: 0 84% 50%;          /* Alert red */
---crime-yellow: 48 98% 50%;      /* Warning yellow */
---crime-red-dark: 0 75% 35%;     /* Dark red variant */
+--crime-black: 0 0% 8%; /* Deep black */
+--crime-red: 0 84% 50%; /* Alert red */
+--crime-yellow: 48 98% 50%; /* Warning yellow */
+--crime-red-dark: 0 75% 35%; /* Dark red variant */
 --crime-yellow-light: 48 95% 70%; /* Light yellow variant */
 ```
 
 ### API Endpoints
 
 #### Authentication
+
 - `POST /api/auth/login` - User authentication
 - `POST /api/auth/logout` - User logout
 - `GET /api/auth/profile` - Get user profile
 
 #### Crime Management
+
 - `GET /api/crimes` - List crime reports (with filters)
 - `GET /api/crimes/:id` - Get specific crime report
 - `POST /api/crimes` - Create new crime report
@@ -243,6 +265,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 For technical support or questions:
+
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation at `/docs`
@@ -250,12 +273,14 @@ For technical support or questions:
 ## 🎯 Roadmap
 
 ### Phase 1 (Current)
+
 - ✅ Basic authentication system
 - ✅ Crime reporting functionality
 - ✅ Role-based dashboard
 - ✅ Responsive design
 
 ### Phase 2 (Planned)
+
 - [ ] Advanced search and filtering
 - [ ] File upload for evidence
 - [ ] Email notifications
@@ -263,6 +288,7 @@ For technical support or questions:
 - [ ] Mobile app companion
 
 ### Phase 3 (Future)
+
 - [ ] GIS mapping integration
 - [ ] AI-powered crime prediction
 - [ ] Integration with external systems

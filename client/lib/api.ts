@@ -14,8 +14,24 @@ async function request(path: string, init?: RequestInit) {
     typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   if (token && !headers.has("Authorization"))
     headers.set("Authorization", `Bearer ${token}`);
-  const res = await fetch(url, { ...init, headers });
-  return res;
+
+  try {
+    const res = await fetch(url, { ...init, headers });
+    return res;
+  } catch (err: any) {
+    // Handle network failures gracefully so callers do not crash unexpectedly.
+    console.error("API request failed", url, err);
+    const body = { success: false, error: err?.message || String(err) };
+    try {
+      return new Response(JSON.stringify(body), {
+        status: 0,
+        headers: { "Content-Type": "application/json" },
+      } as any);
+    } catch (e) {
+      // Fallback for environments without Response constructor
+      throw err;
+    }
+  }
 }
 
 export const api = {
