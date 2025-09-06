@@ -338,7 +338,7 @@ export default function SafetyInformation() {
   >(mockEmergencyContacts);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [selectedInfo, setSelectedInfo] = useState<SafetyInformation | null>(
+  const [selectedInfo, setSelectedInfo] = useState<SafetyInformationType | null>(
     null,
   );
   const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
