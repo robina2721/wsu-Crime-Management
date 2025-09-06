@@ -58,8 +58,8 @@ import {
 
 export default function HRManagement() {
   const { user } = useAuth();
-  const [officers, setOfficers] = useState<OfficerProfile[]>([]);
-  const [selectedOfficer, setSelectedOfficer] = useState<OfficerProfile | null>(null);
+  const [officers, setOfficers] = useState<any[]>([]);
+  const [selectedOfficer, setSelectedOfficer] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
