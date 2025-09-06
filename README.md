@@ -6,7 +6,8 @@ A comprehensive, full-stack crime management system designed for Wolaita Sodo Ci
 ![React](https://img.shields.io/badge/React-18-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Express](https://img.shields.io/badge/Express-5-green)
-
+//to run mssql
+pnpm db:setup:mssql
 ## 🚀 Features
 
 ### Core Functionality
