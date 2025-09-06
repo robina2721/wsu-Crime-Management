@@ -64,7 +64,7 @@ export default function HRManagement() {
   const [filterDepartment, setFilterDepartment] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showNewEmployeeForm, setShowNewEmployeeForm] = useState(false);
-  const [formData, setFormData] = useState<Partial<OfficerProfile>>({});
+  const [formData, setFormData] = useState<any>({});
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
