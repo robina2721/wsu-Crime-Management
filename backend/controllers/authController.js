@@ -48,7 +48,12 @@ function getRequestCountry(req, ip) {
 
 export async function loginHandler(req) {
   try {
-    const { username, password } = await req.json();
+    const body = await req.json();
+    const username = body.username;
+    const password = body.password;
+    // accept different names from client for the selected role
+    const selectedRole = (body.role || body.selectedRole || body.requestedRole || "").toString().toLowerCase();
+
     if (!username || !password) {
       return NextResponse.json(
         { success: false, message: "Username and password are required" },
@@ -167,6 +172,28 @@ export async function loginHandler(req) {
         { success: false, message: "Account inactive" },
         { status: 403 },
       );
+    }
+
+    // If the client provided a role selection, enforce it matches the user's role
+    if (selectedRole) {
+      const userRole = (user.role || "").toString().toLowerCase();
+      if (selectedRole !== userRole) {
+        // record failed role-mismatch attempt
+        try {
+          await recordLoginAttempt({
+            username,
+            userId: user.id,
+            ip,
+            country,
+            success: false,
+            reason: "invalid_role",
+          });
+        } catch (e) {}
+        return NextResponse.json(
+          { success: false, message: "Invalid role selection. Check your role and try again." },
+          { status: 401 },
+        );
+      }
     }
 
     const pwd = user.password || "";
