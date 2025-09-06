@@ -176,7 +176,7 @@ export default function CriminalDatabase() {
           warrants: [
             {
               id: "WR-001",
-              type: "arrest",
+              type: WarrantType.ARREST,
               issueDate: new Date("2023-12-15"),
               issuingCourt: "Wolaita Sodo District Court",
               charges: ["Failure to appear", "Probation violation"],
