@@ -197,7 +197,7 @@ export default function CitizenFeedback() {
     );
   };
 
-  const handleSubmitFeedback = async (data: Partial<CitizenFeedback>) => {
+  const handleSubmitFeedback = async (data: Partial<CitizenFeedbackType>) => {
     setIsSubmitting(true);
     try {
       const payload = {
