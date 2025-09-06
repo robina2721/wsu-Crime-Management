@@ -14,6 +14,7 @@ import AssetManagement from "./pages/AssetManagement";
 import UserManagement from "./pages/UserManagement";
 import SystemConfiguration from "./pages/SystemConfiguration";
 import IncidentReports from "./pages/IncidentReports";
+import ReportIncident from "./pages/ReportIncident";
 import PatrolLogs from "./pages/PatrolLogs";
 import CriminalDatabase from "./pages/CriminalDatabase";
 import InvestigationReports from "./pages/InvestigationReports";
