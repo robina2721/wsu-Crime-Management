@@ -138,7 +138,7 @@ const mockEmergencyContacts: EmergencyContact[] = [
   },
 ];
 
-const mockSafetyInfo: SafetyInformation[] = [
+const mockSafetyInfo: SafetyInformationType[] = [
   {
     id: "1",
     title: "Home Security Basics",
