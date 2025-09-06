@@ -80,7 +80,8 @@ export default function CitizenFeedback() {
   const [feedback, setFeedback] = useState<CitizenFeedbackType[]>([]);
   const [showNewFeedbackForm, setShowNewFeedbackForm] = useState(false);
   const [selectedFeedback, setSelectedFeedback] =
-    useState<CitizenFeedback | null>(null);
+    useState<CitizenFeedbackType | null>(null);
+  const [formData, setFormData] = useState<Partial<CitizenFeedbackType>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
