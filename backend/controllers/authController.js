@@ -60,6 +60,10 @@ export async function loginHandler(req) {
     )
       .toString()
       .toLowerCase();
+    // Debug: log login attempt (do not log password in production)
+    try {
+      console.debug("[auth] login attempt", { username, selectedRole });
+    } catch (e) {}
 
     if (!username || !password) {
       return NextResponse.json(
@@ -145,6 +149,71 @@ export async function loginHandler(req) {
       }
     }
 
+    if (!user) {
+      // In local development allow fallback dev users even if DB is configured but user missing
+      if (process.env.NODE_ENV !== "production") {
+        const devUsers = {
+          admin: {
+            id: "1",
+            username: "admin",
+            password: "admin123",
+            role: "super_admin",
+            fullName: "System Admin",
+            email: "admin@example.com",
+            isActive: 1,
+          },
+          chief: {
+            id: "2",
+            username: "chief",
+            password: "chief123",
+            role: "police_head",
+            fullName: "Police Chief",
+            email: "chief@example.com",
+            isActive: 1,
+          },
+          hr: {
+            id: "3",
+            username: "hr",
+            password: "hr123",
+            role: "hr_manager",
+            fullName: "HR Manager",
+            email: "hr@example.com",
+            isActive: 1,
+          },
+          officer_mulugeta: {
+            id: "4",
+            username: "officer_mulugeta",
+            password: "officer123",
+            role: "preventive_officer",
+            fullName: "Officer Mulugeta Kebede",
+            email: "mulugeta@example.com",
+            isActive: 1,
+          },
+          detective_abel: {
+            id: "5",
+            username: "detective_abel",
+            password: "detective123",
+            role: "detective_officer",
+            fullName: "Detective Abel Tadesse",
+            email: "abel@example.com",
+            isActive: 1,
+          },
+          mekbib: {
+            id: "6",
+            username: "mekbib",
+            password: "password",
+            role: "citizen",
+            fullName: "Mekbib Yohannes",
+            email: "mekbib@example.com",
+            isActive: 1,
+          },
+        };
+        const du = devUsers[username];
+        if (du) {
+          user = du;
+        }
+      }
+    }
     if (!user) {
       // Record failed attempt for unknown user
       try {
