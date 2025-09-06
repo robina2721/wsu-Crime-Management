@@ -60,6 +60,10 @@ export async function loginHandler(req) {
     )
       .toString()
       .toLowerCase();
+    // Debug: log login attempt (do not log password in production)
+    try {
+      console.debug("[auth] login attempt", { username, selectedRole });
+    } catch (e) {}
 
     if (!username || !password) {
       return NextResponse.json(
