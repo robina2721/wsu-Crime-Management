@@ -7,6 +7,7 @@ import {
   ArrestRecord,
   Warrant,
   WarrantStatus,
+  WarrantType,
   UserRole,
   CrimeCategory,
 } from "@shared/types";
