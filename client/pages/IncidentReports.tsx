@@ -179,10 +179,8 @@ export default function IncidentReports() {
   };
 
   const handleCreateIncident = async () => {
-    if (!user) return;
-
     try {
-      const payload = {
+      const payload: any = {
         title: newIncident.title,
         description: newIncident.description,
         incidentType: newIncident.incidentType,
@@ -190,9 +188,17 @@ export default function IncidentReports() {
         location: newIncident.location,
         dateOccurred: newIncident.dateOccurred,
         followUpRequired: newIncident.followUpRequired,
-        reportedBy: user.id,
-        reporterName: user.fullName ?? user.username,
       };
+
+      // If user is logged in attach reporter info, otherwise allow anonymous report
+      if (user) {
+        payload.reportedBy = user.id;
+        payload.reporterName = user.fullName ?? user.username;
+      } else {
+        payload.reportedBy = null;
+        payload.reporterName = 'Anonymous';
+      }
+
       const res = await api.post("/incidents", payload);
       if (!res.ok) return;
       const data = await res.json();
