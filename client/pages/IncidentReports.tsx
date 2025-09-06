@@ -190,6 +190,8 @@ export default function IncidentReports() {
         location: newIncident.location,
         dateOccurred: newIncident.dateOccurred,
         followUpRequired: newIncident.followUpRequired,
+        reportedBy: user.id,
+        reporterName: user.fullName ?? user.username,
       };
       const res = await api.post("/incidents", payload);
       if (!res.ok) return;
