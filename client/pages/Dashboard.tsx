@@ -189,13 +189,7 @@ export default function Dashboard() {
                   {user.role.replace("_", " ").toUpperCase()}
                 </p>
               </div>
-              <Button
-                onClick={logout}
-                variant="outline"
-                className="border-crime-red text-crime-red hover:bg-crime-red hover:text-white"
-              >
-                Logout
-              </Button>
+             
             </div>
           </div>
         </div>
