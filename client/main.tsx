@@ -31,9 +31,8 @@ root.render(
 );
 
 // Handle hot module replacement
-if (import.meta.hot) {
-  import.meta.hot.accept("./App", () => {
-    // Re-render the app when App.tsx changes
+if ((import.meta as any).hot) {
+  (import.meta as any).hot.accept("./App", () => {
     root.render(
       <StrictMode>
         <App />
