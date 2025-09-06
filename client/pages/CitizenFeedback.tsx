@@ -97,7 +97,7 @@ export default function CitizenFeedback() {
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
-            const list: CitizenFeedback[] = (data.data.feedback || []).map(
+            const list: CitizenFeedbackType[] = (data.data.feedback || []).map(
               (f: any) => ({
                 ...f,
                 respondedAt: f.respondedAt
