@@ -68,6 +68,8 @@ export default function StaffManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [newUserPhoto, setNewUserPhoto] = useState<File | null>(null);
+  const [newAssignment, setNewAssignment] = useState<Partial<StaffAssignment>>({});
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
 
   const canManageStaff = hasAnyRole([
     UserRole.SUPER_ADMIN,
