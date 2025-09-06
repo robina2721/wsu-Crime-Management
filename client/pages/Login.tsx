@@ -46,7 +46,8 @@ export default function Login() {
     setIsLoading(true);
     setError("");
 
-    const success = await login(username, password);
+    const roleToSend = typeof selectedRole === 'string' && selectedRole ? selectedRole : undefined;
+    const success = await login(username, password, roleToSend);
     if (success) {
       navigate("/dashboard");
     } else {
