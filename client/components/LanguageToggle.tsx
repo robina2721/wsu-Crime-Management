@@ -1,50 +1,36 @@
 import React from "react";
 import { useI18n } from "@/contexts/I18nContext";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { cn } from "@/lib/utils";
 
-const flagFor = (code: string) => {
-  switch (code) {
-    case "en":
-      return "🇬🇧";
-    case "am":
-      return "🇪🇹";
-    case "wo":
-      return "🌍";
-    default:
-      return "🌐";
-  }
-};
+const LABELS: Record<string, string> = { en: "ENG", wo: "WOL", am: "AMH" };
+const ORDER = ["en", "wo", "am"];
 
 export default function LanguageToggle({ className = "" }: { className?: string }) {
   const { lang, setLang } = useI18n();
 
   return (
-    <div className={className}>
-      <Select value={lang} onValueChange={(v) => setLang(v as any)}>
-        <SelectTrigger className="w-[140px]">
-          <SelectValue placeholder="Language" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="en">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{flagFor("en")}</span>
-              <span>English (ENG)</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="am">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{flagFor("am")}</span>
-              <span>Amharic (AMH)</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="wo">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{flagFor("wo")}</span>
-              <span>Wolaita (WOL)</span>
-            </div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
+    <div className={cn("inline-flex items-center rounded-full bg-white/90 shadow-sm overflow-hidden text-sm", className)}>
+      {ORDER.map((code, idx) => {
+        const active = lang === code;
+        return (
+          <React.Fragment key={code}>
+            <button
+              aria-label={`Set language ${LABELS[code]}`}
+              onClick={() => setLang(code as any)}
+              className={cn(
+                "px-3 py-2 font-semibold leading-none focus:outline-none",
+                active ? "bg-crime-red text-white" : "text-gray-700 hover:bg-gray-100",
+              )}
+              type="button"
+            >
+              {LABELS[code]}
+            </button>
+            {idx < ORDER.length - 1 && (
+              <span className="px-1 text-xs text-gray-400 select-none">&lt;</span>
+            )}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 }
