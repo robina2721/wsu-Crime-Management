@@ -380,5 +380,51 @@ BEGIN
   )
 END
 GO
+-- Assets table
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[assets]') AND type in (N'U'))
+BEGIN
+  CREATE TABLE assets (
+    id NVARCHAR(64) NOT NULL PRIMARY KEY,
+    name NVARCHAR(256) NOT NULL,
+    category NVARCHAR(128) NULL,
+    type NVARCHAR(128) NULL,
+    description NVARCHAR(MAX) NULL,
+    serial_number NVARCHAR(128) NULL,
+    purchase_date DATETIME2 NULL,
+    current_value DECIMAL(18,2) NULL,
+    status NVARCHAR(64) NULL,
+    condition NVARCHAR(64) NULL,
+    location NVARCHAR(256) NULL,
+    assigned_to NVARCHAR(64) NULL,
+    assigned_to_name NVARCHAR(256) NULL,
+    next_maintenance DATETIME2 NULL,
+    created_at DATETIME2 NOT NULL,
+    updated_at DATETIME2 NOT NULL
+  )
+END
+GO
 
+-- Criminals table
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[criminals]') AND type in (N'U'))
+BEGIN
+  CREATE TABLE criminals (
+    id NVARCHAR(64) NOT NULL PRIMARY KEY,
+    full_name NVARCHAR(256) NOT NULL,
+    date_of_birth DATETIME2 NULL,
+    national_id NVARCHAR(128) NULL,
+    address NVARCHAR(512) NULL,
+    phone NVARCHAR(64) NULL,
+    photo_path NVARCHAR(1024) NULL,
+    aliases NVARCHAR(MAX) NULL,
+    height_cm INT NULL,
+    weight_kg INT NULL,
+    eye_color NVARCHAR(64) NULL,
+    hair_color NVARCHAR(64) NULL,
+    risk_level NVARCHAR(32) NULL,
+    is_active BIT NOT NULL DEFAULT 1,
+    created_at DATETIME2 NOT NULL,
+    updated_at DATETIME2 NOT NULL
+  )
+END
+GO
 -- done
