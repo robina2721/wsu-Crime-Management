@@ -117,6 +117,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="/report-incident" element={<ReportIncident />} />
+
       <Route
         path="/incident-reports"
         element={
