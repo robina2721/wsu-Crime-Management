@@ -65,8 +65,8 @@ import {
   MessageCircle,
   Info,
 } from "lucide-react";
-import {
-  CitizenFeedback,
+import type {
+  CitizenFeedback as CitizenFeedbackType,
   FeedbackType,
   FeedbackCategory,
   FeedbackStatus,
