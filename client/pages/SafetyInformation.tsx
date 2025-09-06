@@ -332,7 +332,7 @@ const mockSafetyInfo: SafetyInformationType[] = [
 export default function SafetyInformation() {
   const { user } = useAuth();
   const [safetyInfo, setSafetyInfo] =
-    useState<SafetyInformation[]>(mockSafetyInfo);
+    useState<SafetyInformationType[]>(mockSafetyInfo);
   const [emergencyContacts, setEmergencyContacts] = useState<
     EmergencyContact[]
   >(mockEmergencyContacts);
