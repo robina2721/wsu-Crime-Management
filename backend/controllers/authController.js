@@ -113,19 +113,21 @@ export async function loginHandler(req) {
     }
 
     if (selectedRole && selectedRole !== (user.role || "").toLowerCase()) {
-            console.log("Login failure reason: invalid role");
-      await recordLoginAttempt({
-        username,
-        userId: user.id,
-        ip,
-        country,
-        success: false,
-        reason: "invalid_role",
+      console.warn("Role mismatch on login; allowing login but noting mismatch", {
+        selectedRole,
+        userRole: (user.role || "").toLowerCase(),
       });
-      return NextResponse.json(
-        { success: false, message: "Invalid role selection. Check your role and try again." },
-        { status: 401 },
-      );
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: true,
+          reason: "role_mismatch_allowed",
+        });
+      } catch {}
+      // Do not block login due to role mismatch; proceed to password validation
     }
 
     const pwd = user.password || "";
@@ -159,7 +161,7 @@ export async function loginHandler(req) {
           });
         }
       } catch {}
-      return NextResponse.json({ success: false, message: "1Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 });
     }
 
     await recordLoginAttempt({
