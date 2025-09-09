@@ -22,10 +22,16 @@ async function request(path: string, init?: RequestInit) {
     if (!contentType.includes("application/json")) {
       const text = await res.text();
       // Avoid leaking large HTML in production — only include snippet in dev
-      const payload: any = { success: false, error: "Non-JSON response from server" };
+      const payload: any = {
+        success: false,
+        error: "Non-JSON response from server",
+      };
       payload.originalStatus = res.status;
       payload.originalContentType = contentType;
-      payload.bodySnippet = process.env.NODE_ENV !== "production" ? String(text).slice(0, 8000) : undefined;
+      payload.bodySnippet =
+        process.env.NODE_ENV !== "production"
+          ? String(text).slice(0, 8000)
+          : undefined;
       return new Response(JSON.stringify(payload), {
         status: res.status || 500,
         headers: { "Content-Type": "application/json" },
