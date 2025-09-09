@@ -8,7 +8,8 @@ async function request(path: string, init?: RequestInit) {
   const headers = new Headers(init?.headers || {});
   // prefer JSON responses
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
-  if (!headers.has("X-Requested-With")) headers.set("X-Requested-With", "XMLHttpRequest");
+  if (!headers.has("X-Requested-With"))
+    headers.set("X-Requested-With", "XMLHttpRequest");
   const isFormData =
     typeof FormData !== "undefined" && init?.body instanceof FormData;
   if (!headers.has("Content-Type") && init?.body && !isFormData)
