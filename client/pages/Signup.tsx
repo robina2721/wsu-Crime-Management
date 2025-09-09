@@ -82,7 +82,15 @@ export default function Signup() {
         payload.photo = dataUrl;
         payload.details = { ...employeeDetails };
       }
-      const res = await api.post("/auth/signup", payload);
+      const res = await api.post("auth/signup", payload);
+      const contentType = res.headers.get("content-type") || "";
+          if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("❌ Unexpected response type:", contentType);
+            console.error("📄 Response text:", text);
+            throw new Error("Server returned non-JSON response");
+          }
+
       const data = await res.json();
       if (res.ok && data.success) {
         // Show success dropdown and redirect to login (do not auto-login)

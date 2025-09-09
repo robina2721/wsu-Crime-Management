@@ -60,20 +60,20 @@ export default function Login() {
   };
 
   const roleOptions = [
-    { value: UserRole.SUPER_ADMIN, label: "Super Admin", icon: "👑" },
-    { value: UserRole.POLICE_HEAD, label: "Police Head", icon: "🚔" },
-    { value: UserRole.HR_MANAGER, label: "HR Manager", icon: "👥" },
+    { value: UserRole.SUPER_ADMIN, label: "super_admin", icon: "👑" },
+    { value: UserRole.POLICE_HEAD, label: "police_head", icon: "🚔" },
+    { value: UserRole.HR_MANAGER, label: "hr_manager", icon: "👥" },
     {
       value: UserRole.PREVENTIVE_OFFICER,
-      label: "Preventive Officer",
+      label: "preventive_officer",
       icon: "🛡️",
     },
     {
       value: UserRole.DETECTIVE_OFFICER,
-      label: "Detective Officer",
+      label: "detective_officer",
       icon: "🔍",
     },
-    { value: UserRole.CITIZEN, label: "Citizen", icon: "👤" },
+    { value: UserRole.CITIZEN, label: "citizen", icon: "👤" },
   ];
 
   return (

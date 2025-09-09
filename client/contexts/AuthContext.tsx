@@ -35,7 +35,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on mount
     const token = localStorage.getItem("auth_token");
     const userData = localStorage.getItem("user_data");
 
@@ -59,31 +58,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const body: any = { username, password };
       if (role) body.role = role;
-      console.debug("[auth] sending login request", { body });
+
+      console.debug("[auth] sending login request", body);
       const response = await api.post("/auth/login", body);
 
-      // Check if response is ok before trying to parse
+      const contentType = response.headers.get("Content-Type") || "";
+      const isJson = contentType.includes("application/json");
+
       if (!response.ok) {
-        let text = "";
-        try {
-          text = await response.text();
-        } catch (e) {}
-        console.error("Login failed with status:", response.status, text);
+        const errorText = isJson ? await response.json() : await response.text();
+        console.error("❌ Login failed:", {
+          status: response.status,
+          response: errorText,
+        });
         return false;
       }
 
-      // Clone the response to avoid "body stream already read" errors
-      const responseClone = response.clone();
-      let data;
-
+      let data: any = {};
       try {
-        data = await responseClone.json();
-        console.debug("[auth] login response", {
-          status: response.status,
-          data,
-        });
-      } catch (parseError) {
-        console.error("Failed to parse response JSON:", parseError);
+        data = isJson ? await response.json() : {};
+        console.debug("[auth] login response data:", data);
+      } catch (parseErr) {
+        console.error("❌ Failed to parse JSON:", parseErr);
         return false;
       }
 
@@ -93,9 +89,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem("user_data", JSON.stringify(data.user));
         return true;
       }
+
+      console.warn("⚠️ Login response missing expected fields:", data);
       return false;
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("❌ Login error (network or unexpected):", err);
       return false;
     }
   };
