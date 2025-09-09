@@ -34,9 +34,30 @@ async function request(path: string, init?: RequestInit) {
       ...init,
       headers,
       credentials: "same-origin",
-    });
+      // do not automatically follow redirects so we can detect them and avoid returning HTML pages
+      redirect: "manual",
+    } as RequestInit);
+
+    // If we received a redirect (status 3xx), return JSON describing it so callers don't get HTML body
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get("location") || undefined;
+      console.warn(
+        `[api] received redirect ${res.status} -> ${location} for ${url}`,
+      );
+      const payload: any = {
+        success: false,
+        redirect: true,
+        status: res.status,
+        location,
+      };
+      return new Response(JSON.stringify(payload), {
+        status: res.status,
+        headers: { "Content-Type": "application/json" },
+      } as any);
+    }
+
     // If server returned non-JSON (HTML error page), read its text and wrap into a JSON Response
-    const contentType = res.headers.get("content-type") || "";
+    const contentType = (res.headers.get("content-type") || "").toLowerCase();
     if (!contentType.includes("application/json")) {
       const text = await res.text();
       // Avoid leaking large HTML in production — only include snippet in dev
@@ -50,11 +71,18 @@ async function request(path: string, init?: RequestInit) {
         process.env.NODE_ENV !== "production"
           ? String(text).slice(0, 8000)
           : undefined;
+      console.warn("[api] non-json response wrapped", {
+        url,
+        status: res.status,
+        contentType,
+        snippet: payload.bodySnippet?.slice(0, 200),
+      });
       return new Response(JSON.stringify(payload), {
         status: res.status || 500,
         headers: { "Content-Type": "application/json" },
       } as any);
     }
+
     return res;
   } catch (err: any) {
     // Handle network failures gracefully so callers do not crash unexpectedly.

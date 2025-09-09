@@ -112,6 +112,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
 
+      if (data.redirect) {
+        console.error("❌ Server attempted redirect during API call", data);
+        return false;
+      }
+
+      if (data && data.error && data.originalContentType) {
+        console.error("❌ Server returned non-JSON response", data);
+        return false;
+      }
+
       if (data.success && data.user && data.token) {
         setUser(data.user);
         localStorage.setItem("auth_token", data.token);
