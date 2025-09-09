@@ -188,7 +188,8 @@ export async function loginHandler(req) {
     console.error("❌ Login error:", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, message: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, message: msg, details }, { status });
   }
 }
 
@@ -310,7 +311,8 @@ export async function signupCitizenHandler(req) {
     console.error("❌ Signup error:", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, message: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, message: msg, details }, { status });
   }
 }
 
@@ -335,6 +337,7 @@ export async function profileHandler(req) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, message: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, message: msg, details }, { status });
   }
 }
