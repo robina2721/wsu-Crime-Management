@@ -6,6 +6,10 @@ const BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "/api").replace(
 async function request(path: string, init?: RequestInit) {
   const url = path.startsWith("/") ? `${BASE}${path}` : `${BASE}/${path}`;
   const headers = new Headers(init?.headers || {});
+  // prefer JSON responses
+  if (!headers.has("Accept")) headers.set("Accept", "application/json");
+  if (!headers.has("X-Requested-With"))
+    headers.set("X-Requested-With", "XMLHttpRequest");
   const isFormData =
     typeof FormData !== "undefined" && init?.body instanceof FormData;
   if (!headers.has("Content-Type") && init?.body && !isFormData)

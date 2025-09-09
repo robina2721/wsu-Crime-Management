@@ -82,14 +82,14 @@ export default function Signup() {
         payload.photo = dataUrl;
         payload.details = { ...employeeDetails };
       }
-      const res = await api.post("auth/signup", payload);
+      const res = await api.post("/auth/signup", payload);
       const contentType = res.headers.get("content-type") || "";
-          if (!contentType.includes("application/json")) {
-            const text = await res.text();
-            console.error("❌ Unexpected response type:", contentType);
-            console.error("📄 Response text:", text);
-            throw new Error("Server returned non-JSON response");
-          }
+      if (!contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("❌ Unexpected response type:", contentType);
+        console.error("📄 Response text:", text);
+        throw new Error("Server returned non-JSON response");
+      }
 
       const data = await res.json();
       if (res.ok && data.success) {
@@ -97,16 +97,21 @@ export default function Signup() {
         setShowSuccess(true);
         // If system returns token (auto-login), still redirect user to login page after showing success
         setTimeout(() => {
-          navigate('/login');
+          navigate("/login");
         }, 3500);
         if (data.token && data.user) {
           // Clear any token that might have been issued unintentionally
-          try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch {}
+          try {
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("user_data");
+          } catch {}
         }
         if (!isEmployee) {
           setInfo("Signup successful. Redirecting to login...");
         } else {
-          setInfo("Your request has been submitted for approval. Redirecting to login...");
+          setInfo(
+            "Your request has been submitted for approval. Redirecting to login...",
+          );
         }
       } else {
         setError(data.message || "Signup failed");
@@ -136,7 +141,7 @@ export default function Signup() {
       <div className="absolute inset-0 bg-black/20"></div>
       <Card className="w-full max-w-md relative z-10 border-crime-red shadow-2xl">
         <CardHeader className="text-center space-y-4">
-           <div className="flex justify-center">
+          <div className="flex justify-center">
             <img src="/wspolice.jpeg" alt="Logo" className="w-20 h-20" />
           </div>
           <div>
@@ -251,7 +256,10 @@ export default function Signup() {
                       id="employeeId"
                       value={employeeDetails.employeeId}
                       onChange={(e) =>
-                        setEmployeeDetails({ ...employeeDetails, employeeId: e.target.value })
+                        setEmployeeDetails({
+                          ...employeeDetails,
+                          employeeId: e.target.value,
+                        })
                       }
                       required={isEmployee}
                     />
@@ -262,7 +270,10 @@ export default function Signup() {
                       id="department"
                       value={employeeDetails.department}
                       onChange={(e) =>
-                        setEmployeeDetails({ ...employeeDetails, department: e.target.value })
+                        setEmployeeDetails({
+                          ...employeeDetails,
+                          department: e.target.value,
+                        })
                       }
                       required={isEmployee}
                     />
@@ -273,7 +284,10 @@ export default function Signup() {
                       id="badgeNumber"
                       value={employeeDetails.badgeNumber}
                       onChange={(e) =>
-                        setEmployeeDetails({ ...employeeDetails, badgeNumber: e.target.value })
+                        setEmployeeDetails({
+                          ...employeeDetails,
+                          badgeNumber: e.target.value,
+                        })
                       }
                       required={isEmployee}
                     />
@@ -284,7 +298,10 @@ export default function Signup() {
                       id="rank"
                       value={employeeDetails.rank}
                       onChange={(e) =>
-                        setEmployeeDetails({ ...employeeDetails, rank: e.target.value })
+                        setEmployeeDetails({
+                          ...employeeDetails,
+                          rank: e.target.value,
+                        })
                       }
                       required={isEmployee}
                     />
@@ -310,13 +327,23 @@ export default function Signup() {
                 <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-md flex items-start justify-between">
                   <div>
                     <div className="font-semibold">Signup successful</div>
-                    <div className="text-sm">You will be redirected to login shortly.</div>
+                    <div className="text-sm">
+                      You will be redirected to login shortly.
+                    </div>
                   </div>
-                  <button aria-expanded={successOpen} onClick={() => setSuccessOpen(v => !v)} className="ml-4 text-green-700">{successOpen ? '▴' : '▾'}</button>
+                  <button
+                    aria-expanded={successOpen}
+                    onClick={() => setSuccessOpen((v) => !v)}
+                    className="ml-4 text-green-700"
+                  >
+                    {successOpen ? "▴" : "▾"}
+                  </button>
                 </div>
                 {successOpen && (
                   <div className="mt-2 text-sm text-gray-700 bg-white p-3 rounded border">
-                    Thank you for signing up. If your account requires approval it will be reviewed by the admin. After approval you can login using your credentials.
+                    Thank you for signing up. If your account requires approval
+                    it will be reviewed by the admin. After approval you can
+                    login using your credentials.
                   </div>
                 )}
               </div>
