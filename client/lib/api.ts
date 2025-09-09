@@ -1,7 +1,17 @@
-const BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "/api").replace(
-  /\/$/,
-  "",
-);
+let BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "/api").replace(/\/$/, "");
+// At runtime, ensure we don't call a different origin (which causes CORS issues in preview/dev).
+if (typeof window !== "undefined") {
+  try {
+    const resolved = new URL(BASE, window.location.origin);
+    if (resolved.origin !== window.location.origin) {
+      // Force using relative local API to avoid cross-origin problems in previews
+      BASE = "/api";
+      console.debug("[api] overriding BASE to /api to match current origin");
+    }
+  } catch (e) {
+    BASE = "/api";
+  }
+}
 
 async function request(path: string, init?: RequestInit) {
   const url = path.startsWith("/") ? `${BASE}${path}` : `${BASE}/${path}`;
