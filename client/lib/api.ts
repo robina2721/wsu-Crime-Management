@@ -30,7 +30,11 @@ async function request(path: string, init?: RequestInit) {
     headers.set("Authorization", `Bearer ${token}`);
 
   try {
-    const res = await fetch(url, { ...init, headers, credentials: 'same-origin' });
+    const res = await fetch(url, {
+      ...init,
+      headers,
+      credentials: "same-origin",
+    });
     // If server returned non-JSON (HTML error page), read its text and wrap into a JSON Response
     const contentType = res.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
