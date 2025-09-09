@@ -62,7 +62,8 @@ export async function listIncidentsHandler(req) {
     console.error("[incidents] listIncidentsHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, error: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, error: msg, details }, { status });
   }
 }
 
@@ -165,7 +166,8 @@ export async function createIncidentHandler(req) {
     console.error("[incidents] createIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, error: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, error: msg, details }, { status });
   }
 }
 
@@ -213,7 +215,8 @@ export async function updateIncidentHandler(req, params) {
     console.error("[incidents] updateIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, error: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, error: msg, details }, { status });
   }
 }
 
@@ -245,6 +248,7 @@ export async function deleteIncidentHandler(req, params) {
     console.error("[incidents] deleteIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, error: msg }, { status });
+    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
+    return NextResponse.json({ success: false, error: msg, details }, { status });
   }
 }
