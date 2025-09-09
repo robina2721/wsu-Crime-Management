@@ -41,8 +41,15 @@ async function request(path: string, init?: RequestInit) {
     // If we received a redirect (status 3xx), return JSON describing it so callers don't get HTML body
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get("location") || undefined;
-      console.warn(`[api] received redirect ${res.status} -> ${location} for ${url}`);
-      const payload: any = { success: false, redirect: true, status: res.status, location };
+      console.warn(
+        `[api] received redirect ${res.status} -> ${location} for ${url}`,
+      );
+      const payload: any = {
+        success: false,
+        redirect: true,
+        status: res.status,
+        location,
+      };
       return new Response(JSON.stringify(payload), {
         status: res.status,
         headers: { "Content-Type": "application/json" },
@@ -60,8 +67,16 @@ async function request(path: string, init?: RequestInit) {
       };
       payload.originalStatus = res.status;
       payload.originalContentType = contentType;
-      payload.bodySnippet = process.env.NODE_ENV !== "production" ? String(text).slice(0, 8000) : undefined;
-      console.warn("[api] non-json response wrapped", { url, status: res.status, contentType, snippet: payload.bodySnippet?.slice(0, 200) });
+      payload.bodySnippet =
+        process.env.NODE_ENV !== "production"
+          ? String(text).slice(0, 8000)
+          : undefined;
+      console.warn("[api] non-json response wrapped", {
+        url,
+        status: res.status,
+        contentType,
+        snippet: payload.bodySnippet?.slice(0, 200),
+      });
       return new Response(JSON.stringify(payload), {
         status: res.status || 500,
         headers: { "Content-Type": "application/json" },
