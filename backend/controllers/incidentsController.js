@@ -28,7 +28,10 @@ function allow(roles, user) {
 }
 
 export async function listIncidentsHandler(req) {
-  console.debug("[incidents] listIncidentsHandler called", { url: req.url, headers: Object.fromEntries(req.headers.entries()) });
+  console.debug("[incidents] listIncidentsHandler called", {
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries()),
+  });
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "100");
@@ -46,7 +49,14 @@ export async function listIncidentsHandler(req) {
         reportedBy = reportedByParam;
       }
     }
-    console.debug("[incidents] query params", { limit, offset, status, incidentType, severity, reportedBy });
+    console.debug("[incidents] query params", {
+      limit,
+      offset,
+      status,
+      incidentType,
+      severity,
+      reportedBy,
+    });
     const rows = await listIncidents(limit, offset, {
       status,
       incidentType,
@@ -62,8 +72,14 @@ export async function listIncidentsHandler(req) {
     console.error("[incidents] listIncidentsHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
-    return NextResponse.json({ success: false, error: msg, details }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, error: msg, details },
+      { status },
+    );
   }
 }
 
@@ -84,7 +100,10 @@ export async function getIncidentHandler(_req, params) {
 }
 
 export async function createIncidentHandler(req) {
-  console.debug("[incidents] createIncidentHandler called", { url: req.url, headers: Object.fromEntries(req.headers.entries()) });
+  console.debug("[incidents] createIncidentHandler called", {
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries()),
+  });
   try {
     const user = await getAuthUser(req);
     let body = {};
@@ -92,10 +111,17 @@ export async function createIncidentHandler(req) {
       body = await req.json();
     } catch (pErr) {
       console.warn("[incidents] failed to parse JSON body", pErr);
-      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
     }
 
-    console.debug("[incidents] request body", body, { user: user ? { id: user.id, username: user.username, role: user.role } : null });
+    console.debug("[incidents] request body", body, {
+      user: user
+        ? { id: user.id, username: user.username, role: user.role }
+        : null,
+    });
 
     const required = [
       "title",
@@ -126,7 +152,9 @@ export async function createIncidentHandler(req) {
           user,
         )
       ) {
-        console.warn("[incidents] user forbidden from creating incident", { user: { id: user.id, role: user.role } });
+        console.warn("[incidents] user forbidden from creating incident", {
+          user: { id: user.id, role: user.role },
+        });
         return NextResponse.json(
           { success: false, error: "Forbidden" },
           { status: 403 },
@@ -166,13 +194,22 @@ export async function createIncidentHandler(req) {
     console.error("[incidents] createIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
-    return NextResponse.json({ success: false, error: msg, details }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, error: msg, details },
+      { status },
+    );
   }
 }
 
 export async function updateIncidentHandler(req, params) {
-  console.debug("[incidents] updateIncidentHandler called", { id: params?.id, headers: Object.fromEntries(req.headers.entries()) });
+  console.debug("[incidents] updateIncidentHandler called", {
+    id: params?.id,
+    headers: Object.fromEntries(req.headers.entries()),
+  });
   try {
     const user = await getAuthUser(req);
     if (!user)
@@ -181,7 +218,9 @@ export async function updateIncidentHandler(req, params) {
         { status: 401 },
       );
     if (!allow(["detective_officer", "police_head", "super_admin"], user)) {
-      console.warn("[incidents] user not allowed to update incident", { user: { id: user.id, role: user.role } });
+      console.warn("[incidents] user not allowed to update incident", {
+        user: { id: user.id, role: user.role },
+      });
       return NextResponse.json(
         { success: false, error: "Forbidden" },
         { status: 403 },
@@ -192,7 +231,10 @@ export async function updateIncidentHandler(req, params) {
       updates = await req.json();
     } catch (pErr) {
       console.warn("[incidents] failed to parse JSON updates", pErr);
-      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
     }
     console.debug("[incidents] updates payload", updates);
     const updated = await updateIncident(params.id, updates);
@@ -215,13 +257,22 @@ export async function updateIncidentHandler(req, params) {
     console.error("[incidents] updateIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
-    return NextResponse.json({ success: false, error: msg, details }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, error: msg, details },
+      { status },
+    );
   }
 }
 
 export async function deleteIncidentHandler(req, params) {
-  console.debug("[incidents] deleteIncidentHandler called", { id: params?.id, headers: Object.fromEntries(req.headers.entries()) });
+  console.debug("[incidents] deleteIncidentHandler called", {
+    id: params?.id,
+    headers: Object.fromEntries(req.headers.entries()),
+  });
   try {
     const user = await getAuthUser(req);
     if (!user)
@@ -230,7 +281,9 @@ export async function deleteIncidentHandler(req, params) {
         { status: 401 },
       );
     if (!allow(["police_head", "super_admin"], user)) {
-      console.warn("[incidents] user not allowed to delete incident", { user: { id: user.id, role: user.role } });
+      console.warn("[incidents] user not allowed to delete incident", {
+        user: { id: user.id, role: user.role },
+      });
       return NextResponse.json(
         { success: false, error: "Forbidden" },
         { status: 403 },
@@ -248,7 +301,13 @@ export async function deleteIncidentHandler(req, params) {
     console.error("[incidents] deleteIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    const details = process.env.NODE_ENV !== "production" ? { stack: err instanceof Error ? err.stack : undefined } : undefined;
-    return NextResponse.json({ success: false, error: msg, details }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, error: msg, details },
+      { status },
+    );
   }
 }

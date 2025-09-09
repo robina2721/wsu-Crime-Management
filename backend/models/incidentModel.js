@@ -31,7 +31,11 @@ export async function listIncidents(limit = 100, offset = 0, filters = {}) {
   try {
     return await queryRows(sql, params);
   } catch (err) {
-    console.error("[incidentModel] listIncidents SQL error", { sql, params, err });
+    console.error("[incidentModel] listIncidents SQL error", {
+      sql,
+      params,
+      err,
+    });
     throw err;
   }
 }
@@ -44,7 +48,11 @@ export async function getIncident(id) {
   try {
     return await queryRow(sql, [id]);
   } catch (err) {
-    console.error("[incidentModel] getIncident SQL error", { sql, params: [id], err });
+    console.error("[incidentModel] getIncident SQL error", {
+      sql,
+      params: [id],
+      err,
+    });
     throw err;
   }
 }
@@ -75,7 +83,11 @@ export async function createIncident(data) {
     await queryRows(sql, params);
     return await getIncident(id);
   } catch (err) {
-    console.error("[incidentModel] createIncident SQL error", { sql, params, err });
+    console.error("[incidentModel] createIncident SQL error", {
+      sql,
+      params,
+      err,
+    });
     throw err;
   }
 }
@@ -123,7 +135,11 @@ export async function updateIncident(id, updates) {
     await queryRows(sql, params);
     return await getIncident(id);
   } catch (err) {
-    console.error("[incidentModel] updateIncident SQL error", { sql, params, err });
+    console.error("[incidentModel] updateIncident SQL error", {
+      sql,
+      params,
+      err,
+    });
     throw err;
   }
 }
@@ -134,7 +150,11 @@ export async function deleteIncident(id) {
     await queryRows(sql, [id]);
     return true;
   } catch (err) {
-    console.error("[incidentModel] deleteIncident SQL error", { sql, params: [id], err });
+    console.error("[incidentModel] deleteIncident SQL error", {
+      sql,
+      params: [id],
+      err,
+    });
     throw err;
   }
 }
