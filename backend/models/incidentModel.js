@@ -22,52 +22,74 @@ export async function listIncidents(limit = 100, offset = 0, filters = {}) {
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   params.push(offset);
   params.push(limit);
-  return await queryRows(
-    `SELECT id, title, description, incident_type as incidentType, severity, location, date_occurred as dateOccurred,
+  const sql = `SELECT id, title, description, incident_type as incidentType, severity, location, date_occurred as dateOccurred,
             reported_by as reportedBy, reporter_name as reporterName, status, follow_up_required as followUpRequired,
             related_case_id as relatedCaseId, created_at as createdAt, updated_at as updatedAt
      FROM incidents ${whereSql}
      ORDER BY date_occurred DESC
-     OFFSET @p${params.length - 1} ROWS FETCH NEXT @p${params.length} ROWS ONLY`,
-    params,
-  );
+     OFFSET @p${params.length - 1} ROWS FETCH NEXT @p${params.length} ROWS ONLY`;
+  try {
+    return await queryRows(sql, params);
+  } catch (err) {
+    console.error("[incidentModel] listIncidents SQL error", {
+      sql,
+      params,
+      err,
+    });
+    throw err;
+  }
 }
 
 export async function getIncident(id) {
-  return await queryRow(
-    `SELECT id, title, description, incident_type as incidentType, severity, location, date_occurred as dateOccurred,
+  const sql = `SELECT id, title, description, incident_type as incidentType, severity, location, date_occurred as dateOccurred,
             reported_by as reportedBy, reporter_name as reporterName, status, follow_up_required as followUpRequired,
             related_case_id as relatedCaseId, created_at as createdAt, updated_at as updatedAt
-     FROM incidents WHERE id = @p1`,
-    [id],
-  );
+     FROM incidents WHERE id = @p1`;
+  try {
+    return await queryRow(sql, [id]);
+  } catch (err) {
+    console.error("[incidentModel] getIncident SQL error", {
+      sql,
+      params: [id],
+      err,
+    });
+    throw err;
+  }
 }
 
 export async function createIncident(data) {
   const id =
     global.crypto?.randomUUID?.() || (await import("node:crypto")).randomUUID();
   const now = new Date();
-  await queryRows(
-    `INSERT INTO incidents (id, title, description, incident_type, severity, location, date_occurred, reported_by, reporter_name, status, follow_up_required, related_case_id, created_at, updated_at)
-     VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14)`,
-    [
-      id,
-      data.title,
-      data.description,
-      data.incidentType,
-      data.severity || "low",
-      data.location,
-      new Date(data.dateOccurred),
-      data.reportedBy,
-      data.reporterName,
-      data.status || "reported",
-      data.followUpRequired ? 1 : 0,
-      data.relatedCaseId || null,
-      now,
-      now,
-    ],
-  );
-  return await getIncident(id);
+  const sql = `INSERT INTO incidents (id, title, description, incident_type, severity, location, date_occurred, reported_by, reporter_name, status, follow_up_required, related_case_id, created_at, updated_at)
+     VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14)`;
+  const params = [
+    id,
+    data.title,
+    data.description,
+    data.incidentType,
+    data.severity || "low",
+    data.location,
+    new Date(data.dateOccurred),
+    data.reportedBy,
+    data.reporterName,
+    data.status || "reported",
+    data.followUpRequired ? 1 : 0,
+    data.relatedCaseId || null,
+    now,
+    now,
+  ];
+  try {
+    await queryRows(sql, params);
+    return await getIncident(id);
+  } catch (err) {
+    console.error("[incidentModel] createIncident SQL error", {
+      sql,
+      params,
+      err,
+    });
+    throw err;
+  }
 }
 
 export async function updateIncident(id, updates) {
@@ -108,14 +130,31 @@ export async function updateIncident(id, updates) {
   set.push(`updated_at = @p${params.length + 1}`);
   params.push(now);
   params.push(id);
-  await queryRows(
-    `UPDATE incidents SET ${set.join(", ")} WHERE id = @p${params.length}`,
-    params,
-  );
-  return await getIncident(id);
+  const sql = `UPDATE incidents SET ${set.join(", ")} WHERE id = @p${params.length}`;
+  try {
+    await queryRows(sql, params);
+    return await getIncident(id);
+  } catch (err) {
+    console.error("[incidentModel] updateIncident SQL error", {
+      sql,
+      params,
+      err,
+    });
+    throw err;
+  }
 }
 
 export async function deleteIncident(id) {
-  await queryRows(`DELETE FROM incidents WHERE id = @p1`, [id]);
-  return true;
+  const sql = `DELETE FROM incidents WHERE id = @p1`;
+  try {
+    await queryRows(sql, [id]);
+    return true;
+  } catch (err) {
+    console.error("[incidentModel] deleteIncident SQL error", {
+      sql,
+      params: [id],
+      err,
+    });
+    throw err;
+  }
 }

@@ -48,7 +48,12 @@ export async function loginHandler(req) {
     const body = await req.json();
     const username = body.username;
     const password = body.password;
-    const selectedRole = (body.role || body.selectedRole || body.requestedRole || "")
+    const selectedRole = (
+      body.role ||
+      body.selectedRole ||
+      body.requestedRole ||
+      ""
+    )
       .toString()
       .toLowerCase();
 
@@ -87,7 +92,7 @@ export async function loginHandler(req) {
     }
 
     if (!user) {
-            console.log("Login failure reason: user not found");
+      console.log("Login failure reason: user not found");
       await recordLoginAttempt({
         username,
         userId: null,
@@ -96,11 +101,14 @@ export async function loginHandler(req) {
         success: false,
         reason: "user_not_found",
       });
-      return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 },
+      );
     }
 
     if (!user.isActive) {
-            console.log("Login failure reason: account inactive");
+      console.log("Login failure reason: account inactive");
       await recordLoginAttempt({
         username,
         userId: user.id,
@@ -109,23 +117,31 @@ export async function loginHandler(req) {
         success: false,
         reason: "account_inactive",
       });
-      return NextResponse.json({ success: false, message: "Account inactive" }, { status: 403 });
+      return NextResponse.json(
+        { success: false, message: "Account inactive" },
+        { status: 403 },
+      );
     }
 
     if (selectedRole && selectedRole !== (user.role || "").toLowerCase()) {
-            console.log("Login failure reason: invalid role");
-      await recordLoginAttempt({
-        username,
-        userId: user.id,
-        ip,
-        country,
-        success: false,
-        reason: "invalid_role",
-      });
-      return NextResponse.json(
-        { success: false, message: "Invalid role selection. Check your role and try again." },
-        { status: 401 },
+      console.warn(
+        "Role mismatch on login; allowing login but noting mismatch",
+        {
+          selectedRole,
+          userRole: (user.role || "").toLowerCase(),
+        },
       );
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: true,
+          reason: "role_mismatch_allowed",
+        });
+      } catch {}
+      // Do not block login due to role mismatch; proceed to password validation
     }
 
     const pwd = user.password || "";
@@ -134,7 +150,7 @@ export async function loginHandler(req) {
       : password === pwd;
 
     if (!validPassword) {
-           console.log("Login failure reason: invalid password");
+      console.log("Login failure reason: invalid password");
       await recordLoginAttempt({
         username,
         userId: user.id,
@@ -145,7 +161,10 @@ export async function loginHandler(req) {
       });
 
       try {
-        const count = await countRecentFailedAttempts({ userId: user.id, minutes: 60 });
+        const count = await countRecentFailedAttempts({
+          userId: user.id,
+          minutes: 60,
+        });
         const threshold = 5;
         if (count >= threshold) {
           await updateUser(user.id, { isActive: false });
@@ -159,7 +178,10 @@ export async function loginHandler(req) {
           });
         }
       } catch {}
-      return NextResponse.json({ success: false, message: "1Invalid credentials" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 },
+      );
     }
 
     await recordLoginAttempt({
@@ -186,7 +208,14 @@ export async function loginHandler(req) {
     console.error("❌ Login error:", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, message: msg }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, message: msg, details },
+      { status },
+    );
   }
 }
 
@@ -212,7 +241,10 @@ export async function signupCitizenHandler(req) {
 
     if (!username || !password || !fullName) {
       return NextResponse.json(
-        { success: false, message: "username, password and fullName are required" },
+        {
+          success: false,
+          message: "username, password and fullName are required",
+        },
         { status: 400 },
       );
     }
@@ -308,7 +340,14 @@ export async function signupCitizenHandler(req) {
     console.error("❌ Signup error:", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, message: msg }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, message: msg, details },
+      { status },
+    );
   }
 }
 
@@ -317,7 +356,10 @@ export async function profileHandler(req) {
   try {
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
-      return NextResponse.json({ success: false, message: "No token provided" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "No token provided" },
+        { status: 401 },
+      );
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -325,7 +367,10 @@ export async function profileHandler(req) {
     const user = await findUserById(userId);
 
     if (!user) {
-      return NextResponse.json({ success: false, message: "Invalid token" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Invalid token" },
+        { status: 401 },
+      );
     }
 
     const { password: _p, ...userWithoutPassword } = user;
@@ -333,6 +378,13 @@ export async function profileHandler(req) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
-    return NextResponse.json({ success: false, message: msg }, { status });
+    const details =
+      process.env.NODE_ENV !== "production"
+        ? { stack: err instanceof Error ? err.stack : undefined }
+        : undefined;
+    return NextResponse.json(
+      { success: false, message: msg, details },
+      { status },
+    );
   }
 }
