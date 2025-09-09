@@ -62,7 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.debug("[auth] sending login request", body);
       const response = await api.post("/auth/login", body);
 
-      const contentType = (response.headers.get("Content-Type") || response.headers.get("content-type") || "").toLowerCase();
+      const contentType = (
+        response.headers.get("Content-Type") ||
+        response.headers.get("content-type") ||
+        ""
+      ).toLowerCase();
       const isJson = contentType.includes("application/json");
 
       if (!response.ok) {
@@ -90,7 +94,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // If empty object returned, capture raw text for debugging
           if (data && Object.keys(data).length === 0) {
             const raw = await response.clone().text();
-            console.warn("[auth] parsed JSON was empty — raw response:", raw.slice(0, 2000));
+            console.warn(
+              "[auth] parsed JSON was empty — raw response:",
+              raw.slice(0, 2000),
+            );
             try {
               data = JSON.parse(raw);
             } catch {}
