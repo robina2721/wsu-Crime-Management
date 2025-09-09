@@ -45,7 +45,9 @@ function getRequestCountry(req, ip) {
 // ─── Login Handler ──────────────────────────────────────────────
 export async function loginHandler(req) {
   try {
+    console.debug("[auth] loginHandler called", { url: req.url, headers: Object.fromEntries(req.headers.entries()) });
     const body = await req.json();
+    console.debug("[auth] login payload", { body });
     const username = body.username;
     const password = body.password;
     const selectedRole = (
