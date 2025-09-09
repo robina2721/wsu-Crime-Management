@@ -28,6 +28,7 @@ function allow(roles, user) {
 }
 
 export async function listIncidentsHandler(req) {
+  console.debug("[incidents] listIncidentsHandler called", { url: req.url, headers: Object.fromEntries(req.headers.entries()) });
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "100");
@@ -45,17 +46,20 @@ export async function listIncidentsHandler(req) {
         reportedBy = reportedByParam;
       }
     }
+    console.debug("[incidents] query params", { limit, offset, status, incidentType, severity, reportedBy });
     const rows = await listIncidents(limit, offset, {
       status,
       incidentType,
       severity,
       reportedBy,
     });
+    console.debug(`[incidents] fetched ${rows?.length ?? 0} rows`);
     return NextResponse.json({
       success: true,
       data: { incidents: rows, total: rows.length, limit, offset },
     });
   } catch (err) {
+    console.error("[incidents] listIncidentsHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
     return NextResponse.json({ success: false, error: msg }, { status });
@@ -79,9 +83,18 @@ export async function getIncidentHandler(_req, params) {
 }
 
 export async function createIncidentHandler(req) {
+  console.debug("[incidents] createIncidentHandler called", { url: req.url, headers: Object.fromEntries(req.headers.entries()) });
   try {
     const user = await getAuthUser(req);
-    const body = await req.json();
+    let body = {};
+    try {
+      body = await req.json();
+    } catch (pErr) {
+      console.warn("[incidents] failed to parse JSON body", pErr);
+      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    console.debug("[incidents] request body", body, { user: user ? { id: user.id, username: user.username, role: user.role } : null });
 
     const required = [
       "title",
@@ -112,6 +125,7 @@ export async function createIncidentHandler(req) {
           user,
         )
       ) {
+        console.warn("[incidents] user forbidden from creating incident", { user: { id: user.id, role: user.role } });
         return NextResponse.json(
           { success: false, error: "Forbidden" },
           { status: 403 },
@@ -135,15 +149,20 @@ export async function createIncidentHandler(req) {
       relatedCaseId: body.relatedCaseId || null,
     };
 
+    console.debug("[incidents] creating incident with payload", payload);
     const created = await createIncident(payload);
+    console.debug("[incidents] incident created", created);
     try {
       notifyIncidentUpdate({ type: "created", incident: created });
-    } catch {}
+    } catch (notifyErr) {
+      console.warn("[incidents] notifyIncidentUpdate failed", notifyErr);
+    }
     return NextResponse.json(
       { success: true, data: created, message: "Incident created" },
       { status: 201 },
     );
   } catch (err) {
+    console.error("[incidents] createIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
     return NextResponse.json({ success: false, error: msg }, { status });
@@ -151,6 +170,7 @@ export async function createIncidentHandler(req) {
 }
 
 export async function updateIncidentHandler(req, params) {
+  console.debug("[incidents] updateIncidentHandler called", { id: params?.id, headers: Object.fromEntries(req.headers.entries()) });
   try {
     const user = await getAuthUser(req);
     if (!user)
@@ -159,12 +179,20 @@ export async function updateIncidentHandler(req, params) {
         { status: 401 },
       );
     if (!allow(["detective_officer", "police_head", "super_admin"], user)) {
+      console.warn("[incidents] user not allowed to update incident", { user: { id: user.id, role: user.role } });
       return NextResponse.json(
         { success: false, error: "Forbidden" },
         { status: 403 },
       );
     }
-    const updates = await req.json();
+    let updates = {};
+    try {
+      updates = await req.json();
+    } catch (pErr) {
+      console.warn("[incidents] failed to parse JSON updates", pErr);
+      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+    }
+    console.debug("[incidents] updates payload", updates);
     const updated = await updateIncident(params.id, updates);
     if (!updated)
       return NextResponse.json(
@@ -173,13 +201,16 @@ export async function updateIncidentHandler(req, params) {
       );
     try {
       notifyIncidentUpdate({ type: "updated", incident: updated });
-    } catch {}
+    } catch (notifyErr) {
+      console.warn("[incidents] notifyIncidentUpdate failed", notifyErr);
+    }
     return NextResponse.json({
       success: true,
       data: updated,
       message: "Incident updated",
     });
   } catch (err) {
+    console.error("[incidents] updateIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
     return NextResponse.json({ success: false, error: msg }, { status });
@@ -187,6 +218,7 @@ export async function updateIncidentHandler(req, params) {
 }
 
 export async function deleteIncidentHandler(req, params) {
+  console.debug("[incidents] deleteIncidentHandler called", { id: params?.id, headers: Object.fromEntries(req.headers.entries()) });
   try {
     const user = await getAuthUser(req);
     if (!user)
@@ -195,17 +227,22 @@ export async function deleteIncidentHandler(req, params) {
         { status: 401 },
       );
     if (!allow(["police_head", "super_admin"], user)) {
+      console.warn("[incidents] user not allowed to delete incident", { user: { id: user.id, role: user.role } });
       return NextResponse.json(
         { success: false, error: "Forbidden" },
         { status: 403 },
       );
     }
+    console.debug("[incidents] deleting incident", { id: params.id });
     await deleteIncident(params.id);
     try {
       notifyIncidentUpdate({ type: "deleted", id: params.id });
-    } catch {}
+    } catch (notifyErr) {
+      console.warn("[incidents] notifyIncidentUpdate failed", notifyErr);
+    }
     return NextResponse.json({ success: true, message: "Incident deleted" });
   } catch (err) {
+    console.error("[incidents] deleteIncidentHandler error", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("SQL Server not configured") ? 503 : 500;
     return NextResponse.json({ success: false, error: msg }, { status });
