@@ -82,7 +82,7 @@ export default function Signup() {
         payload.photo = dataUrl;
         payload.details = { ...employeeDetails };
       }
-      const res = await api.post("auth/signup", payload);
+      const res = await api.post("/auth/signup", payload);
       const contentType = res.headers.get("content-type") || "";
           if (!contentType.includes("application/json")) {
             const text = await res.text();
