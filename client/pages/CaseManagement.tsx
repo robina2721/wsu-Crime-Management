@@ -57,6 +57,40 @@ export default function CaseManagement() {
     filterCases();
   }, [cases, searchTerm, statusFilter, priorityFilter, categoryFilter]);
 
+  // Subscribe to real-time crime updates
+  React.useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    if (!token) return;
+    const es = new EventSource(`/api/realtime/crimes?token=${encodeURIComponent(token)}`);
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload?.type === "crime_update" && payload.data) {
+          const r = payload.data;
+          setCases((prev) => {
+            const idx = prev.findIndex((x) => x.id === r.id);
+            const normalized = { ...r } as any;
+            if (idx >= 0) {
+              const copy = [...prev];
+              copy[idx] = { ...copy[idx], ...normalized } as any;
+              return copy;
+            }
+            return [normalized, ...prev];
+          });
+        }
+        if (payload?.type === "status_update" && payload.data) {
+          const { crimeId, update } = payload.data;
+          setCases((prev) => prev.map((c) => (c.id === crimeId ? { ...c, status: update.status, updatedAt: update.createdAt } : c)));
+        }
+        if (payload?.type === "crime_message" && payload.data) {
+          // leave placeholder for message handling
+        }
+      } catch {}
+    };
+    es.onerror = () => {};
+    return () => es.close();
+  }, []);
+
   const fetchCases = async () => {
     try {
       const response = await api.get('/crimes');
