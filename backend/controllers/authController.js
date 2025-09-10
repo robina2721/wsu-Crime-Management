@@ -12,7 +12,6 @@ import {
   countRecentFailedAttempts,
   clearFailedAttemptsForUser,
 } from "../../backend/models/securityModel.js";
-import geoip from "geoip-lite";
 
 // ─── IP + Country Helpers ───────────────────────────────────────
 function getRequestIp(req) {
@@ -24,7 +23,7 @@ function getRequestIp(req) {
   return fwd ? fwd.split(",")[0].trim() : null;
 }
 
-function getRequestCountry(req, ip) {
+async function getRequestCountry(req, ip) {
   const headerCountry =
     req.headers.get("cf-ipcountry") ||
     req.headers.get("x-vercel-ip-country") ||
@@ -35,8 +34,17 @@ function getRequestCountry(req, ip) {
 
   try {
     const lookupIp = ip || getRequestIp(req);
-    const info = geoip.lookup(lookupIp);
-    return info?.country || null;
+    // Dynamically import geoip-lite to avoid startup errors when its data files are missing
+    try {
+      const geoipMod = await import("geoip-lite");
+      const geoip = geoipMod.default || geoipMod;
+      if (!geoip || typeof geoip.lookup !== "function") return null;
+      const info = geoip.lookup(lookupIp);
+      return info?.country || null;
+    } catch (e) {
+      console.warn("[auth] geoip lookup unavailable or failed:", e && e.message ? e.message : String(e));
+      return null;
+    }
   } catch {
     return null;
   }
