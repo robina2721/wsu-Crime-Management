@@ -106,14 +106,18 @@ export async function loginHandler(req) {
 
     if (!user) {
       console.log("Login failure reason: user not found");
-      await recordLoginAttempt({
-        username,
-        userId: null,
-        ip,
-        country,
-        success: false,
-        reason: "user_not_found",
-      });
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: null,
+          ip,
+          country,
+          success: false,
+          reason: "user_not_found",
+        });
+      } catch (e) {
+        console.warn("[auth] recordLoginAttempt failed (user_not_found)", e && e.message ? e.message : String(e));
+      }
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
@@ -122,14 +126,18 @@ export async function loginHandler(req) {
 
     if (!user.isActive) {
       console.log("Login failure reason: account inactive");
-      await recordLoginAttempt({
-        username,
-        userId: user.id,
-        ip,
-        country,
-        success: false,
-        reason: "account_inactive",
-      });
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: false,
+          reason: "account_inactive",
+        });
+      } catch (e) {
+        console.warn("[auth] recordLoginAttempt failed (account_inactive)", e && e.message ? e.message : String(e));
+      }
       return NextResponse.json(
         { success: false, message: "Account inactive" },
         { status: 403 },
@@ -164,14 +172,18 @@ export async function loginHandler(req) {
 
     if (!validPassword) {
       console.log("Login failure reason: invalid password");
-      await recordLoginAttempt({
-        username,
-        userId: user.id,
-        ip,
-        country,
-        success: false,
-        reason: "invalid_password",
-      });
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: false,
+          reason: "invalid_password",
+        });
+      } catch (e) {
+        console.warn("[auth] recordLoginAttempt failed (invalid_password)", e && e.message ? e.message : String(e));
+      }
 
       try {
         const count = await countRecentFailedAttempts({
@@ -181,32 +193,46 @@ export async function loginHandler(req) {
         const threshold = 5;
         if (count >= threshold) {
           await updateUser(user.id, { isActive: false });
-          await recordLoginAttempt({
-            username,
-            userId: user.id,
-            ip,
-            country,
-            success: false,
-            reason: "account_locked",
-          });
+          try {
+            await recordLoginAttempt({
+              username,
+              userId: user.id,
+              ip,
+              country,
+              success: false,
+              reason: "account_locked",
+            });
+          } catch (e) {
+            console.warn("[auth] recordLoginAttempt failed (account_locked)", e && e.message ? e.message : String(e));
+          }
         }
-      } catch {}
+      } catch (e) {
+        console.warn("[auth] countRecentFailedAttempts/updateUser failed", e && e.message ? e.message : String(e));
+      }
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
       );
     }
 
-    await recordLoginAttempt({
-      username,
-      userId: user.id,
-      ip,
-      country,
-      success: true,
-      reason: "login_success",
-    });
+    try {
+      await recordLoginAttempt({
+        username,
+        userId: user.id,
+        ip,
+        country,
+        success: true,
+        reason: "login_success",
+      });
+    } catch (e) {
+      console.warn("[auth] recordLoginAttempt failed (login_success)", e && e.message ? e.message : String(e));
+    }
 
-    await clearFailedAttemptsForUser(user.id);
+    try {
+      await clearFailedAttemptsForUser(user.id);
+    } catch (e) {
+      console.warn("[auth] clearFailedAttemptsForUser failed", e && e.message ? e.message : String(e));
+    }
 
     const token = `token_${user.id}_${Date.now()}`;
     const { password: _p, ...userWithoutPassword } = user;
