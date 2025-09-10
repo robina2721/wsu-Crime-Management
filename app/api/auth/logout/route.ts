@@ -6,7 +6,9 @@ export const dynamic = "force-dynamic";
 export async function POST(req) {
   try {
     // Attempt to use controller's logout handler if available
-    const mod = await import("../../../../backend/controllers/authController.js");
+    const mod = await import(
+      "../../../../backend/controllers/authController.js"
+    );
     if (typeof mod.logoutHandler === "function") {
       return await mod.logoutHandler(req);
     }
