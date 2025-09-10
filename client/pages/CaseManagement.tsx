@@ -74,7 +74,9 @@ export default function CaseManagement() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [officers, setOfficers] = useState<any[]>([]);
   const [selectedOfficer, setSelectedOfficer] = useState<string>("");
-  const [recipientTarget, setRecipientTarget] = useState<"citizen" | "officer">("citizen");
+  const [recipientTarget, setRecipientTarget] = useState<"citizen" | "officer">(
+    "citizen",
+  );
 
   const canManageAllCases = hasAnyRole([
     UserRole.SUPER_ADMIN,
@@ -540,9 +542,7 @@ export default function CaseManagement() {
                               <TabsTrigger value="evidence">
                                 Evidence
                               </TabsTrigger>
-                              <TabsTrigger value="contact">
-                                Contact
-                              </TabsTrigger>
+                              <TabsTrigger value="contact">Contact</TabsTrigger>
                             </TabsList>
                             <TabsContent value="details">
                               <div className="space-y-2">
@@ -612,21 +612,42 @@ export default function CaseManagement() {
                                 )}
                               </div>
                               <div className="mt-4">
-                                <h4 className="font-semibold mb-2">Witnesses</h4>
+                                <h4 className="font-semibold mb-2">
+                                  Witnesses
+                                </h4>
                                 {(activeCase?.witnesses || []).length === 0 ? (
-                                  <p className="text-sm text-gray-500">No witnesses recorded</p>
+                                  <p className="text-sm text-gray-500">
+                                    No witnesses recorded
+                                  </p>
                                 ) : (
                                   <div className="space-y-2">
-                                    {(activeCase?.witnesses || []).map((w: any, idx: number) => (
-                                      <div key={w.id || idx} className="p-2 border rounded">
-                                        <div className="font-medium">{w.name || "Unknown"}</div>
-                                        {w.phone && <div className="text-sm text-gray-600">{w.phone}</div>}
-                                        {w.email && <div className="text-sm text-gray-600">{w.email}</div>}
-                                        {w.statement && (
-                                          <div className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{w.statement}</div>
-                                        )}
-                                      </div>
-                                    ))}
+                                    {(activeCase?.witnesses || []).map(
+                                      (w: any, idx: number) => (
+                                        <div
+                                          key={w.id || idx}
+                                          className="p-2 border rounded"
+                                        >
+                                          <div className="font-medium">
+                                            {w.name || "Unknown"}
+                                          </div>
+                                          {w.phone && (
+                                            <div className="text-sm text-gray-600">
+                                              {w.phone}
+                                            </div>
+                                          )}
+                                          {w.email && (
+                                            <div className="text-sm text-gray-600">
+                                              {w.email}
+                                            </div>
+                                          )}
+                                          {w.statement && (
+                                            <div className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
+                                              {w.statement}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ),
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -690,7 +711,9 @@ export default function CaseManagement() {
                                       <Label>Message</Label>
                                       <Textarea
                                         value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onChange={(e) =>
+                                          setNewMessage(e.target.value)
+                                        }
                                         placeholder="Write your message..."
                                       />
                                     </div>
@@ -698,15 +721,21 @@ export default function CaseManagement() {
                                       <Label>Recipient</Label>
                                       <Select
                                         value={recipientTarget}
-                                        onValueChange={(v) => setRecipientTarget(v as any)}
+                                        onValueChange={(v) =>
+                                          setRecipientTarget(v as any)
+                                        }
                                       >
                                         <SelectTrigger>
                                           <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          <SelectItem value="citizen">Citizen</SelectItem>
+                                          <SelectItem value="citizen">
+                                            Citizen
+                                          </SelectItem>
                                           {activeCase?.assignedTo && (
-                                            <SelectItem value="officer">Assigned Officer</SelectItem>
+                                            <SelectItem value="officer">
+                                              Assigned Officer
+                                            </SelectItem>
                                           )}
                                         </SelectContent>
                                       </Select>
@@ -727,20 +756,42 @@ export default function CaseManagement() {
                                       onClick={async () => {
                                         try {
                                           if (!activeCase) return;
-                                          if (!newMessage && messageFiles.length === 0) return;
-                                          const isOfficer = recipientTarget === "officer" && !!activeCase.assignedTo;
+                                          if (
+                                            !newMessage &&
+                                            messageFiles.length === 0
+                                          )
+                                            return;
+                                          const isOfficer =
+                                            recipientTarget === "officer" &&
+                                            !!activeCase.assignedTo;
                                           const form = new FormData();
-                                          if (newMessage) form.append("message", newMessage);
-                                          if (isOfficer && activeCase.assignedTo) form.append("recipientId", activeCase.assignedTo);
-                                          messageFiles.forEach((f) => form.append("files", f));
+                                          if (newMessage)
+                                            form.append("message", newMessage);
+                                          if (
+                                            isOfficer &&
+                                            activeCase.assignedTo
+                                          )
+                                            form.append(
+                                              "recipientId",
+                                              activeCase.assignedTo,
+                                            );
+                                          messageFiles.forEach((f) =>
+                                            form.append("files", f),
+                                          );
                                           const endpoint = isOfficer
                                             ? `/crimes/${activeCase.id}/contact`
                                             : `/crimes/${activeCase.id}/messages`;
-                                          const res = await api.post(endpoint, form);
+                                          const res = await api.post(
+                                            endpoint,
+                                            form,
+                                          );
                                           if (res.ok) {
                                             const d = await res.json();
                                             if (d.success) {
-                                              setMessages((prev) => [d.data, ...prev]);
+                                              setMessages((prev) => [
+                                                d.data,
+                                                ...prev,
+                                              ]);
                                               setNewMessage("");
                                               setMessageFiles([]);
                                             }
@@ -767,7 +818,9 @@ export default function CaseManagement() {
                             size="sm"
                             onClick={async () => {
                               try {
-                                const res = await api.get(`/crimes/${case_.id}`);
+                                const res = await api.get(
+                                  `/crimes/${case_.id}`,
+                                );
                                 if (res.ok) {
                                   const d = await res.json();
                                   if (d.success) {
