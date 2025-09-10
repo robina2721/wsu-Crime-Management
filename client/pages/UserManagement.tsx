@@ -362,8 +362,8 @@ export default function UserManagement() {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">User Directory</TabsTrigger>
-            <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
-            <TabsTrigger value="roles">Role Management</TabsTrigger>
+            <TabsTrigger value="pending">Pending Accounts</TabsTrigger>
+            <TabsTrigger value="roles">System Roles</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-6">
