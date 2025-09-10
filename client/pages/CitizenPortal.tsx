@@ -115,6 +115,12 @@ export default function CitizenPortal() {
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
   const [submissionStatus, setSubmissionStatus] = useState<null | { type: 'success' | 'error', message: string }>(null);
 
+  const steps = React.useMemo(() => (reportType === "crime" ? ["incident", "evidence", "review"] : ["incident", "review"]), [reportType]);
+  const stepIndex = steps.indexOf(currentTab);
+  const stepProgress = Math.round(((stepIndex + 1) / steps.length) * 100);
+  const goNext = () => setCurrentTab(steps[Math.min(stepIndex + 1, steps.length - 1)]);
+  const goPrev = () => setCurrentTab(steps[Math.max(stepIndex - 1, 0)]);
+
   // Restore draft from localStorage
   useEffect(() => {
     try {
@@ -667,6 +673,10 @@ export default function CitizenPortal() {
                     </div>
                   </div>
 
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Step {stepIndex + 1} of {steps.length}</span>
+                  </div>
+                  <Progress value={stepProgress} className="mb-4" />
                   <Tabs
                     value={currentTab}
                     onValueChange={setCurrentTab}
@@ -1191,22 +1201,34 @@ export default function CitizenPortal() {
                     </TabsContent>
                   </Tabs>
 
-                  <div className="flex justify-end gap-4 mt-6 pt-6 border-t">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        // Keep draft saved; close dialog without clearing draft so user can continue later
-                        setShowNewReportForm(false);
-                      }}
-                    >
-                      {t("general.cancel")}
-                    </Button>
-                    {currentTab === "review" && (
-                      <Button type="submit" className="bg-red-600 hover:bg-red-700">
-                        {t("general.submitReport")}
+                  <div className="flex justify-between gap-4 mt-6 pt-6 border-t">
+                    <div>
+                      {stepIndex > 0 && (
+                        <Button type="button" variant="outline" onClick={goPrev}>
+                          Previous
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowNewReportForm(false);
+                        }}
+                      >
+                        {t("general.cancel")}
                       </Button>
-                    )}
+                      {currentTab !== "review" ? (
+                        <Button type="button" className="bg-red-600 hover:bg-red-700" onClick={goNext}>
+                          Next
+                        </Button>
+                      ) : (
+                        <Button type="submit" className="bg-red-600 hover:bg-red-700">
+                          {t("general.submitReport")}
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* submission feedback */}
