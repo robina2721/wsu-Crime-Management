@@ -42,7 +42,10 @@ async function getRequestCountry(req, ip) {
       const info = geoip.lookup(lookupIp);
       return info?.country || null;
     } catch (e) {
-      console.warn("[auth] geoip lookup unavailable or failed:", e && e.message ? e.message : String(e));
+      console.warn(
+        "[auth] geoip lookup unavailable or failed:",
+        e && e.message ? e.message : String(e),
+      );
       return null;
     }
   } catch {
@@ -116,7 +119,10 @@ export async function loginHandler(req) {
           reason: "user_not_found",
         });
       } catch (e) {
-        console.warn("[auth] recordLoginAttempt failed (user_not_found)", e && e.message ? e.message : String(e));
+        console.warn(
+          "[auth] recordLoginAttempt failed (user_not_found)",
+          e && e.message ? e.message : String(e),
+        );
       }
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
@@ -136,7 +142,10 @@ export async function loginHandler(req) {
           reason: "account_inactive",
         });
       } catch (e) {
-        console.warn("[auth] recordLoginAttempt failed (account_inactive)", e && e.message ? e.message : String(e));
+        console.warn(
+          "[auth] recordLoginAttempt failed (account_inactive)",
+          e && e.message ? e.message : String(e),
+        );
       }
       return NextResponse.json(
         { success: false, message: "Account inactive" },
@@ -182,7 +191,10 @@ export async function loginHandler(req) {
           reason: "invalid_password",
         });
       } catch (e) {
-        console.warn("[auth] recordLoginAttempt failed (invalid_password)", e && e.message ? e.message : String(e));
+        console.warn(
+          "[auth] recordLoginAttempt failed (invalid_password)",
+          e && e.message ? e.message : String(e),
+        );
       }
 
       try {
@@ -203,11 +215,17 @@ export async function loginHandler(req) {
               reason: "account_locked",
             });
           } catch (e) {
-            console.warn("[auth] recordLoginAttempt failed (account_locked)", e && e.message ? e.message : String(e));
+            console.warn(
+              "[auth] recordLoginAttempt failed (account_locked)",
+              e && e.message ? e.message : String(e),
+            );
           }
         }
       } catch (e) {
-        console.warn("[auth] countRecentFailedAttempts/updateUser failed", e && e.message ? e.message : String(e));
+        console.warn(
+          "[auth] countRecentFailedAttempts/updateUser failed",
+          e && e.message ? e.message : String(e),
+        );
       }
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
@@ -225,13 +243,19 @@ export async function loginHandler(req) {
         reason: "login_success",
       });
     } catch (e) {
-      console.warn("[auth] recordLoginAttempt failed (login_success)", e && e.message ? e.message : String(e));
+      console.warn(
+        "[auth] recordLoginAttempt failed (login_success)",
+        e && e.message ? e.message : String(e),
+      );
     }
 
     try {
       await clearFailedAttemptsForUser(user.id);
     } catch (e) {
-      console.warn("[auth] clearFailedAttemptsForUser failed", e && e.message ? e.message : String(e));
+      console.warn(
+        "[auth] clearFailedAttemptsForUser failed",
+        e && e.message ? e.message : String(e),
+      );
     }
 
     const token = `token_${user.id}_${Date.now()}`;

@@ -3,7 +3,8 @@ import sql from "mssql";
 let pool = null;
 
 function getConfig() {
-  const cs = process.env.DATABASE_URL || process.env.SQLSERVER_CONNECTION_STRING;
+  const cs =
+    process.env.DATABASE_URL || process.env.SQLSERVER_CONNECTION_STRING;
   if (cs) return cs; // return raw connection string
   const server = process.env.SQLSERVER_SERVER;
   const user = process.env.SQLSERVER_USER;
@@ -22,7 +23,10 @@ function getConfig() {
 export async function getPool() {
   if (pool) return pool;
   const cfg = getConfig();
-  if (!cfg) throw new Error("SQL Server not configured. Set SQLSERVER_* or DATABASE_URL");
+  if (!cfg)
+    throw new Error(
+      "SQL Server not configured. Set SQLSERVER_* or DATABASE_URL",
+    );
   if (typeof cfg === "string") {
     // mssql accepts a connection string directly
     pool = await new sql.ConnectionPool(cfg).connect();
