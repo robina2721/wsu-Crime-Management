@@ -4,7 +4,7 @@ let pool = null;
 
 function getConfig() {
   const cs = process.env.DATABASE_URL || process.env.SQLSERVER_CONNECTION_STRING;
-  if (cs) return { connectionString: cs, options: { encrypt: true, trustServerCertificate: true } };
+  if (cs) return cs; // return raw connection string
   const server = process.env.SQLSERVER_SERVER;
   const user = process.env.SQLSERVER_USER;
   const password = process.env.SQLSERVER_PASSWORD;
@@ -23,7 +23,12 @@ export async function getPool() {
   if (pool) return pool;
   const cfg = getConfig();
   if (!cfg) throw new Error("SQL Server not configured. Set SQLSERVER_* or DATABASE_URL");
-  pool = await new sql.ConnectionPool(cfg).connect();
+  if (typeof cfg === "string") {
+    // mssql accepts a connection string directly
+    pool = await new sql.ConnectionPool(cfg).connect();
+  } else {
+    pool = await new sql.ConnectionPool(cfg).connect();
+  }
   return pool;
 }
 
