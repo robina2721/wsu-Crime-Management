@@ -19,7 +19,6 @@ export default function RootLayout({
         <link href="/wspolice.jpeg" rel="icon" />
       </head>
       <body className="bg-background text-foreground min-h-screen">
-        <Header />
         <main className="w-full">{children}</main>
       </body>
     </html>
