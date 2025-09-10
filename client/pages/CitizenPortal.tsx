@@ -67,6 +67,7 @@ import {
   IncidentStatus,
 } from "../../shared/types";
 import { api } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 export default function CitizenPortal() {
   const { user } = useAuth();
@@ -499,8 +500,8 @@ export default function CitizenPortal() {
           setWitnesses([]);
           setEvidenceFiles([]);
           localStorage.removeItem('crime_report_draft');
-          setSubmissionStatus({ type: 'success', message: 'Report submitted successfully' });
-          // auto-close after short delay
+          setSubmissionStatus({ type: 'success', message: 'Your Report Is Successfully Submmited Stay in Touch For Update' });
+          toast({ title: 'Success', description: 'Your Report Is Successfully Submmited Stay in Touch For Update' });
           setTimeout(() => { setShowNewReportForm(false); setSubmissionStatus(null); }, 1200);
         } else {
           setSubmissionStatus({ type: 'error', message: 'Failed to submit report' });
@@ -537,7 +538,8 @@ export default function CitizenPortal() {
         setWitnesses([]);
         setEvidenceFiles([]);
         localStorage.removeItem('crime_report_draft');
-        setSubmissionStatus({ type: 'success', message: 'Incident submitted successfully' });
+        setSubmissionStatus({ type: 'success', message: 'Your Report Is Successfully Submmited Stay in Touch For Update' });
+        toast({ title: 'Success', description: 'Your Report Is Successfully Submmited Stay in Touch For Update' });
         setTimeout(() => { setShowNewReportForm(false); setReportType("incident"); setSubmissionStatus(null); }, 1200);
       } catch (e) {
         console.error("Failed to create incident", e);
