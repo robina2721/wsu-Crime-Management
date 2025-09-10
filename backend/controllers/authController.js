@@ -12,7 +12,6 @@ import {
   countRecentFailedAttempts,
   clearFailedAttemptsForUser,
 } from "../../backend/models/securityModel.js";
-import geoip from "geoip-lite";
 
 // ─── IP + Country Helpers ───────────────────────────────────────
 function getRequestIp(req) {
@@ -24,7 +23,7 @@ function getRequestIp(req) {
   return fwd ? fwd.split(",")[0].trim() : null;
 }
 
-function getRequestCountry(req, ip) {
+async function getRequestCountry(req, ip) {
   const headerCountry =
     req.headers.get("cf-ipcountry") ||
     req.headers.get("x-vercel-ip-country") ||
@@ -35,8 +34,20 @@ function getRequestCountry(req, ip) {
 
   try {
     const lookupIp = ip || getRequestIp(req);
-    const info = geoip.lookup(lookupIp);
-    return info?.country || null;
+    // Dynamically import geoip-lite to avoid startup errors when its data files are missing
+    try {
+      const geoipMod = await import("geoip-lite");
+      const geoip = geoipMod.default || geoipMod;
+      if (!geoip || typeof geoip.lookup !== "function") return null;
+      const info = geoip.lookup(lookupIp);
+      return info?.country || null;
+    } catch (e) {
+      console.warn(
+        "[auth] geoip lookup unavailable or failed:",
+        e && e.message ? e.message : String(e),
+      );
+      return null;
+    }
   } catch {
     return null;
   }
@@ -71,7 +82,7 @@ export async function loginHandler(req) {
 
     let user = null;
     const ip = getRequestIp(req);
-    const country = getRequestCountry(req, ip);
+    const country = await getRequestCountry(req, ip);
 
     try {
       user = await findUserByUsername(username);
@@ -98,14 +109,21 @@ export async function loginHandler(req) {
 
     if (!user) {
       console.log("Login failure reason: user not found");
-      await recordLoginAttempt({
-        username,
-        userId: null,
-        ip,
-        country,
-        success: false,
-        reason: "user_not_found",
-      });
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: null,
+          ip,
+          country,
+          success: false,
+          reason: "user_not_found",
+        });
+      } catch (e) {
+        console.warn(
+          "[auth] recordLoginAttempt failed (user_not_found)",
+          e && e.message ? e.message : String(e),
+        );
+      }
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
@@ -114,14 +132,21 @@ export async function loginHandler(req) {
 
     if (!user.isActive) {
       console.log("Login failure reason: account inactive");
-      await recordLoginAttempt({
-        username,
-        userId: user.id,
-        ip,
-        country,
-        success: false,
-        reason: "account_inactive",
-      });
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: false,
+          reason: "account_inactive",
+        });
+      } catch (e) {
+        console.warn(
+          "[auth] recordLoginAttempt failed (account_inactive)",
+          e && e.message ? e.message : String(e),
+        );
+      }
       return NextResponse.json(
         { success: false, message: "Account inactive" },
         { status: 403 },
@@ -156,14 +181,21 @@ export async function loginHandler(req) {
 
     if (!validPassword) {
       console.log("Login failure reason: invalid password");
-      await recordLoginAttempt({
-        username,
-        userId: user.id,
-        ip,
-        country,
-        success: false,
-        reason: "invalid_password",
-      });
+      try {
+        await recordLoginAttempt({
+          username,
+          userId: user.id,
+          ip,
+          country,
+          success: false,
+          reason: "invalid_password",
+        });
+      } catch (e) {
+        console.warn(
+          "[auth] recordLoginAttempt failed (invalid_password)",
+          e && e.message ? e.message : String(e),
+        );
+      }
 
       try {
         const count = await countRecentFailedAttempts({
@@ -173,32 +205,58 @@ export async function loginHandler(req) {
         const threshold = 5;
         if (count >= threshold) {
           await updateUser(user.id, { isActive: false });
-          await recordLoginAttempt({
-            username,
-            userId: user.id,
-            ip,
-            country,
-            success: false,
-            reason: "account_locked",
-          });
+          try {
+            await recordLoginAttempt({
+              username,
+              userId: user.id,
+              ip,
+              country,
+              success: false,
+              reason: "account_locked",
+            });
+          } catch (e) {
+            console.warn(
+              "[auth] recordLoginAttempt failed (account_locked)",
+              e && e.message ? e.message : String(e),
+            );
+          }
         }
-      } catch {}
+      } catch (e) {
+        console.warn(
+          "[auth] countRecentFailedAttempts/updateUser failed",
+          e && e.message ? e.message : String(e),
+        );
+      }
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 },
       );
     }
 
-    await recordLoginAttempt({
-      username,
-      userId: user.id,
-      ip,
-      country,
-      success: true,
-      reason: "login_success",
-    });
+    try {
+      await recordLoginAttempt({
+        username,
+        userId: user.id,
+        ip,
+        country,
+        success: true,
+        reason: "login_success",
+      });
+    } catch (e) {
+      console.warn(
+        "[auth] recordLoginAttempt failed (login_success)",
+        e && e.message ? e.message : String(e),
+      );
+    }
 
-    await clearFailedAttemptsForUser(user.id);
+    try {
+      await clearFailedAttemptsForUser(user.id);
+    } catch (e) {
+      console.warn(
+        "[auth] clearFailedAttemptsForUser failed",
+        e && e.message ? e.message : String(e),
+      );
+    }
 
     const token = `token_${user.id}_${Date.now()}`;
     const { password: _p, ...userWithoutPassword } = user;
