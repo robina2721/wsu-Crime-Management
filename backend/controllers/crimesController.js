@@ -200,6 +200,87 @@ export async function createMessageHandler(req, params) {
   }
 }
 
+// Status summary for a crime
+export async function getStatusHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const report = await getCrime(params.id);
+    if (!report) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+
+    const updates = await getStatusUpdatesByCrime(report.id).catch(() => []);
+    const last = updates[0] || null;
+    const data = {
+      reportId: report.id,
+      currentStatus: report.status,
+      lastUpdate: last ? last.createdAt : report.updatedAt,
+      estimatedResolution: null,
+      statusHistory: updates.map((u) => ({
+        status: u.status,
+        timestamp: u.createdAt,
+        updatedBy: u.updatedBy,
+        notes: u.notes ?? null,
+        isVisibleToCitizen: !!u.isVisibleToCitizen,
+      })),
+    };
+    return NextResponse.json({ success: true, data });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+// Create a status update (also updates crime.status)
+export async function postStatusHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const body = await req.json().catch(() => ({}));
+    const { status: newStatus, notes, isVisibleToCitizen = true } = body || {};
+    if (!newStatus) return NextResponse.json({ success: false, error: "Missing: status" }, { status: 400 });
+
+    const current = await getCrime(params.id);
+    if (!current) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+
+    const isSupervisor = new Set(["detective_officer","police_head","super_admin"]).has(user.role);
+    if (user.role === 'preventive_officer' && current.assignedTo !== user.id && !isSupervisor) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    }
+
+    const updated = await updateCrime(params.id, { status: newStatus });
+    const upd = await addStatusUpdate(params.id, { status: newStatus, notes, updatedBy: user.id, isVisibleToCitizen }).catch(() => null);
+    if (upd) notifyStatusUpdate(params.id, upd, { reportedBy: updated.reportedBy, assignedTo: updated.assignedTo });
+    notifyCrimeUpdate(updated);
+    return NextResponse.json({ success: true, data: { update: upd, report: updated } }, { status: 201 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes("SQL Server not configured") ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
+// Add witnesses to a crime and notify
+export async function addWitnessesHandler(req, params) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const report = await getCrime(params.id);
+    if (!report) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+    const body = await req.json().catch(() => ({}));
+    const witnesses = Array.isArray(body?.witnesses) ? body.witnesses : [];
+    if (!witnesses.length) return NextResponse.json({ success: false, error: 'No witnesses provided' }, { status: 400 });
+    await createWitnessesForCrime(report.id, witnesses);
+    const all = await getWitnessesByCrime(report.id).catch(() => []);
+    try { notifyCrimeUpdate({ ...report, witnesses: all, assignedTo: report.assignedTo, reportedBy: report.reportedBy }); } catch {}
+    return NextResponse.json({ success: true, data: { witnesses: all } }, { status: 201 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const status = msg.includes('SQL Server not configured') ? 503 : 500;
+    return NextResponse.json({ success: false, error: msg }, { status });
+  }
+}
+
 // Upload evidence files
 export async function uploadEvidenceHandler(req, params) {
   try {
