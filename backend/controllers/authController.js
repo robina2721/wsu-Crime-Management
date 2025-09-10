@@ -79,7 +79,7 @@ export async function loginHandler(req) {
 
     let user = null;
     const ip = getRequestIp(req);
-    const country = getRequestCountry(req, ip);
+    const country = await getRequestCountry(req, ip);
 
     try {
       user = await findUserByUsername(username);
