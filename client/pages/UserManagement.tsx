@@ -111,6 +111,10 @@ export default function UserManagement() {
     UserRole.POLICE_HEAD,
   ]);
 
+  const [activeTab, setActiveTab] = useState<"users" | "pending" | "roles">(
+    "users",
+  );
+
   useEffect(() => {
     fetchUsers();
     fetchPendingAccounts();
@@ -292,7 +296,10 @@ export default function UserManagement() {
       <div className="max-w-7xl mx-auto p-6">
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-6 mb-8">
-          <Card>
+          <Card
+            onClick={() => setActiveTab("users")}
+            className="cursor-pointer"
+          >
             <CardContent className="p-6 text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
               <h3 className="text-2xl font-bold text-crime-black">
@@ -319,7 +326,10 @@ export default function UserManagement() {
               <p className="text-gray-600">Inactive</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card
+            onClick={() => setActiveTab("roles")}
+            className="cursor-pointer"
+          >
             <CardContent className="p-6 text-center">
               <Settings className="w-8 h-8 mx-auto mb-2 text-crime-red" />
               <h3 className="text-2xl font-bold text-crime-black">
@@ -346,7 +356,10 @@ export default function UserManagement() {
               <p className="text-gray-600">Citizens</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card
+            onClick={() => setActiveTab("pending")}
+            className="cursor-pointer"
+          >
             <CardContent className="p-6 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-crime-yellow" />
               <h3 className="text-2xl font-bold text-crime-black">
@@ -357,11 +370,15 @@ export default function UserManagement() {
           </Card>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as any)}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">User Directory</TabsTrigger>
-            <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
-            <TabsTrigger value="roles">Role Management</TabsTrigger>
+            <TabsTrigger value="pending">Pending Accounts</TabsTrigger>
+            <TabsTrigger value="roles">System Roles</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-6">
@@ -730,11 +747,25 @@ export default function UserManagement() {
                               </span>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm" onClick={() => { setEditUser(user_); setIsEditDialogOpen(true); }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditUser(user_);
+                                  setIsEditDialogOpen(true);
+                                }}
+                              >
                                 <Edit className="w-4 h-4 mr-1" />
                                 Edit
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => { setResetUser(user_); setIsResetDialogOpen(true); }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setResetUser(user_);
+                                  setIsResetDialogOpen(true);
+                                }}
+                              >
                                 <Key className="w-4 h-4 mr-1" />
                                 Reset Password
                               </Button>
@@ -762,7 +793,13 @@ export default function UserManagement() {
 
             {/* Edit User Dialog */}
             {editUser && (
-              <Dialog open={isEditDialogOpen} onOpenChange={(v) => { if(!v) setEditUser(null); setIsEditDialogOpen(v); }}>
+              <Dialog
+                open={isEditDialogOpen}
+                onOpenChange={(v) => {
+                  if (!v) setEditUser(null);
+                  setIsEditDialogOpen(v);
+                }}
+              >
                 <DialogContent className="max-w-lg">
                   <DialogHeader>
                     <DialogTitle>Edit User</DialogTitle>
@@ -771,56 +808,133 @@ export default function UserManagement() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Full Name</Label>
-                      <Input value={editUser.fullName} onChange={(e) => setEditUser({ ...editUser, fullName: e.target.value })} />
+                      <Input
+                        value={editUser.fullName}
+                        onChange={(e) =>
+                          setEditUser({ ...editUser, fullName: e.target.value })
+                        }
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Username</Label>
-                        <Input value={editUser.username} onChange={(e) => setEditUser({ ...editUser, username: e.target.value })} />
+                        <Input
+                          value={editUser.username}
+                          onChange={(e) =>
+                            setEditUser({
+                              ...editUser,
+                              username: e.target.value,
+                            })
+                          }
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Email</Label>
-                        <Input value={editUser.email || ''} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} />
+                        <Input
+                          value={editUser.email || ""}
+                          onChange={(e) =>
+                            setEditUser({ ...editUser, email: e.target.value })
+                          }
+                        />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Phone</Label>
-                        <Input value={editUser.phone || ''} onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })} />
+                        <Input
+                          value={editUser.phone || ""}
+                          onChange={(e) =>
+                            setEditUser({ ...editUser, phone: e.target.value })
+                          }
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Role</Label>
-                        <Select value={editUser.role} onValueChange={(val) => setEditUser({ ...editUser, role: val as UserRole })}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        <Select
+                          value={editUser.role}
+                          onValueChange={(val) =>
+                            setEditUser({ ...editUser, role: val as UserRole })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value={UserRole.SUPER_ADMIN}>Super Admin</SelectItem>
-                            <SelectItem value={UserRole.POLICE_HEAD}>Police Head</SelectItem>
-                            <SelectItem value={UserRole.DETECTIVE_OFFICER}>Detective Officer</SelectItem>
-                            <SelectItem value={UserRole.PREVENTIVE_OFFICER}>Preventive Officer</SelectItem>
-                            <SelectItem value={UserRole.HR_MANAGER}>HR Manager</SelectItem>
-                            <SelectItem value={UserRole.CITIZEN}>Citizen</SelectItem>
+                            <SelectItem value={UserRole.SUPER_ADMIN}>
+                              Super Admin
+                            </SelectItem>
+                            <SelectItem value={UserRole.POLICE_HEAD}>
+                              Police Head
+                            </SelectItem>
+                            <SelectItem value={UserRole.DETECTIVE_OFFICER}>
+                              Detective Officer
+                            </SelectItem>
+                            <SelectItem value={UserRole.PREVENTIVE_OFFICER}>
+                              Preventive Officer
+                            </SelectItem>
+                            <SelectItem value={UserRole.HR_MANAGER}>
+                              HR Manager
+                            </SelectItem>
+                            <SelectItem value={UserRole.CITIZEN}>
+                              Citizen
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                      <Button className="bg-crime-red text-white" onClick={async () => {
-                        if (!editUser) return;
-                        try {
-                          const updates: any = { fullName: editUser.fullName, username: editUser.username, email: editUser.email, phone: editUser.phone, role: editUser.role };
-                          const res = await api.put(`/users/${editUser.id}`, updates);
-                          if (res.ok) {
-                            const d = await res.json();
-                            const updated = d.data;
-                            setUsers(prev => prev.map(u => u.id === updated.id ? { ...u, ...updated, createdAt: new Date(updated.createdAt), updatedAt: new Date(updated.updatedAt) } : u));
-                            setIsEditDialogOpen(false);
-                            setEditUser(null);
+                      <Button
+                        className="bg-crime-red text-white"
+                        onClick={async () => {
+                          if (!editUser) return;
+                          try {
+                            const updates: any = {
+                              fullName: editUser.fullName,
+                              username: editUser.username,
+                              email: editUser.email,
+                              phone: editUser.phone,
+                              role: editUser.role,
+                            };
+                            const res = await api.put(
+                              `/users/${editUser.id}`,
+                              updates,
+                            );
+                            if (res.ok) {
+                              const d = await res.json();
+                              const updated = d.data;
+                              setUsers((prev) =>
+                                prev.map((u) =>
+                                  u.id === updated.id
+                                    ? {
+                                        ...u,
+                                        ...updated,
+                                        createdAt: new Date(updated.createdAt),
+                                        updatedAt: new Date(updated.updatedAt),
+                                      }
+                                    : u,
+                                ),
+                              );
+                              setIsEditDialogOpen(false);
+                              setEditUser(null);
+                            }
+                          } catch (e) {
+                            console.error("Failed to update user", e);
                           }
-                        } catch (e) { console.error('Failed to update user', e); }
-                      }}>Save</Button>
-                      <Button variant="outline" onClick={() => { setIsEditDialogOpen(false); setEditUser(null); }}>Cancel</Button>
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsEditDialogOpen(false);
+                          setEditUser(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
                 </DialogContent>
@@ -829,36 +943,66 @@ export default function UserManagement() {
 
             {/* Reset Password Dialog */}
             {resetUser && (
-              <Dialog open={isResetDialogOpen} onOpenChange={(v) => { if(!v) setResetUser(null); setIsResetDialogOpen(v); }}>
+              <Dialog
+                open={isResetDialogOpen}
+                onOpenChange={(v) => {
+                  if (!v) setResetUser(null);
+                  setIsResetDialogOpen(v);
+                }}
+              >
                 <DialogContent className="max-w-sm">
                   <DialogHeader>
                     <DialogTitle>Reset Password</DialogTitle>
-                    <DialogDescription>Set a new password for {resetUser.fullName}</DialogDescription>
+                    <DialogDescription>
+                      Set a new password for {resetUser.fullName}
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>New Password</Label>
-                      <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                      <Input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
                     </div>
                     <div className="flex gap-3 pt-2">
-                      <Button className="bg-crime-red text-white" onClick={async () => {
-                        if (!resetUser || !newPassword) return;
-                        try {
-                          const res = await api.post(`/users/${resetUser.id}/reset-password`, { password: newPassword });
-                          if (res.ok) {
-                            setIsResetDialogOpen(false);
-                            setResetUser(null);
-                            setNewPassword('');
+                      <Button
+                        className="bg-crime-red text-white"
+                        onClick={async () => {
+                          if (!resetUser || !newPassword) return;
+                          try {
+                            const res = await api.post(
+                              `/users/${resetUser.id}/reset-password`,
+                              { password: newPassword },
+                            );
+                            if (res.ok) {
+                              setIsResetDialogOpen(false);
+                              setResetUser(null);
+                              setNewPassword("");
+                            }
+                          } catch (e) {
+                            console.error("Failed to reset password", e);
                           }
-                        } catch (e) { console.error('Failed to reset password', e); }
-                      }}>Reset</Button>
-                      <Button variant="outline" onClick={() => { setIsResetDialogOpen(false); setResetUser(null); setNewPassword(''); }}>Cancel</Button>
+                        }}
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsResetDialogOpen(false);
+                          setResetUser(null);
+                          setNewPassword("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
                 </DialogContent>
               </Dialog>
             )}
-
           </TabsContent>
 
           <TabsContent value="pending" className="space-y-6">
@@ -945,25 +1089,25 @@ export default function UserManagement() {
                             </div>
                           )}
 
-                         {Array.isArray(account.documents) && account.documents.length > 0 && (
-  <div className="mb-3">
-    <p className="text-sm font-medium text-gray-700 mb-2">
-      Submitted Documents:
-    </p>
-    <div className="flex flex-wrap gap-2">
-      {account.documents.map((doc, index) => (
-        <Badge
-          key={index}
-          variant="outline"
-          className="text-xs"
-        >
-          {doc}
-        </Badge>
-      ))}
-    </div>
-  </div>
-)}
-
+                          {Array.isArray(account.documents) &&
+                            account.documents.length > 0 && (
+                              <div className="mb-3">
+                                <p className="text-sm font-medium text-gray-700 mb-2">
+                                  Submitted Documents:
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {account.documents.map((doc, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {doc}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                         </div>
 
                         {canApproveAccounts && account.status === "pending" && (

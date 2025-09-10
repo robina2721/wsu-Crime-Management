@@ -1,3 +1,7 @@
 import { contactOfficerHandler } from "../../../../../backend/controllers/crimesController.js";
 
-export async function POST(req, { params }) { return contactOfficerHandler(req, params); }
+import { contactOfficerHandler } from "../../../../../backend/controllers/crimesController.js";
+
+export async function POST(req, { params }) {
+  return contactOfficerHandler(req, params);
+}

@@ -67,6 +67,7 @@ import {
   IncidentStatus,
 } from "../../shared/types";
 import { api } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 export default function CitizenPortal() {
   const { user } = useAuth();
@@ -75,9 +76,7 @@ export default function CitizenPortal() {
   const [activeSection, setActiveSection] = useState<"crimes" | "incidents">(
     "crimes",
   );
-  const [reportType, setReportType] = useState<"crime" | "incident">(
-    "crime",
-  );
+  const [reportType, setReportType] = useState<"crime" | "incident">("crime");
 
   // Crimes state
   const [reports, setReports] = useState<CrimeReport[]>([]);
@@ -112,12 +111,28 @@ export default function CitizenPortal() {
   >({});
   const [currentTab, setCurrentTab] = useState("incident");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
-  const [submissionStatus, setSubmissionStatus] = useState<null | { type: 'success' | 'error', message: string }>(null);
+  const [submissionStatus, setSubmissionStatus] = useState<null | {
+    type: "success" | "error";
+    message: string;
+  }>(null);
+
+  const steps = React.useMemo(
+    () =>
+      reportType === "crime"
+        ? ["incident", "evidence", "review"]
+        : ["incident", "review"],
+    [reportType],
+  );
+  const stepIndex = steps.indexOf(currentTab);
+  const stepProgress = Math.round(((stepIndex + 1) / steps.length) * 100);
+  const goNext = () =>
+    setCurrentTab(steps[Math.min(stepIndex + 1, steps.length - 1)]);
+  const goPrev = () => setCurrentTab(steps[Math.max(stepIndex - 1, 0)]);
 
   // Restore draft from localStorage
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('crime_report_draft');
+      const raw = localStorage.getItem("crime_report_draft");
       if (raw) {
         const d = JSON.parse(raw);
         if (d) {
@@ -143,16 +158,15 @@ export default function CitizenPortal() {
         currentTab,
         reportType,
       };
-      localStorage.setItem('crime_report_draft', JSON.stringify(draft));
+      localStorage.setItem("crime_report_draft", JSON.stringify(draft));
     } catch (e) {}
   }, [formData, witnesses, currentTab, reportType]);
 
   // Incidents state
   const [incidents, setIncidents] = useState<IncidentReport[]>([]);
   const [incidentTypeFilter, setIncidentTypeFilter] = useState<string>("all");
-  const [incidentStatusFilter, setIncidentStatusFilter] = useState<string>(
-    "all",
-  );
+  const [incidentStatusFilter, setIncidentStatusFilter] =
+    useState<string>("all");
 
   useEffect(() => {
     const loadReports = async () => {
@@ -283,14 +297,16 @@ export default function CitizenPortal() {
               createdAt: new Date(inc.createdAt),
               updatedAt: new Date(inc.updatedAt),
             } as any;
-            if (ev.type === "deleted") return prev.filter((x) => x.id !== inc.id);
+            if (ev.type === "deleted")
+              return prev.filter((x) => x.id !== inc.id);
             if (idx >= 0) {
               const copy = [...prev];
               copy[idx] = { ...copy[idx], ...normalized } as any;
               return copy;
             }
             // Only add if created by this user
-            if (normalized.reportedBy === user?.id) return [normalized, ...prev];
+            if (normalized.reportedBy === user?.id)
+              return [normalized, ...prev];
             return prev;
           });
         }
@@ -363,9 +379,11 @@ export default function CitizenPortal() {
       incident.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       incident.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
-      incidentStatusFilter === "all" || incident.status === incidentStatusFilter;
+      incidentStatusFilter === "all" ||
+      incident.status === incidentStatusFilter;
     const matchesType =
-      incidentTypeFilter === "all" || incident.incidentType === incidentTypeFilter;
+      incidentTypeFilter === "all" ||
+      incident.incidentType === incidentTypeFilter;
     const matchesOwner = incident.reportedBy === user?.id;
     return matchesOwner && matchesSearch && matchesStatus && matchesType;
   });
@@ -382,9 +400,7 @@ export default function CitizenPortal() {
 
     const icons: Record<CrimeStatus, React.ReactNode> = {
       [CrimeStatus.REPORTED]: <Clock className="h-3 w-3 mr-1" />,
-      [CrimeStatus.UNDER_INVESTIGATION]: (
-        <RefreshCw className="h-3 w-3 mr-1" />
-      ),
+      [CrimeStatus.UNDER_INVESTIGATION]: <RefreshCw className="h-3 w-3 mr-1" />,
       [CrimeStatus.ASSIGNED]: <User className="h-3 w-3 mr-1" />,
       [CrimeStatus.RESOLVED]: <CheckCircle className="h-3 w-3 mr-1" />,
       [CrimeStatus.CLOSED]: <CheckCircle className="h-3 w-3 mr-1" />,
@@ -491,19 +507,35 @@ export default function CitizenPortal() {
             dateIncident: new Date(r.dateIncident),
             createdAt: new Date(r.createdAt),
             updatedAt: new Date(r.updatedAt),
-            evidence: (uploadedEvidence || []).map((e: any) => e.fileName) as any,
+            evidence: (uploadedEvidence || []).map(
+              (e: any) => e.fileName,
+            ) as any,
             witnesses: [],
           } as any;
           setReports((prev) => [normalized, ...prev]);
           setFormData({});
           setWitnesses([]);
           setEvidenceFiles([]);
-          localStorage.removeItem('crime_report_draft');
-          setSubmissionStatus({ type: 'success', message: 'Report submitted successfully' });
-          // auto-close after short delay
-          setTimeout(() => { setShowNewReportForm(false); setSubmissionStatus(null); }, 1200);
+          localStorage.removeItem("crime_report_draft");
+          setSubmissionStatus({
+            type: "success",
+            message:
+              "Your Report Is Successfully Submmited Stay in Touch For Update",
+          });
+          toast({
+            title: "Success",
+            description:
+              "Your Report Is Successfully Submmited Stay in Touch For Update",
+          });
+          setTimeout(() => {
+            setShowNewReportForm(false);
+            setSubmissionStatus(null);
+          }, 1200);
         } else {
-          setSubmissionStatus({ type: 'error', message: 'Failed to submit report' });
+          setSubmissionStatus({
+            type: "error",
+            message: "Failed to submit report",
+          });
         }
       } catch (e) {
         console.error("Failed to submit report", e);
@@ -515,11 +547,13 @@ export default function CitizenPortal() {
           title: (formData as any).title || "",
           description: (formData as any).description || "",
           incidentType:
-            (((formData as any).incidentType as any) || IncidentType.PATROL_OBSERVATION),
+            ((formData as any).incidentType as any) ||
+            IncidentType.PATROL_OBSERVATION,
           severity: (formData as any).priority || Priority.LOW,
           location: (formData as any).location || "",
-          dateOccurred:
-            ((formData as any).dateIncident || new Date()).toString(),
+          dateOccurred: (
+            (formData as any).dateIncident || new Date()
+          ).toString(),
           followUpRequired: false,
         };
         const res = await api.post("/incidents", payload);
@@ -536,12 +570,28 @@ export default function CitizenPortal() {
         setFormData({});
         setWitnesses([]);
         setEvidenceFiles([]);
-        localStorage.removeItem('crime_report_draft');
-        setSubmissionStatus({ type: 'success', message: 'Incident submitted successfully' });
-        setTimeout(() => { setShowNewReportForm(false); setReportType("incident"); setSubmissionStatus(null); }, 1200);
+        localStorage.removeItem("crime_report_draft");
+        setSubmissionStatus({
+          type: "success",
+          message:
+            "Your Report Is Successfully Submmited Stay in Touch For Update",
+        });
+        toast({
+          title: "Success",
+          description:
+            "Your Report Is Successfully Submmited Stay in Touch For Update",
+        });
+        setTimeout(() => {
+          setShowNewReportForm(false);
+          setReportType("incident");
+          setSubmissionStatus(null);
+        }, 1200);
       } catch (e) {
         console.error("Failed to create incident", e);
-        setSubmissionStatus({ type: 'error', message: 'Failed to submit incident' });
+        setSubmissionStatus({
+          type: "error",
+          message: "Failed to submit incident",
+        });
       }
     }
   };
@@ -617,7 +667,10 @@ export default function CitizenPortal() {
               </h1>
               <p className="text-gray-600 mt-2">{t("citizen.subtitle")}</p>
             </div>
-            <Dialog open={showNewReportForm} onOpenChange={setShowNewReportForm}>
+            <Dialog
+              open={showNewReportForm}
+              onOpenChange={setShowNewReportForm}
+            >
               <DialogTrigger asChild>
                 <Button className="bg-red-600 hover:bg-red-700">
                   <Plus className="h-4 w-4 mr-2" />
@@ -659,30 +712,46 @@ export default function CitizenPortal() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="crime">Crime Report</SelectItem>
-                          <SelectItem value="incident">Incident Report</SelectItem>
+                          <SelectItem value="incident">
+                            Incident Report
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                      Step {stepIndex + 1} of {steps.length}
+                    </span>
+                  </div>
+                  <Progress value={stepProgress} className="mb-4" />
                   <Tabs
                     value={currentTab}
                     onValueChange={setCurrentTab}
                     className="w-full"
                   >
                     <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="incident">{t("tabs.incident")}</TabsTrigger>
+                      <TabsTrigger value="incident">
+                        {t("tabs.incident")}
+                      </TabsTrigger>
                       {reportType === "crime" && (
-                        <TabsTrigger value="evidence">{t("tabs.evidence")}</TabsTrigger>
+                        <TabsTrigger value="evidence">
+                          {t("tabs.evidence")}
+                        </TabsTrigger>
                       )}
-                      <TabsTrigger value="review">{t("tabs.review")}</TabsTrigger>
+                      <TabsTrigger value="review">
+                        {t("tabs.review")}
+                      </TabsTrigger>
                     </TabsList>
                     <TabsContent value="incident" className="space-y-4">
                       {reportType === "crime" ? (
                         <>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="title">{t("crime.form.title")}</Label>
+                              <Label htmlFor="title">
+                                {t("crime.form.title")}
+                              </Label>
                               <Input
                                 id="title"
                                 required
@@ -700,7 +769,9 @@ export default function CitizenPortal() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="category">{t("crime.form.category")}</Label>
+                              <Label htmlFor="category">
+                                {t("crime.form.category")}
+                              </Label>
                               <Select
                                 value={formData.category || ""}
                                 onValueChange={(value) =>
@@ -711,14 +782,27 @@ export default function CitizenPortal() {
                                 }
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder={t("filters.category")} />
+                                  <SelectValue
+                                    placeholder={t("filters.category")}
+                                  />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {Object.values(CrimeCategory).map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                      {getCategoryIcon(category)} {t(`category.${category}`, category.replace("_", " ").toUpperCase())}
-                                    </SelectItem>
-                                  ))}
+                                  {Object.values(CrimeCategory).map(
+                                    (category) => (
+                                      <SelectItem
+                                        key={category}
+                                        value={category}
+                                      >
+                                        {getCategoryIcon(category)}{" "}
+                                        {t(
+                                          `category.${category}`,
+                                          category
+                                            .replace("_", " ")
+                                            .toUpperCase(),
+                                        )}
+                                      </SelectItem>
+                                    ),
+                                  )}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -726,14 +810,17 @@ export default function CitizenPortal() {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="dateIncident">{t("crime.form.date")}</Label>
+                              <Label htmlFor="dateIncident">
+                                {t("crime.form.date")}
+                              </Label>
                               <Input
                                 id="dateIncident"
                                 type="datetime-local"
                                 required
                                 value={
-                                  formData.dateIncident?.toISOString().slice(0, 16) ||
-                                  ""
+                                  formData.dateIncident
+                                    ?.toISOString()
+                                    .slice(0, 16) || ""
                                 }
                                 onChange={(e) =>
                                   setFormData((prev) => ({
@@ -744,7 +831,9 @@ export default function CitizenPortal() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="priority">{t("crime.form.priority")}</Label>
+                              <Label htmlFor="priority">
+                                {t("crime.form.priority")}
+                              </Label>
                               <Select
                                 value={formData.priority || Priority.MEDIUM}
                                 onValueChange={(value) =>
@@ -760,7 +849,10 @@ export default function CitizenPortal() {
                                 <SelectContent>
                                   {Object.values(Priority).map((priority) => (
                                     <SelectItem key={priority} value={priority}>
-                                      {t(`priority.${priority}`, priority.toUpperCase())}
+                                      {t(
+                                        `priority.${priority}`,
+                                        priority.toUpperCase(),
+                                      )}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -769,7 +861,9 @@ export default function CitizenPortal() {
                           </div>
 
                           <div>
-                            <Label htmlFor="location">{t("crime.form.location")}</Label>
+                            <Label htmlFor="location">
+                              {t("crime.form.location")}
+                            </Label>
                             <Input
                               id="location"
                               required
@@ -788,7 +882,9 @@ export default function CitizenPortal() {
                           </div>
 
                           <div>
-                            <Label htmlFor="description">{t("crime.form.description")}</Label>
+                            <Label htmlFor="description">
+                              {t("crime.form.description")}
+                            </Label>
                             <Textarea
                               id="description"
                               required
@@ -811,7 +907,9 @@ export default function CitizenPortal() {
                         <>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="title">{t("incident.form.title")}</Label>
+                              <Label htmlFor="title">
+                                {t("incident.form.title")}
+                              </Label>
                               <Input
                                 id="title"
                                 required
@@ -829,9 +927,14 @@ export default function CitizenPortal() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="type">{t("incident.form.type")}</Label>
+                              <Label htmlFor="type">
+                                {t("incident.form.type")}
+                              </Label>
                               <Select
-                                value={(formData as any).incidentType || IncidentType.PATROL_OBSERVATION}
+                                value={
+                                  (formData as any).incidentType ||
+                                  IncidentType.PATROL_OBSERVATION
+                                }
                                 onValueChange={(value) =>
                                   setFormData((prev) => ({
                                     ...prev,
@@ -855,21 +958,22 @@ export default function CitizenPortal() {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="dateOccurred">{t("incident.form.dateOccurred")}</Label>
+                              <Label htmlFor="dateOccurred">
+                                {t("incident.form.dateOccurred")}
+                              </Label>
                               <Input
                                 id="dateOccurred"
                                 type="datetime-local"
                                 required
-                                value={
-                                  ((formData as any).dateIncident instanceof Date
-                                    ? (formData as any).dateIncident
-                                    : (formData as any).dateIncident
+                                value={((formData as any)
+                                  .dateIncident instanceof Date
+                                  ? (formData as any).dateIncident
+                                  : (formData as any).dateIncident
                                     ? new Date((formData as any).dateIncident)
                                     : new Date()
-                                  )
-                                    .toISOString()
-                                    .slice(0, 16)
-                                }
+                                )
+                                  .toISOString()
+                                  .slice(0, 16)}
                                 onChange={(e) =>
                                   setFormData((prev) => ({
                                     ...prev,
@@ -879,9 +983,13 @@ export default function CitizenPortal() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="severity">{t("incident.form.severity")}</Label>
+                              <Label htmlFor="severity">
+                                {t("incident.form.severity")}
+                              </Label>
                               <Select
-                                value={(formData as any).priority || Priority.LOW}
+                                value={
+                                  (formData as any).priority || Priority.LOW
+                                }
                                 onValueChange={(value) =>
                                   setFormData((prev) => ({
                                     ...prev,
@@ -895,7 +1003,10 @@ export default function CitizenPortal() {
                                 <SelectContent>
                                   {Object.values(Priority).map((priority) => (
                                     <SelectItem key={priority} value={priority}>
-                                      {t(`priority.${priority}`, priority.toUpperCase())}
+                                      {t(
+                                        `priority.${priority}`,
+                                        priority.toUpperCase(),
+                                      )}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -904,7 +1015,9 @@ export default function CitizenPortal() {
                           </div>
 
                           <div>
-                            <Label htmlFor="location">{t("incident.form.location")}</Label>
+                            <Label htmlFor="location">
+                              {t("incident.form.location")}
+                            </Label>
                             <Input
                               id="location"
                               required
@@ -923,7 +1036,9 @@ export default function CitizenPortal() {
                           </div>
 
                           <div>
-                            <Label htmlFor="description">{t("incident.form.description")}</Label>
+                            <Label htmlFor="description">
+                              {t("incident.form.description")}
+                            </Label>
                             <Textarea
                               id="description"
                               required
@@ -989,7 +1104,10 @@ export default function CitizenPortal() {
                               <Label>{t("general.evidenceFiles")}</Label>
                               <div className="grid grid-cols-2 gap-2 mt-2">
                                 {evidenceFiles.map((file, index) => (
-                                  <div key={index} className="p-2 border rounded">
+                                  <div
+                                    key={index}
+                                    className="p-2 border rounded"
+                                  >
                                     {file.type.startsWith("image/") ? (
                                       <img
                                         src={URL.createObjectURL(file)}
@@ -1003,7 +1121,9 @@ export default function CitizenPortal() {
                                         className="h-24 w-full rounded"
                                       />
                                     )}
-                                    <p className="text-xs mt-1 truncate">{file.name}</p>
+                                    <p className="text-xs mt-1 truncate">
+                                      {file.name}
+                                    </p>
                                   </div>
                                 ))}
                               </div>
@@ -1011,17 +1131,25 @@ export default function CitizenPortal() {
                           )}
 
                           {/* If draft contains evidence filenames but files are not attached, prompt to reattach */}
-                          {(!evidenceFiles.length && formData.evidence && formData.evidence.length) && (
-                            <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
-                              Saved evidence placeholders detected: {formData.evidence.join(', ')}. Please re-attach files to include them with submission.
-                            </div>
-                          )}
+                          {!evidenceFiles.length &&
+                            formData.evidence &&
+                            formData.evidence.length && (
+                              <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
+                                Saved evidence placeholders detected:{" "}
+                                {formData.evidence.join(", ")}. Please re-attach
+                                files to include them with submission.
+                              </div>
+                            )}
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between">
                             <Label>{t("general.witnesses")}</Label>
-                            <Button type="button" variant="outline" onClick={addWitness}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={addWitness}
+                            >
                               <Plus className="h-4 w-4 mr-2" />
                               {t("general.addWitness")}
                             </Button>
@@ -1036,7 +1164,9 @@ export default function CitizenPortal() {
                                 <Card key={index}>
                                   <CardContent className="p-4">
                                     <div className="flex justify-between items-start mb-4">
-                                      <h4 className="font-medium">{t("general.witnesses")} {index + 1}</h4>
+                                      <h4 className="font-medium">
+                                        {t("general.witnesses")} {index + 1}
+                                      </h4>
                                       <Button
                                         type="button"
                                         variant="outline"
@@ -1052,7 +1182,11 @@ export default function CitizenPortal() {
                                         <Input
                                           value={witness.name}
                                           onChange={(e) =>
-                                            updateWitness(index, "name", e.target.value)
+                                            updateWitness(
+                                              index,
+                                              "name",
+                                              e.target.value,
+                                            )
                                           }
                                           placeholder="Witness name"
                                         />
@@ -1062,7 +1196,11 @@ export default function CitizenPortal() {
                                         <Input
                                           value={witness.phone || ""}
                                           onChange={(e) =>
-                                            updateWitness(index, "phone", e.target.value)
+                                            updateWitness(
+                                              index,
+                                              "phone",
+                                              e.target.value,
+                                            )
                                           }
                                           placeholder="Phone number"
                                         />
@@ -1073,7 +1211,11 @@ export default function CitizenPortal() {
                                           type="email"
                                           value={witness.email || ""}
                                           onChange={(e) =>
-                                            updateWitness(index, "email", e.target.value)
+                                            updateWitness(
+                                              index,
+                                              "email",
+                                              e.target.value,
+                                            )
                                           }
                                           placeholder="Email address"
                                         />
@@ -1083,7 +1225,11 @@ export default function CitizenPortal() {
                                         <Textarea
                                           value={witness.statement}
                                           onChange={(e) =>
-                                            updateWitness(index, "statement", e.target.value)
+                                            updateWitness(
+                                              index,
+                                              "statement",
+                                              e.target.value,
+                                            )
                                           }
                                           placeholder="What did this witness see or know about the incident?"
                                         />
@@ -1107,7 +1253,10 @@ export default function CitizenPortal() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label>Title</Label>
-                              <p className="mt-1">{(formData as any).title || t("general.notProvided")}</p>
+                              <p className="mt-1">
+                                {(formData as any).title ||
+                                  t("general.notProvided")}
+                              </p>
                             </div>
                             <div>
                               <Label>{t("general.category")}</Label>
@@ -1117,8 +1266,10 @@ export default function CitizenPortal() {
                                     ? `${getCategoryIcon(formData.category)} ${t(`category.${formData.category}`, (formData.category as any).replace("_", " ").toUpperCase())}`
                                     : t("general.notSelected")
                                   : (formData as any).incidentType
-                                  ? t(`incidentType.${(formData as any).incidentType}`)
-                                  : t("general.notSelected")}
+                                    ? t(
+                                        `incidentType.${(formData as any).incidentType}`,
+                                      )
+                                    : t("general.notSelected")}
                               </p>
                             </div>
                             <div>
@@ -1137,20 +1288,32 @@ export default function CitizenPortal() {
                               <Label>{t("general.priority")}</Label>
                               <p className="mt-1">
                                 {reportType === "crime"
-                                  ? (formData.priority && t(`priority.${formData.priority}`)) || t("priority.medium", "MEDIUM")
-                                  : ((formData as any).priority && t(`priority.${(formData as any).priority}`)) || t("priority.low", "LOW")}
+                                  ? (formData.priority &&
+                                      t(`priority.${formData.priority}`)) ||
+                                    t("priority.medium", "MEDIUM")
+                                  : ((formData as any).priority &&
+                                      t(
+                                        `priority.${(formData as any).priority}`,
+                                      )) ||
+                                    t("priority.low", "LOW")}
                               </p>
                             </div>
                           </div>
 
                           <div>
                             <Label>{t("general.location")}</Label>
-                            <p className="mt-1">{(formData as any).location || t("general.notProvided")}</p>
+                            <p className="mt-1">
+                              {(formData as any).location ||
+                                t("general.notProvided")}
+                            </p>
                           </div>
 
                           <div>
                             <Label>{t("general.description")}</Label>
-                            <p className="mt-1 whitespace-pre-wrap">{(formData as any).description || t("general.notProvided")}</p>
+                            <p className="mt-1 whitespace-pre-wrap">
+                              {(formData as any).description ||
+                                t("general.notProvided")}
+                            </p>
                           </div>
 
                           {reportType === "crime" && (
@@ -1158,7 +1321,8 @@ export default function CitizenPortal() {
                               <div>
                                 <Label>{t("general.evidenceFiles")}</Label>
                                 <p className="mt-1">
-                                  {formData.evidence && formData.evidence.length > 0
+                                  {formData.evidence &&
+                                  formData.evidence.length > 0
                                     ? `${formData.evidence.length} files uploaded`
                                     : t("general.noFilesUploaded")}
                                 </p>
@@ -1169,7 +1333,10 @@ export default function CitizenPortal() {
                                 <p className="mt-1">
                                   {witnesses.length > 0
                                     ? `${witnesses.length} ${t("general.witnesses").toLowerCase()} ${t("general.added", "added")}`
-                                    : t("general.noWitnesses", "No witnesses added")}
+                                    : t(
+                                        "general.noWitnesses",
+                                        "No witnesses added",
+                                      )}
                                 </p>
                               </div>
                             </>
@@ -1189,27 +1356,52 @@ export default function CitizenPortal() {
                     </TabsContent>
                   </Tabs>
 
-                  <div className="flex justify-end gap-4 mt-6 pt-6 border-t">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        // Keep draft saved; close dialog without clearing draft so user can continue later
-                        setShowNewReportForm(false);
-                      }}
-                    >
-                      {t("general.cancel")}
-                    </Button>
-                    {currentTab === "review" && (
-                      <Button type="submit" className="bg-red-600 hover:bg-red-700">
-                        {t("general.submitReport")}
+                  <div className="flex justify-between gap-4 mt-6 pt-6 border-t">
+                    <div>
+                      {stepIndex > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={goPrev}
+                        >
+                          Previous
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowNewReportForm(false);
+                        }}
+                      >
+                        {t("general.cancel")}
                       </Button>
-                    )}
+                      {currentTab !== "review" ? (
+                        <Button
+                          type="button"
+                          className="bg-red-600 hover:bg-red-700"
+                          onClick={goNext}
+                        >
+                          Next
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          {t("general.submitReport")}
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* submission feedback */}
                   {submissionStatus && (
-                    <div className={`mt-4 p-3 rounded ${submissionStatus.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                    <div
+                      className={`mt-4 p-3 rounded ${submissionStatus.type === "success" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}
+                    >
                       {submissionStatus.message}
                     </div>
                   )}
@@ -1220,10 +1412,16 @@ export default function CitizenPortal() {
         </div>
 
         {/* Section Switch */}
-        <Tabs value={activeSection} onValueChange={(v) => setActiveSection(v as any)} className="mb-6">
+        <Tabs
+          value={activeSection}
+          onValueChange={(v) => setActiveSection(v as any)}
+          className="mb-6"
+        >
           <TabsList>
             <TabsTrigger value="crimes">{t("citizen.tabs.crimes")}</TabsTrigger>
-            <TabsTrigger value="incidents">{t("citizen.tabs.incidents")}</TabsTrigger>
+            <TabsTrigger value="incidents">
+              {t("citizen.tabs.incidents")}
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -1236,8 +1434,14 @@ export default function CitizenPortal() {
                   <FileText className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.totalReports")}</p>
-                  <p className="text-2xl font-bold">{activeSection === "crimes" ? reports.length : filteredIncidents.length}</p>
+                  <p className="text-sm text-gray-600">
+                    {t("stats.totalReports")}
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {activeSection === "crimes"
+                      ? reports.length
+                      : filteredIncidents.length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -1250,11 +1454,17 @@ export default function CitizenPortal() {
                   <RefreshCw className="h-6 w-6 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.underInvestigation")}</p>
+                  <p className="text-sm text-gray-600">
+                    {t("stats.underInvestigation")}
+                  </p>
                   <p className="text-2xl font-bold">
                     {activeSection === "crimes"
-                      ? reports.filter((r) => r.status === CrimeStatus.UNDER_INVESTIGATION).length
-                      : filteredIncidents.filter((i) => i.status === IncidentStatus.INVESTIGATING).length}
+                      ? reports.filter(
+                          (r) => r.status === CrimeStatus.UNDER_INVESTIGATION,
+                        ).length
+                      : filteredIncidents.filter(
+                          (i) => i.status === IncidentStatus.INVESTIGATING,
+                        ).length}
                   </p>
                 </div>
               </div>
@@ -1271,8 +1481,11 @@ export default function CitizenPortal() {
                   <p className="text-sm text-gray-600">{t("stats.resolved")}</p>
                   <p className="text-2xl font-bold">
                     {activeSection === "crimes"
-                      ? reports.filter((r) => r.status === CrimeStatus.RESOLVED).length
-                      : filteredIncidents.filter((i) => i.status === IncidentStatus.RESOLVED).length}
+                      ? reports.filter((r) => r.status === CrimeStatus.RESOLVED)
+                          .length
+                      : filteredIncidents.filter(
+                          (i) => i.status === IncidentStatus.RESOLVED,
+                        ).length}
                   </p>
                 </div>
               </div>
@@ -1286,8 +1499,12 @@ export default function CitizenPortal() {
                   <Clock className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.avgResponse")}</p>
-                  <p className="text-2xl font-bold">2 {t("stats.days", "days")}</p>
+                  <p className="text-sm text-gray-600">
+                    {t("stats.avgResponse")}
+                  </p>
+                  <p className="text-2xl font-bold">
+                    2 {t("stats.days", "days")}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -1312,28 +1529,45 @@ export default function CitizenPortal() {
               <div className="flex gap-4">
                 {activeSection === "crimes" ? (
                   <>
-                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <Select
+                      value={filterStatus}
+                      onValueChange={setFilterStatus}
+                    >
                       <SelectTrigger className="w-48">
                         <SelectValue placeholder={t("filters.status")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
+                        <SelectItem value="all">
+                          {t("filters.allStatuses")}
+                        </SelectItem>
                         {Object.values(CrimeStatus).map((status) => (
                           <SelectItem key={status} value={status}>
-                            {t(`status.${status}`, status.replace("_", " ").toUpperCase())}
+                            {t(
+                              `status.${status}`,
+                              status.replace("_", " ").toUpperCase(),
+                            )}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                    <Select
+                      value={filterCategory}
+                      onValueChange={setFilterCategory}
+                    >
                       <SelectTrigger className="w-48">
                         <SelectValue placeholder={t("filters.category")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{t("filters.allCategories")}</SelectItem>
+                        <SelectItem value="all">
+                          {t("filters.allCategories")}
+                        </SelectItem>
                         {Object.values(CrimeCategory).map((category) => (
                           <SelectItem key={category} value={category}>
-                            {getCategoryIcon(category)} {t(`category.${category}`, category.replace("_", " ").toUpperCase())}
+                            {getCategoryIcon(category)}{" "}
+                            {t(
+                              `category.${category}`,
+                              category.replace("_", " ").toUpperCase(),
+                            )}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1341,12 +1575,17 @@ export default function CitizenPortal() {
                   </>
                 ) : (
                   <>
-                    <Select value={incidentStatusFilter} onValueChange={setIncidentStatusFilter}>
+                    <Select
+                      value={incidentStatusFilter}
+                      onValueChange={setIncidentStatusFilter}
+                    >
                       <SelectTrigger className="w-48">
                         <SelectValue placeholder={t("filters.status")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
+                        <SelectItem value="all">
+                          {t("filters.allStatuses")}
+                        </SelectItem>
                         {Object.values(IncidentStatus).map((status) => (
                           <SelectItem key={status} value={status}>
                             {t(`incidentStatus.${status}`, status)}
@@ -1354,12 +1593,17 @@ export default function CitizenPortal() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select value={incidentTypeFilter} onValueChange={setIncidentTypeFilter}>
+                    <Select
+                      value={incidentTypeFilter}
+                      onValueChange={setIncidentTypeFilter}
+                    >
                       <SelectTrigger className="w-48">
                         <SelectValue placeholder={t("filters.type")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{t("filters.allTypes")}</SelectItem>
+                        <SelectItem value="all">
+                          {t("filters.allTypes")}
+                        </SelectItem>
                         {Object.values(IncidentType).map((typ) => (
                           <SelectItem key={typ} value={typ}>
                             {t(`incidentType.${typ}`, typ)}
@@ -1380,49 +1624,67 @@ export default function CitizenPortal() {
             {filteredReports.map((report) => {
               const status = getReportStatus(report.id);
               return (
-                <Card key={report.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={report.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">
-                        <div className="text-2xl mt-1">{getCategoryIcon(report.category)}</div>
+                        <div className="text-2xl mt-1">
+                          {getCategoryIcon(report.category)}
+                        </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{report.title}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {report.title}
+                            </h3>
                             {getStatusBadge(report.status)}
                             {getPriorityBadge(report.priority)}
                           </div>
-                          <p className="text-gray-600 mb-3 line-clamp-2">{report.description}</p>
+                          <p className="text-gray-600 mb-3 line-clamp-2">
+                            {report.description}
+                          </p>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4 text-gray-400" />
-                              <span className="truncate">{report.location}</span>
+                              <span className="truncate">
+                                {report.location}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-gray-400" />
-                              <span>{report.dateIncident.toLocaleDateString()}</span>
+                              <span>
+                                {report.dateIncident.toLocaleDateString()}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-gray-400" />
                               <span>
-                                {t("general.reportedDate")} {report.dateReported.toLocaleDateString()}
+                                {t("general.reportedDate")}{" "}
+                                {report.dateReported.toLocaleDateString()}
                               </span>
                             </div>
                             {status?.assignedOfficer && (
                               <div className="flex items-center gap-2">
                                 <User className="h-4 w-4 text-gray-400" />
-                                <span className="truncate">{status.assignedOfficer.name}</span>
+                                <span className="truncate">
+                                  {status.assignedOfficer.name}
+                                </span>
                               </div>
                             )}
                           </div>
 
                           {status?.estimatedResolution &&
-                            report.status === CrimeStatus.UNDER_INVESTIGATION && (
+                            report.status ===
+                              CrimeStatus.UNDER_INVESTIGATION && (
                               <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                                 <div className="flex items-center gap-2 text-sm text-blue-700">
                                   <Info className="h-4 w-4" />
                                   <span>
-                                    {t("general.estimatedResolution")}: {status.estimatedResolution.toLocaleDateString()}
+                                    {t("general.estimatedResolution")}:{" "}
+                                    {status.estimatedResolution.toLocaleDateString()}
                                   </span>
                                 </div>
                               </div>
@@ -1449,30 +1711,54 @@ export default function CitizenPortal() {
                             </DialogHeader>
                             <Tabs defaultValue="details" className="w-full">
                               <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="details">{t("tabs.details")}</TabsTrigger>
-                                <TabsTrigger value="status">{t("tabs.status")}</TabsTrigger>
-                                <TabsTrigger value="contact">{t("tabs.contact")}</TabsTrigger>
+                                <TabsTrigger value="details">
+                                  {t("tabs.details")}
+                                </TabsTrigger>
+                                <TabsTrigger value="status">
+                                  {t("tabs.status")}
+                                </TabsTrigger>
+                                <TabsTrigger value="contact">
+                                  {t("tabs.contact")}
+                                </TabsTrigger>
                               </TabsList>
-                              <TabsContent value="details" className="space-y-6">
+                              <TabsContent
+                                value="details"
+                                className="space-y-6"
+                              >
                                 <div className="grid grid-cols-2 gap-6">
                                   <div>
                                     <Label>{t("general.category")}</Label>
                                     <div className="flex items-center gap-2 mt-1">
-                                      <span className="text-lg">{getCategoryIcon(report.category)}</span>
-                                      <span>{t(`category.${report.category}`, report.category.replace("_", " ").toUpperCase())}</span>
+                                      <span className="text-lg">
+                                        {getCategoryIcon(report.category)}
+                                      </span>
+                                      <span>
+                                        {t(
+                                          `category.${report.category}`,
+                                          report.category
+                                            .replace("_", " ")
+                                            .toUpperCase(),
+                                        )}
+                                      </span>
                                     </div>
                                   </div>
                                   <div>
                                     <Label>{t("general.priority")}</Label>
-                                    <div className="mt-1">{getPriorityBadge(report.priority)}</div>
+                                    <div className="mt-1">
+                                      {getPriorityBadge(report.priority)}
+                                    </div>
                                   </div>
                                   <div>
                                     <Label>{t("general.incidentDate")}</Label>
-                                    <p className="mt-1">{report.dateIncident.toLocaleDateString()}</p>
+                                    <p className="mt-1">
+                                      {report.dateIncident.toLocaleDateString()}
+                                    </p>
                                   </div>
                                   <div>
                                     <Label>{t("general.reportedDate")}</Label>
-                                    <p className="mt-1">{report.dateReported.toLocaleDateString()}</p>
+                                    <p className="mt-1">
+                                      {report.dateReported.toLocaleDateString()}
+                                    </p>
                                   </div>
                                 </div>
 
@@ -1486,97 +1772,171 @@ export default function CitizenPortal() {
 
                                 <div>
                                   <Label>{t("general.description")}</Label>
-                                  <p className="mt-1 text-gray-700 whitespace-pre-wrap">{report.description}</p>
+                                  <p className="mt-1 text-gray-700 whitespace-pre-wrap">
+                                    {report.description}
+                                  </p>
                                 </div>
 
-                                {report.evidence && (report.evidence as any).length > 0 && (
-                                  <div>
-                                    <Label>{t("general.evidence")}</Label>
-                                    <div className="grid grid-cols-2 gap-2 mt-2">
-                                      {(report.evidence as any).map((ev: any, index: number) => {
-                                        const name = typeof ev === "string" ? ev : ev.fileName;
-                                        const type = typeof ev === "string" ? "" : ev.fileType || "";
-                                        const isImg = type.startsWith("image/") || name.match(/\.(png|jpg|jpeg|gif|webp)$/i);
-                                        const isVideo = type.startsWith("video/") || name.match(/\.(mp4|webm|ogg)$/i);
-                                        return (
-                                          <div key={index} className="p-2 border rounded">
-                                            {isImg ? (
-                                              <img src={name} alt={`evidence-${index}`} className="h-24 w-full object-cover rounded" />
-                                            ) : isVideo ? (
-                                              <video src={name} controls className="h-24 w-full rounded" />
-                                            ) : (
-                                              <div className="flex items-center gap-2">
-                                                <Camera className="h-4 w-4 text-gray-400" />
-                                                <span className="text-sm truncate">{name}</span>
+                                {report.evidence &&
+                                  (report.evidence as any).length > 0 && (
+                                    <div>
+                                      <Label>{t("general.evidence")}</Label>
+                                      <div className="grid grid-cols-2 gap-2 mt-2">
+                                        {(report.evidence as any).map(
+                                          (ev: any, index: number) => {
+                                            const name =
+                                              typeof ev === "string"
+                                                ? ev
+                                                : ev.fileName;
+                                            const type =
+                                              typeof ev === "string"
+                                                ? ""
+                                                : ev.fileType || "";
+                                            const isImg =
+                                              type.startsWith("image/") ||
+                                              name.match(
+                                                /\.(png|jpg|jpeg|gif|webp)$/i,
+                                              );
+                                            const isVideo =
+                                              type.startsWith("video/") ||
+                                              name.match(/\.(mp4|webm|ogg)$/i);
+                                            return (
+                                              <div
+                                                key={index}
+                                                className="p-2 border rounded"
+                                              >
+                                                {isImg ? (
+                                                  <img
+                                                    src={name}
+                                                    alt={`evidence-${index}`}
+                                                    className="h-24 w-full object-cover rounded"
+                                                  />
+                                                ) : isVideo ? (
+                                                  <video
+                                                    src={name}
+                                                    controls
+                                                    className="h-24 w-full rounded"
+                                                  />
+                                                ) : (
+                                                  <div className="flex items-center gap-2">
+                                                    <Camera className="h-4 w-4 text-gray-400" />
+                                                    <span className="text-sm truncate">
+                                                      {name}
+                                                    </span>
+                                                  </div>
+                                                )}
                                               </div>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
+                                            );
+                                          },
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
 
-                                {report.witnesses && report.witnesses.length > 0 && (
-                                  <div>
-                                    <Label>{t("general.witnesses")}</Label>
-                                    <div className="space-y-2 mt-2">
-                                      {report.witnesses.map((witness, index) => (
-                                        <div key={index} className="p-3 border rounded">
-                                          <p className="font-medium">{witness.name}</p>
-                                          {witness.phone && (
-                                            <p className="text-sm text-gray-600">{witness.phone}</p>
-                                          )}
-                                          {witness.email && (
-                                            <p className="text-sm text-gray-600">{witness.email}</p>
-                                          )}
-                                        </div>
-                                      ))}
+                                {report.witnesses &&
+                                  report.witnesses.length > 0 && (
+                                    <div>
+                                      <Label>{t("general.witnesses")}</Label>
+                                      <div className="space-y-2 mt-2">
+                                        {report.witnesses.map(
+                                          (witness, index) => (
+                                            <div
+                                              key={index}
+                                              className="p-3 border rounded"
+                                            >
+                                              <p className="font-medium">
+                                                {witness.name}
+                                              </p>
+                                              {witness.phone && (
+                                                <p className="text-sm text-gray-600">
+                                                  {witness.phone}
+                                                </p>
+                                              )}
+                                              {witness.email && (
+                                                <p className="text-sm text-gray-600">
+                                                  {witness.email}
+                                                </p>
+                                              )}
+                                            </div>
+                                          ),
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
                               </TabsContent>
                               <TabsContent value="status" className="space-y-6">
                                 {status && (
                                   <div>
                                     <div className="flex items-center justify-between mb-4">
                                       <div>
-                                        <h3 className="font-semibold">{t("general.currentStatus")}</h3>
-                                        <div className="mt-1">{getStatusBadge(status.currentStatus)}</div>
+                                        <h3 className="font-semibold">
+                                          {t("general.currentStatus")}
+                                        </h3>
+                                        <div className="mt-1">
+                                          {getStatusBadge(status.currentStatus)}
+                                        </div>
                                       </div>
                                       <div className="text-right">
-                                        <p className="text-sm text-gray-600">{t("general.lastUpdated")}</p>
-                                        <p className="font-medium">{status.lastUpdate.toLocaleString()}</p>
+                                        <p className="text-sm text-gray-600">
+                                          {t("general.lastUpdated")}
+                                        </p>
+                                        <p className="font-medium">
+                                          {status.lastUpdate.toLocaleString()}
+                                        </p>
                                       </div>
                                     </div>
 
                                     <div>
-                                      <h4 className="font-semibold mb-3">{t("general.statusHistory")}</h4>
+                                      <h4 className="font-semibold mb-3">
+                                        {t("general.statusHistory")}
+                                      </h4>
                                       <div className="space-y-4">
-                                        {status.statusHistory.map((update, index) => (
-                                          <div key={index} className="flex gap-4">
-                                            <div className="flex flex-col items-center">
-                                              <div className={`w-3 h-3 rounded-full ${index === 0 ? "bg-red-500" : "bg-gray-300"}`} />
-                                              {index < status.statusHistory.length - 1 && (
-                                                <div className="w-px h-8 bg-gray-300 mt-2" />
-                                              )}
-                                            </div>
-                                            <div className="flex-1 pb-4">
-                                              <div className="flex items-center gap-2 mb-1">
-                                                {getStatusBadge(update.status as CrimeStatus)}
-                                                <span className="text-sm text-gray-500">by {update.updatedBy}</span>
+                                        {status.statusHistory.map(
+                                          (update, index) => (
+                                            <div
+                                              key={index}
+                                              className="flex gap-4"
+                                            >
+                                              <div className="flex flex-col items-center">
+                                                <div
+                                                  className={`w-3 h-3 rounded-full ${index === 0 ? "bg-red-500" : "bg-gray-300"}`}
+                                                />
+                                                {index <
+                                                  status.statusHistory.length -
+                                                    1 && (
+                                                  <div className="w-px h-8 bg-gray-300 mt-2" />
+                                                )}
                                               </div>
-                                              <p className="text-sm text-gray-600 mb-1">{update.timestamp.toLocaleString()}</p>
-                                              {update.notes && <p className="text-sm">{update.notes}</p>}
+                                              <div className="flex-1 pb-4">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                  {getStatusBadge(
+                                                    update.status as CrimeStatus,
+                                                  )}
+                                                  <span className="text-sm text-gray-500">
+                                                    by {update.updatedBy}
+                                                  </span>
+                                                </div>
+                                                <p className="text-sm text-gray-600 mb-1">
+                                                  {update.timestamp.toLocaleString()}
+                                                </p>
+                                                {update.notes && (
+                                                  <p className="text-sm">
+                                                    {update.notes}
+                                                  </p>
+                                                )}
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          ),
+                                        )}
                                       </div>
                                     </div>
                                   </div>
                                 )}
                               </TabsContent>
-                              <TabsContent value="contact" className="space-y-6">
+                              <TabsContent
+                                value="contact"
+                                className="space-y-6"
+                              >
                                 {status?.assignedOfficer ? (
                                   <div>
                                     <div className="flex items-center gap-4 mb-4">
@@ -1584,29 +1944,39 @@ export default function CitizenPortal() {
                                         <User className="h-8 w-8 text-gray-600" />
                                       </div>
                                       <div>
-                                        <h3 className="font-semibold text-lg">{status.assignedOfficer.name}</h3>
-                                        <p className="text-gray-600">{status.assignedOfficer.badgeNumber}</p>
+                                        <h3 className="font-semibold text-lg">
+                                          {status.assignedOfficer.name}
+                                        </h3>
+                                        <p className="text-gray-600">
+                                          {status.assignedOfficer.badgeNumber}
+                                        </p>
                                       </div>
                                     </div>
 
                                     {status.assignedOfficer.contactInfo && (
                                       <Alert>
                                         <Info className="h-4 w-4" />
-                                        <AlertDescription>{status.assignedOfficer.contactInfo}</AlertDescription>
+                                        <AlertDescription>
+                                          {status.assignedOfficer.contactInfo}
+                                        </AlertDescription>
                                       </Alert>
                                     )}
 
                                     {status.canProvideUpdates && (
                                       <div className="space-y-4">
                                         <div>
-                                          <Label htmlFor={`additionalInfo-${report.id}`}>
+                                          <Label
+                                            htmlFor={`additionalInfo-${report.id}`}
+                                          >
                                             {t("general.provideAdditionalInfo")}
                                           </Label>
                                           <Textarea
                                             id={`additionalInfo-${report.id}`}
                                             placeholder="Any additional information or updates regarding this incident..."
                                             className="mt-1"
-                                            value={contactTextById[report.id] || ""}
+                                            value={
+                                              contactTextById[report.id] || ""
+                                            }
                                             onChange={(e) =>
                                               setContactTextById((prev) => ({
                                                 ...prev,
@@ -1616,15 +1986,27 @@ export default function CitizenPortal() {
                                           />
                                         </div>
                                         <div className="space-y-2">
-                                          <Label>{t("general.conversation")}</Label>
+                                          <Label>
+                                            {t("general.conversation")}
+                                          </Label>
                                           <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white">
                                             {(messagesById[report.id] || [])
                                               .slice()
                                               .reverse()
                                               .map((m, idx) => (
-                                                <div key={m.id || idx} className="text-sm mb-2">
-                                                  <span className="font-medium">{m.senderRole}:</span> {m.message}
-                                                  <span className="text-xs text-gray-500 ml-2">{new Date(m.createdAt).toLocaleString()}</span>
+                                                <div
+                                                  key={m.id || idx}
+                                                  className="text-sm mb-2"
+                                                >
+                                                  <span className="font-medium">
+                                                    {m.senderRole}:
+                                                  </span>{" "}
+                                                  {m.message}
+                                                  <span className="text-xs text-gray-500 ml-2">
+                                                    {new Date(
+                                                      m.createdAt,
+                                                    ).toLocaleString()}
+                                                  </span>
                                                 </div>
                                               ))}
                                           </div>
@@ -1633,21 +2015,32 @@ export default function CitizenPortal() {
                                           className="bg-red-600 hover:bg-red-700"
                                           type="button"
                                           onClick={async () => {
-                                            const msg = (contactTextById[report.id] || "").trim();
+                                            const msg = (
+                                              contactTextById[report.id] || ""
+                                            ).trim();
                                             if (!msg) return;
                                             try {
-                                              const res = await api.post(`/crimes/${report.id}/messages`, { message: msg });
+                                              const res = await api.post(
+                                                `/crimes/${report.id}/messages`,
+                                                { message: msg },
+                                              );
                                               if (res.ok) {
                                                 const data = await res.json();
                                                 if (data.success) {
                                                   setMessagesById((prev) => ({
                                                     ...prev,
-                                                    [report.id]: [data.data, ...(prev[report.id] || [])],
+                                                    [report.id]: [
+                                                      data.data,
+                                                      ...(prev[report.id] ||
+                                                        []),
+                                                    ],
                                                   }));
-                                                  setContactTextById((prev) => ({
-                                                    ...prev,
-                                                    [report.id]: "",
-                                                  }));
+                                                  setContactTextById(
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      [report.id]: "",
+                                                    }),
+                                                  );
                                                 }
                                               }
                                             } catch {}
@@ -1662,8 +2055,12 @@ export default function CitizenPortal() {
                                 ) : (
                                   <div className="text-center py-8">
                                     <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("general.noOfficerAssigned")}</h3>
-                                    <p className="text-gray-600">{t("general.pendingAssignment")}</p>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                      {t("general.noOfficerAssigned")}
+                                    </h3>
+                                    <p className="text-gray-600">
+                                      {t("general.pendingAssignment")}
+                                    </p>
                                   </div>
                                 )}
                               </TabsContent>
@@ -1685,11 +2082,15 @@ export default function CitizenPortal() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{inc.title}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {inc.title}
+                        </h3>
                         {getIncidentStatusBadge(inc.status)}
                         {getPriorityBadge(inc.severity)}
                       </div>
-                      <p className="text-gray-600 mb-3 line-clamp-2">{inc.description}</p>
+                      <p className="text-gray-600 mb-3 line-clamp-2">
+                        {inc.description}
+                      </p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-gray-400" />
@@ -1697,11 +2098,18 @@ export default function CitizenPortal() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-400" />
-                          <span>{new Date(inc.dateOccurred).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(inc.dateOccurred).toLocaleDateString()}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <AlertTriangle className="h-4 w-4 text-gray-400" />
-                          <span>{t(`incidentType.${inc.incidentType}`, inc.incidentType)}</span>
+                          <span>
+                            {t(
+                              `incidentType.${inc.incidentType}`,
+                              inc.incidentType,
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-gray-400" />
@@ -1721,9 +2129,14 @@ export default function CitizenPortal() {
           <Card>
             <CardContent className="p-12 text-center">
               <Shield className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("empty.noReports")}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t("empty.noReports")}
+              </h3>
               <p className="text-gray-600 mb-4">{t("empty.noReportsDesc")}</p>
-              <Button onClick={() => setShowNewReportForm(true)} className="bg-red-600 hover:bg-red-700">
+              <Button
+                onClick={() => setShowNewReportForm(true)}
+                className="bg-red-600 hover:bg-red-700"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 {t("empty.submitFirst")}
               </Button>
@@ -1735,9 +2148,17 @@ export default function CitizenPortal() {
           <Card>
             <CardContent className="p-12 text-center">
               <Shield className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("empty.noReports")}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t("empty.noReports")}
+              </h3>
               <p className="text-gray-600 mb-4">{t("empty.noReportsDesc")}</p>
-              <Button onClick={() => { setReportType("incident"); setShowNewReportForm(true); }} className="bg-red-600 hover:bg-red-700">
+              <Button
+                onClick={() => {
+                  setReportType("incident");
+                  setShowNewReportForm(true);
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 {t("empty.submitFirst")}
               </Button>

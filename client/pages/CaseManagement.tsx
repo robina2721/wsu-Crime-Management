@@ -74,6 +74,9 @@ export default function CaseManagement() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [officers, setOfficers] = useState<any[]>([]);
   const [selectedOfficer, setSelectedOfficer] = useState<string>("");
+  const [recipientTarget, setRecipientTarget] = useState<"citizen" | "officer">(
+    "citizen",
+  );
 
   const canManageAllCases = hasAnyRole([
     UserRole.SUPER_ADMIN,
@@ -539,9 +542,7 @@ export default function CaseManagement() {
                               <TabsTrigger value="evidence">
                                 Evidence
                               </TabsTrigger>
-                              <TabsTrigger value="contact">
-                                Contact Citizen
-                              </TabsTrigger>
+                              <TabsTrigger value="contact">Contact</TabsTrigger>
                             </TabsList>
                             <TabsContent value="details">
                               <div className="space-y-2">
@@ -610,6 +611,46 @@ export default function CaseManagement() {
                                   },
                                 )}
                               </div>
+                              <div className="mt-4">
+                                <h4 className="font-semibold mb-2">
+                                  Witnesses
+                                </h4>
+                                {(activeCase?.witnesses || []).length === 0 ? (
+                                  <p className="text-sm text-gray-500">
+                                    No witnesses recorded
+                                  </p>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {(activeCase?.witnesses || []).map(
+                                      (w: any, idx: number) => (
+                                        <div
+                                          key={w.id || idx}
+                                          className="p-2 border rounded"
+                                        >
+                                          <div className="font-medium">
+                                            {w.name || "Unknown"}
+                                          </div>
+                                          {w.phone && (
+                                            <div className="text-sm text-gray-600">
+                                              {w.phone}
+                                            </div>
+                                          )}
+                                          {w.email && (
+                                            <div className="text-sm text-gray-600">
+                                              {w.email}
+                                            </div>
+                                          )}
+                                          {w.statement && (
+                                            <div className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
+                                              {w.statement}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </TabsContent>
                             <TabsContent value="contact">
                               <div className="space-y-3">
@@ -665,14 +706,41 @@ export default function CaseManagement() {
                                     ))}
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>Message</Label>
-                                  <Textarea
-                                    value={newMessage}
-                                    onChange={(e) =>
-                                      setNewMessage(e.target.value)
-                                    }
-                                    placeholder="Write a message to the citizen..."
-                                  />
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div className="md:col-span-2">
+                                      <Label>Message</Label>
+                                      <Textarea
+                                        value={newMessage}
+                                        onChange={(e) =>
+                                          setNewMessage(e.target.value)
+                                        }
+                                        placeholder="Write your message..."
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label>Recipient</Label>
+                                      <Select
+                                        value={recipientTarget}
+                                        onValueChange={(v) =>
+                                          setRecipientTarget(v as any)
+                                        }
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="citizen">
+                                            Citizen
+                                          </SelectItem>
+                                          {activeCase?.assignedTo && (
+                                            <SelectItem value="officer">
+                                              Assigned Officer
+                                            </SelectItem>
+                                          )}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
                                   <Input
                                     type="file"
                                     multiple
@@ -693,14 +761,28 @@ export default function CaseManagement() {
                                             messageFiles.length === 0
                                           )
                                             return;
+                                          const isOfficer =
+                                            recipientTarget === "officer" &&
+                                            !!activeCase.assignedTo;
                                           const form = new FormData();
                                           if (newMessage)
                                             form.append("message", newMessage);
+                                          if (
+                                            isOfficer &&
+                                            activeCase.assignedTo
+                                          )
+                                            form.append(
+                                              "recipientId",
+                                              activeCase.assignedTo,
+                                            );
                                           messageFiles.forEach((f) =>
                                             form.append("files", f),
                                           );
+                                          const endpoint = isOfficer
+                                            ? `/crimes/${activeCase.id}/contact`
+                                            : `/crimes/${activeCase.id}/messages`;
                                           const res = await api.post(
-                                            `/crimes/${activeCase.id}/messages`,
+                                            endpoint,
                                             form,
                                           );
                                           if (res.ok) {
@@ -731,7 +813,26 @@ export default function CaseManagement() {
 
                       {canManageAllCases && (
                         <>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                const res = await api.get(
+                                  `/crimes/${case_.id}`,
+                                );
+                                if (res.ok) {
+                                  const d = await res.json();
+                                  if (d.success) {
+                                    setActiveCase(d.data);
+                                    setIsViewOpen(true);
+                                  }
+                                }
+                              } catch (e) {
+                                console.error(e);
+                              }
+                            }}
+                          >
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
