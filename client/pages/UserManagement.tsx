@@ -111,6 +111,8 @@ export default function UserManagement() {
     UserRole.POLICE_HEAD,
   ]);
 
+  const [activeTab, setActiveTab] = useState<"users" | "pending" | "roles">("users");
+
   useEffect(() => {
     fetchUsers();
     fetchPendingAccounts();
@@ -292,7 +294,7 @@ export default function UserManagement() {
       <div className="max-w-7xl mx-auto p-6">
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-6 mb-8">
-          <Card>
+          <Card onClick={() => setActiveTab("users")} className="cursor-pointer">
             <CardContent className="p-6 text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
               <h3 className="text-2xl font-bold text-crime-black">
@@ -319,7 +321,7 @@ export default function UserManagement() {
               <p className="text-gray-600">Inactive</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => setActiveTab("roles")} className="cursor-pointer">
             <CardContent className="p-6 text-center">
               <Settings className="w-8 h-8 mx-auto mb-2 text-crime-red" />
               <h3 className="text-2xl font-bold text-crime-black">
@@ -346,7 +348,7 @@ export default function UserManagement() {
               <p className="text-gray-600">Citizens</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => setActiveTab("pending")} className="cursor-pointer">
             <CardContent className="p-6 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-crime-yellow" />
               <h3 className="text-2xl font-bold text-crime-black">
@@ -357,7 +359,7 @@ export default function UserManagement() {
           </Card>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">User Directory</TabsTrigger>
             <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
