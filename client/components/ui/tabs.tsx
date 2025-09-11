@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 export function Tabs({ value, onValueChange, children, className }: any) {
   return <div className={cn(className)}>{children}</div>;
 }
-export const TabsList = ({ children }: any) => (
-  <div className="flex flex-col sm:flex-row w-full gap-2 sm:gap-0 sm:space-x-2">
+export const TabsList = ({ children, className }: any) => (
+  <div className={cn("flex flex-col sm:flex-row w-full gap-2 sm:gap-0 sm:space-x-2", className)}>
     {children}
   </div>
 );
