@@ -10,7 +10,9 @@ export const TabsList = ({ children, className }: any) => (
   </div>
 );
 export const TabsTrigger = ({ value, children, onClick }: any) => (
-  <button className="px-3 py-1 rounded" onClick={() => onClick?.(value)}>{children}</button>
+  <button className="w-full sm:w-auto px-3 py-1 rounded text-sm" onClick={() => onClick?.(value)}>
+    {children}
+  </button>
 );
 export const TabsContent = ({ value, activeValue, children, className }: any) => {
   if (value && activeValue && value !== activeValue) return null;
