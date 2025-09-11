@@ -263,7 +263,7 @@ export default function Index() {
       {/* Stats Section */}
       <section className="relative -mt-16 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
               <Card
                 key={index}
@@ -517,7 +517,9 @@ export default function Index() {
             <div className="flex justify-center md:justify-end gap-4 text-sm text-gray-300">
               <Link to="/">Home</Link>
               <Link to="/login">Login</Link>
-              <Link to="/signup">Sign Up</Link>
+              <Link to="/signup" className="hidden sm:inline">
+                Sign Up
+              </Link>
               <Link to="/citizen-portal">Citizen Portal</Link>
               <Link to="/incident-reports">Incidents</Link>
             </div>

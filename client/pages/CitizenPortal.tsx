@@ -106,8 +106,16 @@ export default function CitizenPortal() {
         senderRole: string;
         message: string;
         createdAt: string | Date;
+        attachments?: {
+          id?: string;
+          fileName: string;
+          fileType?: string | null;
+        }[];
       }[]
     >
+  >({});
+  const [contactFilesById, setContactFilesById] = useState<
+    Record<string, File[]>
   >({});
   const [currentTab, setCurrentTab] = useState("incident");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
@@ -517,20 +525,13 @@ export default function CitizenPortal() {
           setWitnesses([]);
           setEvidenceFiles([]);
           localStorage.removeItem("crime_report_draft");
-          setSubmissionStatus({
-            type: "success",
-            message:
-              "Your Report Is Successfully Submmited Stay in Touch For Update",
-          });
+
           toast({
             title: "Success",
             description:
               "Your Report Is Successfully Submmited Stay in Touch For Update",
           });
-          setTimeout(() => {
-            setShowNewReportForm(false);
-            setSubmissionStatus(null);
-          }, 1200);
+          setShowNewReportForm(false);
         } else {
           setSubmissionStatus({
             type: "error",
@@ -581,11 +582,6 @@ export default function CitizenPortal() {
           description:
             "Your Report Is Successfully Submmited Stay in Touch For Update",
         });
-        setTimeout(() => {
-          setShowNewReportForm(false);
-          setReportType("incident");
-          setSubmissionStatus(null);
-        }, 1200);
       } catch (e) {
         console.error("Failed to create incident", e);
         setSubmissionStatus({
@@ -731,19 +727,6 @@ export default function CitizenPortal() {
                     onValueChange={setCurrentTab}
                     className="w-full"
                   >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="incident">
-                        {t("tabs.incident")}
-                      </TabsTrigger>
-                      {reportType === "crime" && (
-                        <TabsTrigger value="evidence">
-                          {t("tabs.evidence")}
-                        </TabsTrigger>
-                      )}
-                      <TabsTrigger value="review">
-                        {t("tabs.review")}
-                      </TabsTrigger>
-                    </TabsList>
                     <TabsContent value="incident" className="space-y-4">
                       {reportType === "crime" ? (
                         <>
@@ -1985,6 +1968,80 @@ export default function CitizenPortal() {
                                             }
                                           />
                                         </div>
+
+                                        <div>
+                                          <Label>Attach Photos/Videos</Label>
+                                          <div className="flex items-center justify-center w-full mt-2">
+                                            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                              <div className="flex flex-col items-center justify-center pt-3 pb-4">
+                                                <Upload className="h-6 w-6 text-gray-400 mb-1" />
+                                                <p className="text-xs text-gray-500">
+                                                  Click to upload
+                                                </p>
+                                              </div>
+                                              <input
+                                                type="file"
+                                                className="hidden"
+                                                multiple
+                                                accept="image/*,video/*"
+                                                onChange={(e) => {
+                                                  const files = e.target.files
+                                                    ? Array.from(e.target.files)
+                                                    : [];
+                                                  if (!files.length) return;
+                                                  setContactFilesById(
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      [report.id]: [
+                                                        ...(prev[report.id] ||
+                                                          []),
+                                                        ...files,
+                                                      ],
+                                                    }),
+                                                  );
+                                                }}
+                                              />
+                                            </label>
+                                          </div>
+                                          {(contactFilesById[report.id] || [])
+                                            .length > 0 && (
+                                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                              {(
+                                                contactFilesById[report.id] ||
+                                                []
+                                              ).map((file, idx) => (
+                                                <div
+                                                  key={idx}
+                                                  className="p-2 border rounded"
+                                                >
+                                                  {file.type.startsWith(
+                                                    "image/",
+                                                  ) ? (
+                                                    <img
+                                                      src={URL.createObjectURL(
+                                                        file,
+                                                      )}
+                                                      alt={file.name}
+                                                      className="h-20 w-full object-cover rounded"
+                                                    />
+                                                  ) : (
+                                                    <video
+                                                      src={URL.createObjectURL(
+                                                        file,
+                                                      )}
+                                                      controls
+                                                      className="h-20 w-full rounded"
+                                                    />
+                                                  )}
+                                                  <p className="text-xs mt-1 truncate">
+                                                    {file.name}
+                                                  </p>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+
                                         <div className="space-y-2">
                                           <Label>
                                             {t("general.conversation")}
@@ -1996,17 +2053,77 @@ export default function CitizenPortal() {
                                               .map((m, idx) => (
                                                 <div
                                                   key={m.id || idx}
-                                                  className="text-sm mb-2"
+                                                  className="text-sm mb-3"
                                                 >
-                                                  <span className="font-medium">
-                                                    {m.senderRole}:
-                                                  </span>{" "}
-                                                  {m.message}
-                                                  <span className="text-xs text-gray-500 ml-2">
-                                                    {new Date(
-                                                      m.createdAt,
-                                                    ).toLocaleString()}
-                                                  </span>
+                                                  <div>
+                                                    <span className="font-medium">
+                                                      {m.senderRole}:
+                                                    </span>{" "}
+                                                    {m.message}
+                                                    <span className="text-xs text-gray-500 ml-2">
+                                                      {new Date(
+                                                        m.createdAt,
+                                                      ).toLocaleString()}
+                                                    </span>
+                                                  </div>
+                                                  {m.attachments &&
+                                                    m.attachments.length >
+                                                      0 && (
+                                                      <div className="grid grid-cols-2 gap-2 mt-1">
+                                                        {m.attachments.map(
+                                                          (att, i) => {
+                                                            const name =
+                                                              att.fileName;
+                                                            const type =
+                                                              att.fileType ||
+                                                              "";
+                                                            const isImg =
+                                                              type.startsWith(
+                                                                "image/",
+                                                              ) ||
+                                                              /\.(png|jpg|jpeg|gif|webp)$/i.test(
+                                                                name,
+                                                              );
+                                                            const isVideo =
+                                                              type.startsWith(
+                                                                "video/",
+                                                              ) ||
+                                                              /\.(mp4|webm|ogg)$/i.test(
+                                                                name,
+                                                              );
+                                                            return (
+                                                              <div
+                                                                key={i}
+                                                                className="p-1 border rounded"
+                                                              >
+                                                                {isImg ? (
+                                                                  <img
+                                                                    src={name}
+                                                                    alt={`attachment-${i}`}
+                                                                    className="h-20 w-full object-cover rounded"
+                                                                  />
+                                                                ) : isVideo ? (
+                                                                  <video
+                                                                    src={name}
+                                                                    controls
+                                                                    className="h-20 w-full rounded"
+                                                                  />
+                                                                ) : (
+                                                                  <a
+                                                                    href={name}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="text-blue-600 underline text-xs break-all"
+                                                                  >
+                                                                    {name}
+                                                                  </a>
+                                                                )}
+                                                              </div>
+                                                            );
+                                                          },
+                                                        )}
+                                                      </div>
+                                                    )}
                                                 </div>
                                               ))}
                                           </div>
@@ -2018,29 +2135,72 @@ export default function CitizenPortal() {
                                             const msg = (
                                               contactTextById[report.id] || ""
                                             ).trim();
-                                            if (!msg) return;
+                                            const files =
+                                              contactFilesById[report.id] || [];
+                                            if (!msg && files.length === 0)
+                                              return;
                                             try {
-                                              const res = await api.post(
-                                                `/crimes/${report.id}/messages`,
-                                                { message: msg },
-                                              );
-                                              if (res.ok) {
-                                                const data = await res.json();
-                                                if (data.success) {
-                                                  setMessagesById((prev) => ({
-                                                    ...prev,
-                                                    [report.id]: [
-                                                      data.data,
-                                                      ...(prev[report.id] ||
-                                                        []),
-                                                    ],
-                                                  }));
-                                                  setContactTextById(
-                                                    (prev) => ({
+                                              if (files.length > 0) {
+                                                const form = new FormData();
+                                                form.append(
+                                                  "message",
+                                                  msg || "",
+                                                );
+                                                files.forEach((f) =>
+                                                  form.append("files", f),
+                                                );
+                                                const res = await api.post(
+                                                  `/crimes/${report.id}/messages`,
+                                                  form,
+                                                );
+                                                if (res.ok) {
+                                                  const data = await res.json();
+                                                  if (data.success) {
+                                                    setMessagesById((prev) => ({
                                                       ...prev,
-                                                      [report.id]: "",
-                                                    }),
-                                                  );
+                                                      [report.id]: [
+                                                        data.data,
+                                                        ...(prev[report.id] ||
+                                                          []),
+                                                      ],
+                                                    }));
+                                                    setContactTextById(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [report.id]: "",
+                                                      }),
+                                                    );
+                                                    setContactFilesById(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [report.id]: [],
+                                                      }),
+                                                    );
+                                                  }
+                                                }
+                                              } else {
+                                                const res = await api.post(
+                                                  `/crimes/${report.id}/messages`,
+                                                  { message: msg },
+                                                );
+                                                if (res.ok) {
+                                                  const data = await res.json();
+                                                  if (data.success) {
+                                                    setMessagesById((prev) => ({
+                                                      ...prev,
+                                                      [report.id]: [
+                                                        data.data,
+                                                        ...(prev[report.id] ||
+                                                          []),
+                                                      ],
+                                                    }));
+                                                    setContactTextById(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [report.id]: "",
+                                                      }),
+                                                    );
+                                                  }
                                                 }
                                               }
                                             } catch {}
