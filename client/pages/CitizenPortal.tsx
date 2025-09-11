@@ -577,11 +577,6 @@ export default function CitizenPortal() {
           description:
             "Your Report Is Successfully Submmited Stay in Touch For Update",
         });
-        setTimeout(() => {
-          setShowNewReportForm(false);
-          setReportType("incident");
-          setSubmissionStatus(null);
-        }, 1200);
       } catch (e) {
         console.error("Failed to create incident", e);
         setSubmissionStatus({
