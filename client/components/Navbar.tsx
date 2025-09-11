@@ -147,7 +147,7 @@ export default function Navbar() {
           <NavLinks />
           <div className="pt-2 border-t border-crime-red/10">
             {!isAuthenticated ? (
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <Link to="/signup" onClick={() => setOpen(false)}>
                   <Button variant="outline" className="h-9 w-full">
                     Sign Up
