@@ -517,11 +517,7 @@ export default function CitizenPortal() {
           setWitnesses([]);
           setEvidenceFiles([]);
           localStorage.removeItem("crime_report_draft");
-          setSubmissionStatus({
-            type: "success",
-            message:
-              "Your Report Is Successfully Submmited Stay in Touch For Update",
-          });
+
           toast({
             title: "Success",
             description:
