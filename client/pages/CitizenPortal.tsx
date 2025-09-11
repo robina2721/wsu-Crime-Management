@@ -523,6 +523,7 @@ export default function CitizenPortal() {
             description:
               "Your Report Is Successfully Submmited Stay in Touch For Update",
           });
+          setShowNewReportForm(false);
         } else {
           setSubmissionStatus({
             type: "error",
