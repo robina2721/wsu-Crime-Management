@@ -430,7 +430,7 @@ export default function MyCases() {
                             </DialogHeader>
 
                             <Tabs defaultValue="overview" className="space-y-4">
-                              <TabsList className="grid w-full grid-cols-3">
+                              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
                                 <TabsTrigger value="overview">
                                   Overview
                                 </TabsTrigger>
