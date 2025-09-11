@@ -527,10 +527,6 @@ export default function CitizenPortal() {
             description:
               "Your Report Is Successfully Submmited Stay in Touch For Update",
           });
-          setTimeout(() => {
-            setShowNewReportForm(false);
-            setSubmissionStatus(null);
-          }, 1200);
         } else {
           setSubmissionStatus({
             type: "error",
@@ -731,19 +727,6 @@ export default function CitizenPortal() {
                     onValueChange={setCurrentTab}
                     className="w-full"
                   >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="incident">
-                        {t("tabs.incident")}
-                      </TabsTrigger>
-                      {reportType === "crime" && (
-                        <TabsTrigger value="evidence">
-                          {t("tabs.evidence")}
-                        </TabsTrigger>
-                      )}
-                      <TabsTrigger value="review">
-                        {t("tabs.review")}
-                      </TabsTrigger>
-                    </TabsList>
                     <TabsContent value="incident" className="space-y-4">
                       {reportType === "crime" ? (
                         <>
@@ -1695,7 +1678,7 @@ export default function CitizenPortal() {
                       <div className="flex gap-2 ml-4">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className={!status?.assignedOfficer ? "hidden" : undefined}>
                               <Eye className="h-4 w-4 mr-2" />
                               {t("general.viewDetails")}
                             </Button>
