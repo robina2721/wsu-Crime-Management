@@ -517,7 +517,9 @@ export default function Index() {
             <div className="flex justify-center md:justify-end gap-4 text-sm text-gray-300">
               <Link to="/">Home</Link>
               <Link to="/login">Login</Link>
-              <Link to="/signup" className="hidden sm:inline">Sign Up</Link>
+              <Link to="/signup" className="hidden sm:inline">
+                Sign Up
+              </Link>
               <Link to="/citizen-portal">Citizen Portal</Link>
               <Link to="/incident-reports">Incidents</Link>
             </div>
