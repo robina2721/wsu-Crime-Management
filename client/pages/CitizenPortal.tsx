@@ -1120,8 +1120,9 @@ export default function CitizenPortal() {
                               formData.evidence.length && (
                                 <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
                                   Saved evidence placeholders detected:{" "}
-                                  {formData.evidence.join(", ")}. Please re-attach
-                                  files to include them with submission.
+                                  {formData.evidence.join(", ")}. Please
+                                  re-attach files to include them with
+                                  submission.
                                 </div>
                               )}
                           </div>
