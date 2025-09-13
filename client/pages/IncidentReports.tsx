@@ -798,12 +798,106 @@ export default function IncidentReports() {
                           </DialogContent>
                         </Dialog>
 
-                        {(incident.reportedBy === user?.id ||
-                          canManageAllIncidents) && (
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
+                        {canManageAllIncidents && (
+                          <Dialog open={isEditOpen && activeIncident?.id === incident.id} onOpenChange={(o)=>{ if(!o){ setIsEditOpen(false); setActiveIncident(null); setEditIncident(null);} }}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={async ()=>{
+                                try {
+                                  const res = await api.get(`/incidents/${incident.id}`);
+                                  if (res.ok) {
+                                    const d = await res.json();
+                                    if (d.success) {
+                                      const it = {
+                                        ...d.data,
+                                        dateOccurred: new Date(d.data.dateOccurred).toISOString().slice(0,16),
+                                      } as any;
+                                      setActiveIncident(d.data);
+                                      setEditIncident(it);
+                                      setIsEditOpen(true);
+                                    }
+                                  }
+                                } catch(e){ console.error(e); }
+                              }}>
+                                <Edit className="w-4 h-4 mr-1" />
+                                Edit
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Edit Incident</DialogTitle>
+                              </DialogHeader>
+                              {editIncident && (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Title</Label>
+                                      <Input value={editIncident.title || ""} onChange={(e)=> setEditIncident((p)=> ({...p!, title: e.target.value}))} />
+                                    </div>
+                                    <div>
+                                      <Label>Type</Label>
+                                      <Select value={editIncident.incidentType as any} onValueChange={(v)=> setEditIncident((p)=> ({...p!, incidentType: v as any}))}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                          {Object.values(IncidentType).map((typ)=> (
+                                            <SelectItem key={typ} value={typ}>{typ}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Severity</Label>
+                                      <Select value={editIncident.severity as any} onValueChange={(v)=> setEditIncident((p)=> ({...p!, severity: v as any}))}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                          {Object.values(Priority).map((pr)=> (
+                                            <SelectItem key={pr} value={pr}>{pr.toUpperCase()}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label>Date Occurred</Label>
+                                      <Input type="datetime-local" value={(editIncident as any).dateOccurred as any} onChange={(e)=> setEditIncident((p)=> ({...p!, dateOccurred: e.target.value}))} />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Location</Label>
+                                    <Input value={editIncident.location || ""} onChange={(e)=> setEditIncident((p)=> ({...p!, location: e.target.value}))} />
+                                  </div>
+                                  <div>
+                                    <Label>Description</Label>
+                                    <Textarea value={editIncident.description || ""} onChange={(e)=> setEditIncident((p)=> ({...p!, description: e.target.value}))} />
+                                  </div>
+                                  <div className="flex justify-end gap-2">
+                                    <Button variant="outline" onClick={()=> setIsEditOpen(false)}>Cancel</Button>
+                                    <Button onClick={async ()=>{
+                                      if (!activeIncident || !editIncident) return;
+                                      try {
+                                        const payload:any = {
+                                          title: editIncident.title,
+                                          description: editIncident.description,
+                                          incidentType: editIncident.incidentType,
+                                          severity: editIncident.severity,
+                                          location: editIncident.location,
+                                          dateOccurred: editIncident.dateOccurred,
+                                        };
+                                        const res = await api.put(`/incidents/${activeIncident.id}`, payload);
+                                        if (res.ok) {
+                                          const d = await res.json();
+                                          if (d.success) {
+                                            setIncidents((prev)=> prev.map((x)=> x.id === d.data.id ? { ...d.data, dateOccurred: new Date(d.data.dateOccurred), createdAt: new Date(d.data.createdAt), updatedAt: new Date(d.data.updatedAt) } : x));
+                                            setIsEditOpen(false);
+                                          }
+                                        }
+                                      } catch(e){ console.error(e); }
+                                    }}>Save</Button>
+                                  </div>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
                         )}
 
                         <Button
