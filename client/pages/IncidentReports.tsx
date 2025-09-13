@@ -732,10 +732,71 @@ export default function IncidentReports() {
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
+                        <Dialog open={isViewOpen && activeIncident?.id === incident.id} onOpenChange={(o)=>{ if(!o){ setIsViewOpen(false); setActiveIncident(null);} }}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={async ()=>{
+                              try {
+                                const res = await api.get(`/incidents/${incident.id}`);
+                                if (res.ok) {
+                                  const d = await res.json();
+                                  if (d.success) {
+                                    setActiveIncident({
+                                      ...d.data,
+                                      dateOccurred: new Date(d.data.dateOccurred),
+                                      createdAt: new Date(d.data.createdAt),
+                                      updatedAt: new Date(d.data.updatedAt),
+                                    } as any);
+                                    setIsViewOpen(true);
+                                  }
+                                }
+                              } catch(e){ console.error(e); }
+                            }}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              View
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Incident Details - {activeIncident?.title}</DialogTitle>
+                              <DialogDescription>ID: {activeIncident?.id}</DialogDescription>
+                            </DialogHeader>
+                            {activeIncident && (
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Type</Label>
+                                    <p className="mt-1">{activeIncident.incidentType}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Severity</Label>
+                                    <div className="mt-1">
+                                      <Badge className={getSeverityBadgeColor(activeIncident.severity)}>{activeIncident.severity.toUpperCase()}</Badge>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Date Occurred</Label>
+                                    <p className="mt-1">{new Date(activeIncident.dateOccurred as any).toLocaleString()}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Status</Label>
+                                    <Badge className={getStatusBadgeColor(activeIncident.status)}>{activeIncident.status.toUpperCase()}</Badge>
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label>Location</Label>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <MapPin className="h-4 w-4 text-gray-400" />
+                                    <span>{activeIncident.location}</span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label>Description</Label>
+                                  <p className="mt-1 whitespace-pre-wrap">{activeIncident.description}</p>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
 
                         {(incident.reportedBy === user?.id ||
                           canManageAllIncidents) && (
