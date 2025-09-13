@@ -68,10 +68,12 @@ import {
 } from "../../shared/types";
 import { api } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function CitizenPortal() {
   const { user } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState<"crimes" | "incidents">(
     "crimes",
@@ -123,6 +125,8 @@ export default function CitizenPortal() {
     type: "success" | "error";
     message: string;
   }>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmittedKey, setLastSubmittedKey] = useState<string | null>(null);
 
   const steps = React.useMemo(
     () =>
@@ -479,6 +483,24 @@ export default function CitizenPortal() {
   };
 
   const handleSubmitReport = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const key = JSON.stringify({
+      reportType,
+      formData,
+      witnesses: witnesses.map((w) => ({
+        name: w.name,
+        phone: w.phone,
+        email: w.email,
+        statement: w.statement,
+      })),
+      evidenceCount: evidenceFiles.length,
+    });
+    if (lastSubmittedKey === key) {
+      setIsSubmitting(false);
+      return;
+    }
+    setLastSubmittedKey(key);
     if (reportType === "crime") {
       const data = formData;
       try {
@@ -520,26 +542,37 @@ export default function CitizenPortal() {
             ) as any,
             witnesses: [],
           } as any;
-          setReports((prev) => [normalized, ...prev]);
+          setReports((prev) =>
+            prev.some((r) => r.id === (normalized as any).id)
+              ? prev
+              : [normalized, ...prev],
+          );
           setFormData({});
           setWitnesses([]);
           setEvidenceFiles([]);
           localStorage.removeItem("crime_report_draft");
 
+          setSubmissionStatus({
+            type: "success",
+            message: "Your report was submitted successfully",
+          });
           toast({
             title: "Success",
             description:
               "Your Report Is Successfully Submmited Stay in Touch For Update",
           });
           setShowNewReportForm(false);
+          setIsSubmitting(false);
         } else {
           setSubmissionStatus({
             type: "error",
             message: "Failed to submit report",
           });
+          setIsSubmitting(false);
         }
       } catch (e) {
         console.error("Failed to submit report", e);
+        setIsSubmitting(false);
       }
     } else {
       // Incident report
@@ -558,7 +591,14 @@ export default function CitizenPortal() {
           followUpRequired: false,
         };
         const res = await api.post("/incidents", payload);
-        if (!res.ok) return;
+        if (!res.ok) {
+          setSubmissionStatus({
+            type: "error",
+            message: "Failed to submit incident",
+          });
+          setIsSubmitting(false);
+          return;
+        }
         const data = await res.json();
         const r = data.data;
         const created: IncidentReport = {
@@ -582,12 +622,14 @@ export default function CitizenPortal() {
           description:
             "Your Report Is Successfully Submmited Stay in Touch For Update",
         });
+        setIsSubmitting(false);
       } catch (e) {
         console.error("Failed to create incident", e);
         setSubmissionStatus({
           type: "error",
           message: "Failed to submit incident",
         });
+        setIsSubmitting(false);
       }
     }
   };
@@ -663,6 +705,13 @@ export default function CitizenPortal() {
               </h1>
               <p className="text-gray-600 mt-2">{t("citizen.subtitle")}</p>
             </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/citizen-feedback")}
+              className="mr-2"
+            >
+              Submit Feedback
+            </Button>
             <Dialog
               open={showNewReportForm}
               onOpenChange={setShowNewReportForm}
@@ -1378,6 +1427,7 @@ export default function CitizenPortal() {
                         <Button
                           type="submit"
                           className="bg-red-600 hover:bg-red-700"
+                          disabled={isSubmitting}
                         >
                           {t("general.submitReport")}
                         </Button>
@@ -2281,6 +2331,68 @@ export default function CitizenPortal() {
                           <span className="truncate">{inc.reporterName}</span>
                         </div>
                       </div>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>
+                              Incident Details - {inc.title}
+                            </DialogTitle>
+                            <DialogDescription>ID: {inc.id}</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Type</Label>
+                                <p className="mt-1">
+                                  {t(
+                                    `incidentType.${inc.incidentType}`,
+                                    inc.incidentType,
+                                  )}
+                                </p>
+                              </div>
+                              <div>
+                                <Label>Severity</Label>
+                                <div className="mt-1">
+                                  {getPriorityBadge(inc.severity)}
+                                </div>
+                              </div>
+                              <div>
+                                <Label>Date Occurred</Label>
+                                <p className="mt-1">
+                                  {new Date(inc.dateOccurred).toLocaleString()}
+                                </p>
+                              </div>
+                              <div>
+                                <Label>Status</Label>
+                                <div className="mt-1">
+                                  {getIncidentStatusBadge(inc.status)}
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <Label>Location</Label>
+                              <div className="flex items-center gap-2 mt-1">
+                                <MapPin className="h-4 w-4 text-gray-400" />
+                                <span>{inc.location}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <Label>Description</Label>
+                              <p className="mt-1 whitespace-pre-wrap">
+                                {inc.description}
+                              </p>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </CardContent>
