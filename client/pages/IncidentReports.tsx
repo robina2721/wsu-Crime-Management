@@ -900,13 +900,32 @@ export default function IncidentReports() {
                           </Dialog>
                         )}
 
-                        <Button
-                          size="sm"
-                          className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
-                        >
-                          <Camera className="w-4 h-4 mr-1" />
-                          Add Evidence
-                        </Button>
+                        <Dialog open={isEvidenceOpen && activeIncident?.id === incident.id} onOpenChange={(o)=>{ if(!o){ setIsEvidenceOpen(false); setActiveIncident(null);} }}>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
+                              onClick={()=>{ setActiveIncident(incident); setIsEvidenceOpen(true); }}
+                            >
+                              <Camera className="w-4 h-4 mr-1" />
+                              Add Evidence
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Add Evidence</DialogTitle>
+                              <DialogDescription>
+                                Evidence uploads are supported for Cases (Crimes) only. For incidents, attach files to the related case or convert this incident into a case.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-3 text-sm text-gray-700">
+                              <p>Tip: If this incident relates to a crime, open the associated case and use “Add Evidence”.</p>
+                            </div>
+                            <div className="flex justify-end">
+                              <Button variant="outline" onClick={()=> setIsEvidenceOpen(false)}>Close</Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   </div>
