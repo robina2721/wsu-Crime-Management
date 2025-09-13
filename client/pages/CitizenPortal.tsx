@@ -485,6 +485,17 @@ export default function CitizenPortal() {
   const handleSubmitReport = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    const key = JSON.stringify({
+      reportType,
+      formData,
+      witnesses: witnesses.map((w) => ({ name: w.name, phone: w.phone, email: w.email, statement: w.statement })),
+      evidenceCount: evidenceFiles.length,
+    });
+    if (lastSubmittedKey === key) {
+      setIsSubmitting(false);
+      return;
+    }
+    setLastSubmittedKey(key);
     if (reportType === "crime") {
       const data = formData;
       try {
