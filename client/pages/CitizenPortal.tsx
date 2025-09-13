@@ -127,7 +127,7 @@ export default function CitizenPortal() {
   const steps = React.useMemo(
     () =>
       reportType === "crime"
-        ? ["incident", "evidence", "review"]
+        ? ["incident", "evidence", "witnesses", "review"]
         : ["incident", "review"],
     [reportType],
   );
@@ -1044,187 +1044,191 @@ export default function CitizenPortal() {
                     </TabsContent>
 
                     {reportType === "crime" && (
-                      <TabsContent value="evidence" className="space-y-6">
-                        <div>
-                          <Label>{t("general.uploadEvidence")}</Label>
-                          <div className="flex items-center justify-center w-full mt-2">
-                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                                <p className="text-sm text-gray-500">
-                                  {t("general.clickToUpload")}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {t("general.maxFileSize")}
-                                </p>
-                              </div>
-                              <input
-                                type="file"
-                                className="hidden"
-                                multiple
-                                accept="image/*,video/*"
-                                onChange={(e) => {
-                                  if (e.target.files) {
-                                    handleFileUpload(e.target.files);
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-
-                          {isUploading && (
-                            <div className="space-y-2 mt-4">
-                              <div className="flex justify-between text-sm">
-                                <span>{t("general.uploadingFiles")}</span>
-                                <span>{uploadProgress}%</span>
-                              </div>
-                              <Progress value={uploadProgress} />
+                      <>
+                        <TabsContent value="evidence" className="space-y-6">
+                          <div>
+                            <Label>{t("general.uploadEvidence")}</Label>
+                            <div className="flex items-center justify-center w-full mt-2">
+                              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                                  <p className="text-sm text-gray-500">
+                                    {t("general.clickToUpload")}
+                                  </p>
+                                  <p className="text-xs text-gray-400">
+                                    {t("general.maxFileSize")}
+                                  </p>
+                                </div>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  multiple
+                                  accept="image/*,video/*"
+                                  onChange={(e) => {
+                                    if (e.target.files) {
+                                      handleFileUpload(e.target.files);
+                                    }
+                                  }}
+                                />
+                              </label>
                             </div>
-                          )}
 
-                          {evidenceFiles.length > 0 && (
-                            <div className="mt-4">
-                              <Label>{t("general.evidenceFiles")}</Label>
-                              <div className="grid grid-cols-2 gap-2 mt-2">
-                                {evidenceFiles.map((file, index) => (
-                                  <div
-                                    key={index}
-                                    className="p-2 border rounded"
-                                  >
-                                    {file.type.startsWith("image/") ? (
-                                      <img
-                                        src={URL.createObjectURL(file)}
-                                        alt={file.name}
-                                        className="h-24 w-full object-cover rounded"
-                                      />
-                                    ) : (
-                                      <video
-                                        src={URL.createObjectURL(file)}
-                                        controls
-                                        className="h-24 w-full rounded"
-                                      />
-                                    )}
-                                    <p className="text-xs mt-1 truncate">
-                                      {file.name}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* If draft contains evidence filenames but files are not attached, prompt to reattach */}
-                          {!evidenceFiles.length &&
-                            formData.evidence &&
-                            formData.evidence.length && (
-                              <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
-                                Saved evidence placeholders detected:{" "}
-                                {formData.evidence.join(", ")}. Please re-attach
-                                files to include them with submission.
+                            {isUploading && (
+                              <div className="space-y-2 mt-4">
+                                <div className="flex justify-between text-sm">
+                                  <span>{t("general.uploadingFiles")}</span>
+                                  <span>{uploadProgress}%</span>
+                                </div>
+                                <Progress value={uploadProgress} />
                               </div>
                             )}
-                        </div>
 
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <Label>{t("general.witnesses")}</Label>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={addWitness}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              {t("general.addWitness")}
-                            </Button>
+                            {evidenceFiles.length > 0 && (
+                              <div className="mt-4">
+                                <Label>{t("general.evidenceFiles")}</Label>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                  {evidenceFiles.map((file, index) => (
+                                    <div
+                                      key={index}
+                                      className="p-2 border rounded"
+                                    >
+                                      {file.type.startsWith("image/") ? (
+                                        <img
+                                          src={URL.createObjectURL(file)}
+                                          alt={file.name}
+                                          className="h-24 w-full object-cover rounded"
+                                        />
+                                      ) : (
+                                        <video
+                                          src={URL.createObjectURL(file)}
+                                          controls
+                                          className="h-24 w-full rounded"
+                                        />
+                                      )}
+                                      <p className="text-xs mt-1 truncate">
+                                        {file.name}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* If draft contains evidence filenames but files are not attached, prompt to reattach */}
+                            {!evidenceFiles.length &&
+                              formData.evidence &&
+                              formData.evidence.length && (
+                                <div className="mt-4 p-3 rounded bg-yellow-50 text-yellow-800">
+                                  Saved evidence placeholders detected:{" "}
+                                  {formData.evidence.join(", ")}. Please re-attach
+                                  files to include them with submission.
+                                </div>
+                              )}
                           </div>
-                          {witnesses.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4">
-                              {t("general.noWitnesses", "No witnesses added")}
-                            </p>
-                          ) : (
-                            <div className="space-y-4 mt-4">
-                              {witnesses.map((witness, index) => (
-                                <Card key={index}>
-                                  <CardContent className="p-4">
-                                    <div className="flex justify-between items-start mb-4">
-                                      <h4 className="font-medium">
-                                        {t("general.witnesses")} {index + 1}
-                                      </h4>
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => removeWitness(index)}
-                                      >
-                                        {t("general.remove")}
-                                      </Button>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <Label>Name</Label>
-                                        <Input
-                                          value={witness.name}
-                                          onChange={(e) =>
-                                            updateWitness(
-                                              index,
-                                              "name",
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder="Witness name"
-                                        />
-                                      </div>
-                                      <div>
-                                        <Label>Phone</Label>
-                                        <Input
-                                          value={witness.phone || ""}
-                                          onChange={(e) =>
-                                            updateWitness(
-                                              index,
-                                              "phone",
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder="Phone number"
-                                        />
-                                      </div>
-                                      <div className="col-span-2">
-                                        <Label>Email</Label>
-                                        <Input
-                                          type="email"
-                                          value={witness.email || ""}
-                                          onChange={(e) =>
-                                            updateWitness(
-                                              index,
-                                              "email",
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder="Email address"
-                                        />
-                                      </div>
-                                      <div className="col-span-2">
-                                        <Label>Statement</Label>
-                                        <Textarea
-                                          value={witness.statement}
-                                          onChange={(e) =>
-                                            updateWitness(
-                                              index,
-                                              "statement",
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder="What did this witness see or know about the incident?"
-                                        />
-                                      </div>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              ))}
+                        </TabsContent>
+
+                        <TabsContent value="witnesses" className="space-y-6">
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <Label>{t("general.witnesses")}</Label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={addWitness}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                {t("general.addWitness")}
+                              </Button>
                             </div>
-                          )}
-                        </div>
-                      </TabsContent>
+                            {witnesses.length === 0 ? (
+                              <p className="text-gray-500 text-center py-4">
+                                {t("general.noWitnesses", "No witnesses added")}
+                              </p>
+                            ) : (
+                              <div className="space-y-4 mt-4">
+                                {witnesses.map((witness, index) => (
+                                  <Card key={index}>
+                                    <CardContent className="p-4">
+                                      <div className="flex justify-between items-start mb-4">
+                                        <h4 className="font-medium">
+                                          {t("general.witnesses")} {index + 1}
+                                        </h4>
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => removeWitness(index)}
+                                        >
+                                          {t("general.remove")}
+                                        </Button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <Label>Name</Label>
+                                          <Input
+                                            value={witness.name}
+                                            onChange={(e) =>
+                                              updateWitness(
+                                                index,
+                                                "name",
+                                                e.target.value,
+                                              )
+                                            }
+                                            placeholder="Witness name"
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label>Phone</Label>
+                                          <Input
+                                            value={witness.phone || ""}
+                                            onChange={(e) =>
+                                              updateWitness(
+                                                index,
+                                                "phone",
+                                                e.target.value,
+                                              )
+                                            }
+                                            placeholder="Phone number"
+                                          />
+                                        </div>
+                                        <div className="col-span-2">
+                                          <Label>Email</Label>
+                                          <Input
+                                            type="email"
+                                            value={witness.email || ""}
+                                            onChange={(e) =>
+                                              updateWitness(
+                                                index,
+                                                "email",
+                                                e.target.value,
+                                              )
+                                            }
+                                            placeholder="Email address"
+                                          />
+                                        </div>
+                                        <div className="col-span-2">
+                                          <Label>Statement</Label>
+                                          <Textarea
+                                            value={witness.statement}
+                                            onChange={(e) =>
+                                              updateWitness(
+                                                index,
+                                                "statement",
+                                                e.target.value,
+                                              )
+                                            }
+                                            placeholder="What did this witness see or know about the incident?"
+                                          />
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </TabsContent>
+                      </>
                     )}
 
                     <TabsContent value="review" className="space-y-6">
