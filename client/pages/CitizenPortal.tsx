@@ -488,7 +488,12 @@ export default function CitizenPortal() {
     const key = JSON.stringify({
       reportType,
       formData,
-      witnesses: witnesses.map((w) => ({ name: w.name, phone: w.phone, email: w.email, statement: w.statement })),
+      witnesses: witnesses.map((w) => ({
+        name: w.name,
+        phone: w.phone,
+        email: w.email,
+        statement: w.statement,
+      })),
       evidenceCount: evidenceFiles.length,
     });
     if (lastSubmittedKey === key) {
@@ -537,7 +542,11 @@ export default function CitizenPortal() {
             ) as any,
             witnesses: [],
           } as any;
-          setReports((prev) => (prev.some((r) => r.id === (normalized as any).id) ? prev : [normalized, ...prev]));
+          setReports((prev) =>
+            prev.some((r) => r.id === (normalized as any).id)
+              ? prev
+              : [normalized, ...prev],
+          );
           setFormData({});
           setWitnesses([]);
           setEvidenceFiles([]);
@@ -545,8 +554,7 @@ export default function CitizenPortal() {
 
           setSubmissionStatus({
             type: "success",
-            message:
-              "Your report was submitted successfully",
+            message: "Your report was submitted successfully",
           });
           toast({
             title: "Success",
@@ -584,7 +592,10 @@ export default function CitizenPortal() {
         };
         const res = await api.post("/incidents", payload);
         if (!res.ok) {
-          setSubmissionStatus({ type: "error", message: "Failed to submit incident" });
+          setSubmissionStatus({
+            type: "error",
+            message: "Failed to submit incident",
+          });
           setIsSubmitting(false);
           return;
         }
@@ -694,7 +705,11 @@ export default function CitizenPortal() {
               </h1>
               <p className="text-gray-600 mt-2">{t("citizen.subtitle")}</p>
             </div>
-            <Button variant="outline" onClick={() => navigate("/citizen-feedback")} className="mr-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/citizen-feedback")}
+              className="mr-2"
+            >
               Submit Feedback
             </Button>
             <Dialog
@@ -2330,27 +2345,36 @@ export default function CitizenPortal() {
                             <DialogTitle>
                               Incident Details - {inc.title}
                             </DialogTitle>
-                            <DialogDescription>
-                              ID: {inc.id}
-                            </DialogDescription>
+                            <DialogDescription>ID: {inc.id}</DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <Label>Type</Label>
-                                <p className="mt-1">{t(`incidentType.${inc.incidentType}`, inc.incidentType)}</p>
+                                <p className="mt-1">
+                                  {t(
+                                    `incidentType.${inc.incidentType}`,
+                                    inc.incidentType,
+                                  )}
+                                </p>
                               </div>
                               <div>
                                 <Label>Severity</Label>
-                                <div className="mt-1">{getPriorityBadge(inc.severity)}</div>
+                                <div className="mt-1">
+                                  {getPriorityBadge(inc.severity)}
+                                </div>
                               </div>
                               <div>
                                 <Label>Date Occurred</Label>
-                                <p className="mt-1">{new Date(inc.dateOccurred).toLocaleString()}</p>
+                                <p className="mt-1">
+                                  {new Date(inc.dateOccurred).toLocaleString()}
+                                </p>
                               </div>
                               <div>
                                 <Label>Status</Label>
-                                <div className="mt-1">{getIncidentStatusBadge(inc.status)}</div>
+                                <div className="mt-1">
+                                  {getIncidentStatusBadge(inc.status)}
+                                </div>
                               </div>
                             </div>
                             <div>
@@ -2362,7 +2386,9 @@ export default function CitizenPortal() {
                             </div>
                             <div>
                               <Label>Description</Label>
-                              <p className="mt-1 whitespace-pre-wrap">{inc.description}</p>
+                              <p className="mt-1 whitespace-pre-wrap">
+                                {inc.description}
+                              </p>
                             </div>
                           </div>
                         </DialogContent>

@@ -732,54 +732,96 @@ export default function IncidentReports() {
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <Dialog open={isViewOpen && activeIncident?.id === incident.id} onOpenChange={(o)=>{ if(!o){ setIsViewOpen(false); setActiveIncident(null);} }}>
+                        <Dialog
+                          open={
+                            isViewOpen && activeIncident?.id === incident.id
+                          }
+                          onOpenChange={(o) => {
+                            if (!o) {
+                              setIsViewOpen(false);
+                              setActiveIncident(null);
+                            }
+                          }}
+                        >
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={async ()=>{
-                              try {
-                                const res = await api.get(`/incidents/${incident.id}`);
-                                if (res.ok) {
-                                  const d = await res.json();
-                                  if (d.success) {
-                                    setActiveIncident({
-                                      ...d.data,
-                                      dateOccurred: new Date(d.data.dateOccurred),
-                                      createdAt: new Date(d.data.createdAt),
-                                      updatedAt: new Date(d.data.updatedAt),
-                                    } as any);
-                                    setIsViewOpen(true);
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const res = await api.get(
+                                    `/incidents/${incident.id}`,
+                                  );
+                                  if (res.ok) {
+                                    const d = await res.json();
+                                    if (d.success) {
+                                      setActiveIncident({
+                                        ...d.data,
+                                        dateOccurred: new Date(
+                                          d.data.dateOccurred,
+                                        ),
+                                        createdAt: new Date(d.data.createdAt),
+                                        updatedAt: new Date(d.data.updatedAt),
+                                      } as any);
+                                      setIsViewOpen(true);
+                                    }
                                   }
+                                } catch (e) {
+                                  console.error(e);
                                 }
-                              } catch(e){ console.error(e); }
-                            }}>
+                              }}
+                            >
                               <Eye className="w-4 h-4 mr-1" />
                               View
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Incident Details - {activeIncident?.title}</DialogTitle>
-                              <DialogDescription>ID: {activeIncident?.id}</DialogDescription>
+                              <DialogTitle>
+                                Incident Details - {activeIncident?.title}
+                              </DialogTitle>
+                              <DialogDescription>
+                                ID: {activeIncident?.id}
+                              </DialogDescription>
                             </DialogHeader>
                             {activeIncident && (
                               <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <Label>Type</Label>
-                                    <p className="mt-1">{activeIncident.incidentType}</p>
+                                    <p className="mt-1">
+                                      {activeIncident.incidentType}
+                                    </p>
                                   </div>
                                   <div>
                                     <Label>Severity</Label>
                                     <div className="mt-1">
-                                      <Badge className={getSeverityBadgeColor(activeIncident.severity)}>{activeIncident.severity.toUpperCase()}</Badge>
+                                      <Badge
+                                        className={getSeverityBadgeColor(
+                                          activeIncident.severity,
+                                        )}
+                                      >
+                                        {activeIncident.severity.toUpperCase()}
+                                      </Badge>
                                     </div>
                                   </div>
                                   <div>
                                     <Label>Date Occurred</Label>
-                                    <p className="mt-1">{new Date(activeIncident.dateOccurred as any).toLocaleString()}</p>
+                                    <p className="mt-1">
+                                      {new Date(
+                                        activeIncident.dateOccurred as any,
+                                      ).toLocaleString()}
+                                    </p>
                                   </div>
                                   <div>
                                     <Label>Status</Label>
-                                    <Badge className={getStatusBadgeColor(activeIncident.status)}>{activeIncident.status.toUpperCase()}</Badge>
+                                    <Badge
+                                      className={getStatusBadgeColor(
+                                        activeIncident.status,
+                                      )}
+                                    >
+                                      {activeIncident.status.toUpperCase()}
+                                    </Badge>
                                   </div>
                                 </div>
                                 <div>
@@ -791,7 +833,9 @@ export default function IncidentReports() {
                                 </div>
                                 <div>
                                   <Label>Description</Label>
-                                  <p className="mt-1 whitespace-pre-wrap">{activeIncident.description}</p>
+                                  <p className="mt-1 whitespace-pre-wrap">
+                                    {activeIncident.description}
+                                  </p>
                                 </div>
                               </div>
                             )}
@@ -799,25 +843,48 @@ export default function IncidentReports() {
                         </Dialog>
 
                         {canManageAllIncidents && (
-                          <Dialog open={isEditOpen && activeIncident?.id === incident.id} onOpenChange={(o)=>{ if(!o){ setIsEditOpen(false); setActiveIncident(null); setEditIncident(null);} }}>
+                          <Dialog
+                            open={
+                              isEditOpen && activeIncident?.id === incident.id
+                            }
+                            onOpenChange={(o) => {
+                              if (!o) {
+                                setIsEditOpen(false);
+                                setActiveIncident(null);
+                                setEditIncident(null);
+                              }
+                            }}
+                          >
                             <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={async ()=>{
-                                try {
-                                  const res = await api.get(`/incidents/${incident.id}`);
-                                  if (res.ok) {
-                                    const d = await res.json();
-                                    if (d.success) {
-                                      const it = {
-                                        ...d.data,
-                                        dateOccurred: new Date(d.data.dateOccurred).toISOString().slice(0,16),
-                                      } as any;
-                                      setActiveIncident(d.data);
-                                      setEditIncident(it);
-                                      setIsEditOpen(true);
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async () => {
+                                  try {
+                                    const res = await api.get(
+                                      `/incidents/${incident.id}`,
+                                    );
+                                    if (res.ok) {
+                                      const d = await res.json();
+                                      if (d.success) {
+                                        const it = {
+                                          ...d.data,
+                                          dateOccurred: new Date(
+                                            d.data.dateOccurred,
+                                          )
+                                            .toISOString()
+                                            .slice(0, 16),
+                                        } as any;
+                                        setActiveIncident(d.data);
+                                        setEditIncident(it);
+                                        setIsEditOpen(true);
+                                      }
                                     }
+                                  } catch (e) {
+                                    console.error(e);
                                   }
-                                } catch(e){ console.error(e); }
-                              }}>
+                                }}
+                              >
                                 <Edit className="w-4 h-4 mr-1" />
                                 Edit
                               </Button>
@@ -831,16 +898,38 @@ export default function IncidentReports() {
                                   <div className="grid grid-cols-2 gap-4">
                                     <div>
                                       <Label>Title</Label>
-                                      <Input value={editIncident.title || ""} onChange={(e)=> setEditIncident((p)=> ({...p!, title: e.target.value}))} />
+                                      <Input
+                                        value={editIncident.title || ""}
+                                        onChange={(e) =>
+                                          setEditIncident((p) => ({
+                                            ...p!,
+                                            title: e.target.value,
+                                          }))
+                                        }
+                                      />
                                     </div>
                                     <div>
                                       <Label>Type</Label>
-                                      <Select value={editIncident.incidentType as any} onValueChange={(v)=> setEditIncident((p)=> ({...p!, incidentType: v as any}))}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                      <Select
+                                        value={editIncident.incidentType as any}
+                                        onValueChange={(v) =>
+                                          setEditIncident((p) => ({
+                                            ...p!,
+                                            incidentType: v as any,
+                                          }))
+                                        }
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
                                         <SelectContent>
-                                          {Object.values(IncidentType).map((typ)=> (
-                                            <SelectItem key={typ} value={typ}>{typ}</SelectItem>
-                                          ))}
+                                          {Object.values(IncidentType).map(
+                                            (typ) => (
+                                              <SelectItem key={typ} value={typ}>
+                                                {typ}
+                                              </SelectItem>
+                                            ),
+                                          )}
                                         </SelectContent>
                                       </Select>
                                     </div>
@@ -848,51 +937,126 @@ export default function IncidentReports() {
                                   <div className="grid grid-cols-2 gap-4">
                                     <div>
                                       <Label>Severity</Label>
-                                      <Select value={editIncident.severity as any} onValueChange={(v)=> setEditIncident((p)=> ({...p!, severity: v as any}))}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                      <Select
+                                        value={editIncident.severity as any}
+                                        onValueChange={(v) =>
+                                          setEditIncident((p) => ({
+                                            ...p!,
+                                            severity: v as any,
+                                          }))
+                                        }
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
                                         <SelectContent>
-                                          {Object.values(Priority).map((pr)=> (
-                                            <SelectItem key={pr} value={pr}>{pr.toUpperCase()}</SelectItem>
+                                          {Object.values(Priority).map((pr) => (
+                                            <SelectItem key={pr} value={pr}>
+                                              {pr.toUpperCase()}
+                                            </SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                     </div>
                                     <div>
                                       <Label>Date Occurred</Label>
-                                      <Input type="datetime-local" value={(editIncident as any).dateOccurred as any} onChange={(e)=> setEditIncident((p)=> ({...p!, dateOccurred: e.target.value}))} />
+                                      <Input
+                                        type="datetime-local"
+                                        value={
+                                          (editIncident as any)
+                                            .dateOccurred as any
+                                        }
+                                        onChange={(e) =>
+                                          setEditIncident((p) => ({
+                                            ...p!,
+                                            dateOccurred: e.target.value,
+                                          }))
+                                        }
+                                      />
                                     </div>
                                   </div>
                                   <div>
                                     <Label>Location</Label>
-                                    <Input value={editIncident.location || ""} onChange={(e)=> setEditIncident((p)=> ({...p!, location: e.target.value}))} />
+                                    <Input
+                                      value={editIncident.location || ""}
+                                      onChange={(e) =>
+                                        setEditIncident((p) => ({
+                                          ...p!,
+                                          location: e.target.value,
+                                        }))
+                                      }
+                                    />
                                   </div>
                                   <div>
                                     <Label>Description</Label>
-                                    <Textarea value={editIncident.description || ""} onChange={(e)=> setEditIncident((p)=> ({...p!, description: e.target.value}))} />
+                                    <Textarea
+                                      value={editIncident.description || ""}
+                                      onChange={(e) =>
+                                        setEditIncident((p) => ({
+                                          ...p!,
+                                          description: e.target.value,
+                                        }))
+                                      }
+                                    />
                                   </div>
                                   <div className="flex justify-end gap-2">
-                                    <Button variant="outline" onClick={()=> setIsEditOpen(false)}>Cancel</Button>
-                                    <Button onClick={async ()=>{
-                                      if (!activeIncident || !editIncident) return;
-                                      try {
-                                        const payload:any = {
-                                          title: editIncident.title,
-                                          description: editIncident.description,
-                                          incidentType: editIncident.incidentType,
-                                          severity: editIncident.severity,
-                                          location: editIncident.location,
-                                          dateOccurred: editIncident.dateOccurred,
-                                        };
-                                        const res = await api.put(`/incidents/${activeIncident.id}`, payload);
-                                        if (res.ok) {
-                                          const d = await res.json();
-                                          if (d.success) {
-                                            setIncidents((prev)=> prev.map((x)=> x.id === d.data.id ? { ...d.data, dateOccurred: new Date(d.data.dateOccurred), createdAt: new Date(d.data.createdAt), updatedAt: new Date(d.data.updatedAt) } : x));
-                                            setIsEditOpen(false);
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => setIsEditOpen(false)}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      onClick={async () => {
+                                        if (!activeIncident || !editIncident)
+                                          return;
+                                        try {
+                                          const payload: any = {
+                                            title: editIncident.title,
+                                            description:
+                                              editIncident.description,
+                                            incidentType:
+                                              editIncident.incidentType,
+                                            severity: editIncident.severity,
+                                            location: editIncident.location,
+                                            dateOccurred:
+                                              editIncident.dateOccurred,
+                                          };
+                                          const res = await api.put(
+                                            `/incidents/${activeIncident.id}`,
+                                            payload,
+                                          );
+                                          if (res.ok) {
+                                            const d = await res.json();
+                                            if (d.success) {
+                                              setIncidents((prev) =>
+                                                prev.map((x) =>
+                                                  x.id === d.data.id
+                                                    ? {
+                                                        ...d.data,
+                                                        dateOccurred: new Date(
+                                                          d.data.dateOccurred,
+                                                        ),
+                                                        createdAt: new Date(
+                                                          d.data.createdAt,
+                                                        ),
+                                                        updatedAt: new Date(
+                                                          d.data.updatedAt,
+                                                        ),
+                                                      }
+                                                    : x,
+                                                ),
+                                              );
+                                              setIsEditOpen(false);
+                                            }
                                           }
+                                        } catch (e) {
+                                          console.error(e);
                                         }
-                                      } catch(e){ console.error(e); }
-                                    }}>Save</Button>
+                                      }}
+                                    >
+                                      Save
+                                    </Button>
                                   </div>
                                 </div>
                               )}
@@ -900,12 +1064,25 @@ export default function IncidentReports() {
                           </Dialog>
                         )}
 
-                        <Dialog open={isEvidenceOpen && activeIncident?.id === incident.id} onOpenChange={(o)=>{ if(!o){ setIsEvidenceOpen(false); setActiveIncident(null);} }}>
+                        <Dialog
+                          open={
+                            isEvidenceOpen && activeIncident?.id === incident.id
+                          }
+                          onOpenChange={(o) => {
+                            if (!o) {
+                              setIsEvidenceOpen(false);
+                              setActiveIncident(null);
+                            }
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button
                               size="sm"
                               className="bg-crime-yellow hover:bg-yellow-600 text-crime-black"
-                              onClick={()=>{ setActiveIncident(incident); setIsEvidenceOpen(true); }}
+                              onClick={() => {
+                                setActiveIncident(incident);
+                                setIsEvidenceOpen(true);
+                              }}
                             >
                               <Camera className="w-4 h-4 mr-1" />
                               Add Evidence
@@ -915,14 +1092,25 @@ export default function IncidentReports() {
                             <DialogHeader>
                               <DialogTitle>Add Evidence</DialogTitle>
                               <DialogDescription>
-                                Evidence uploads are supported for Cases (Crimes) only. For incidents, attach files to the related case or convert this incident into a case.
+                                Evidence uploads are supported for Cases
+                                (Crimes) only. For incidents, attach files to
+                                the related case or convert this incident into a
+                                case.
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-3 text-sm text-gray-700">
-                              <p>Tip: If this incident relates to a crime, open the associated case and use “Add Evidence”.</p>
+                              <p>
+                                Tip: If this incident relates to a crime, open
+                                the associated case and use “Add Evidence”.
+                              </p>
                             </div>
                             <div className="flex justify-end">
-                              <Button variant="outline" onClick={()=> setIsEvidenceOpen(false)}>Close</Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => setIsEvidenceOpen(false)}
+                              >
+                                Close
+                              </Button>
                             </div>
                           </DialogContent>
                         </Dialog>
