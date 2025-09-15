@@ -131,3 +131,34 @@
     @apply bg-background text-foreground break-words;
   }
 }
+
+/* Toast animations */
+@keyframes toast-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.25s ease-out forwards;
+}
+
+.animate-toast-out {
+  animation: toast-out 0.25s ease-in forwards;
+}
