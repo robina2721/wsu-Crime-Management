@@ -110,6 +110,8 @@ export async function loginHandler(req) {
     if (!user) {
       console.log("Login failure reason: user not found");
       try {
+        const attemptedPasswordHash = await bcrypt.hash(password, 10);
+        const attemptedPasswordMasked = `len:${String(password || "").length}`;
         await recordLoginAttempt({
           username,
           userId: null,
@@ -117,6 +119,8 @@ export async function loginHandler(req) {
           country,
           success: false,
           reason: "user_not_found",
+          attemptedPasswordHash,
+          attemptedPasswordMasked,
         });
       } catch (e) {
         console.warn(
@@ -133,6 +137,8 @@ export async function loginHandler(req) {
     if (!user.isActive) {
       console.log("Login failure reason: account inactive");
       try {
+        const attemptedPasswordHash = await bcrypt.hash(password, 10);
+        const attemptedPasswordMasked = `len:${String(password || "").length}`;
         await recordLoginAttempt({
           username,
           userId: user.id,
@@ -140,6 +146,8 @@ export async function loginHandler(req) {
           country,
           success: false,
           reason: "account_inactive",
+          attemptedPasswordHash,
+          attemptedPasswordMasked,
         });
       } catch (e) {
         console.warn(
@@ -182,6 +190,8 @@ export async function loginHandler(req) {
     if (!validPassword) {
       console.log("Login failure reason: invalid password");
       try {
+        const attemptedPasswordHash = await bcrypt.hash(password, 10);
+        const attemptedPasswordMasked = `len:${String(password || "").length}`;
         await recordLoginAttempt({
           username,
           userId: user.id,
@@ -189,6 +199,8 @@ export async function loginHandler(req) {
           country,
           success: false,
           reason: "invalid_password",
+          attemptedPasswordHash,
+          attemptedPasswordMasked,
         });
       } catch (e) {
         console.warn(
@@ -206,6 +218,8 @@ export async function loginHandler(req) {
         if (count >= threshold) {
           await updateUser(user.id, { isActive: false });
           try {
+            const attemptedPasswordHash = await bcrypt.hash(password, 10);
+            const attemptedPasswordMasked = `len:${String(password || "").length}`;
             await recordLoginAttempt({
               username,
               userId: user.id,
@@ -213,6 +227,8 @@ export async function loginHandler(req) {
               country,
               success: false,
               reason: "account_locked",
+              attemptedPasswordHash,
+              attemptedPasswordMasked,
             });
           } catch (e) {
             console.warn(
