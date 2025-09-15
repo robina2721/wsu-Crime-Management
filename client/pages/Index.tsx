@@ -383,6 +383,16 @@ export default function Index() {
                     ))}
                   </ul>
                 </CardContent>
+                {role.title === "Citizens" && (
+                  <div className="p-6 pt-0">
+                    <Link to="/citizen-portal">
+                      <Button variant="outline" className="w-full">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </Card>
             ))}
           </div>
